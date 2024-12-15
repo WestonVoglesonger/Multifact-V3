@@ -6,9 +6,10 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 
 
-
 from .api import (
     static_files,
+    ni,
+    compilation
 )
 
 __authors__ = ["Weston Voglesonger"]
@@ -25,6 +26,8 @@ app = FastAPI(
     version="0.0.1",
     description=description,
     openapi_tags=[
+        ni.openapi_tags,
+        compilation.openapi_tags,
     ],
 )
 
@@ -33,6 +36,8 @@ app.add_middleware(GZipMiddleware)
 
 # Plugging in each of the router APIs
 feature_apis = [
+    ni,
+    compilation,
 ]
 
 for feature_api in feature_apis:

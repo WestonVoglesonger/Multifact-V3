@@ -16,6 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from ..database import engine
 from ..env import getenv
+from .. import entities
 
 __authors__ = ["Kris Jordan", "Ajay Gandecha"]
 __copyright__ = "Copyright 2023"
@@ -31,6 +32,9 @@ if getenv("MODE") != "development":
 subprocess.run(["python3", "-m", "backend.script.delete_database"])
 subprocess.run(["python3", "-m", "backend.script.create_database"])
 
+# Reset Tables
+entities.EntityBase.metadata.drop_all(engine)
+entities.EntityBase.metadata.create_all(engine)
 # Initialize the SQLAlchemy session
 with Session(engine) as session:
     # Commit changes to the database

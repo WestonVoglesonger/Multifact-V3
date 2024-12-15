@@ -14,7 +14,6 @@ global to a module are available for import from other modules."""
 
 
 from .entity_base import EntityBase
-
-__authors__ = ["Weston Voglesonger", "Kris Jordan"]
-__copyright__ = "Copyright 2023"
-__license__ = "MIT"
+from .ni_document import NIDocument
+from .ni_token import NIToken
+from .compiled_multifact import CompiledMultifact
