@@ -1,40 +1,21 @@
 import { NgModule } from "@angular/core";
 import { BrowserModule } from "@angular/platform-browser";
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule } from "@angular/common/http";
-import { AppRoutingModule } from "./app-routing.module";
-import { ReactiveFormsModule } from "@angular/forms";
+import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 
-// Angular Material Components
-import { MatButtonModule } from "@angular/material/button";
-import { MatToolbarModule } from "@angular/material/toolbar";
-import { MatIconModule } from "@angular/material/icon";
-import { MatSidenavModule } from "@angular/material/sidenav";
-import { MatListModule } from "@angular/material/list";
-
-// Components
 import { AppComponent } from "./app.component";
+import { DocumentListComponent } from "./document-list/document-list.component";
+import { DocumentDetailComponent } from "./document-detail/document-detail.component";
+import { TokenCardComponent } from "./token-card/token-card.component";
 
 @NgModule({
   declarations: [
     AppComponent,
-    // Add other component declarations here
+    DocumentListComponent,
+    DocumentDetailComponent,
+    TokenCardComponent,
   ],
-  imports: [
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    AppRoutingModule,
-    ReactiveFormsModule,
-
-    // Angular Material Modules
-    MatButtonModule,
-    MatToolbarModule,
-    MatIconModule,
-    MatSidenavModule,
-    MatListModule,
-    // Add other module imports as necessary
-  ],
+  imports: [BrowserModule, HttpClientModule, FormsModule, ReactiveFormsModule],
   providers: [],
   bootstrap: [AppComponent],
 })
