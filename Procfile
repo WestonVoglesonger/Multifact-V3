@@ -7,4 +7,3 @@
 
 proxy: caddy run
 backend: uvicorn --port=1461 --reload backend.main:app
-frontend: cd frontend && npm run start:dynamic
