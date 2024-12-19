@@ -1,0 +1,10 @@
+validators:
+  typescript:
+    class: "TypeScriptValidator"
+    tool: "tsc"
+    # possible additional tool config options
+
+  python:
+    class: "PythonValidator"
+    tool: "mypy"
+    # etc.

@@ -1,22 +1,34 @@
+"""
+This module attempts to self-repair invalid code artifacts by repeatedly prompting the LLM to fix errors 
+until the code validates or the maximum attempts are reached.
+"""
+
 from sqlalchemy.orm import Session
 from typing import List
-from backend.services.validation import ValidationService, ValidationResult, ValidationError
+from backend.services.validation.validation_service import ValidationService, ValidationResult, ValidationError
 from backend.entities.compiled_multifact import CompiledMultifact
-from backend.services.llm_client import LLMClient
+from backend.services.llm.groq_llm_client import GroqLLMClient
 from sqlalchemy import select
 
 class SelfRepairService:
     @staticmethod
     def repair_artifact(artifact_id: int, session: Session, max_attempts: int = 3) -> bool:
         """
-        Attempt to self-repair the code for the given artifact up to max_attempts.
-        
+        Attempt to self-repair code for a given artifact up to max_attempts.
+
         Steps:
-        1. Validate artifact. If success, return True immediately.
-        2. If fail, summarize errors and call LLM to fix code.
-        3. Update artifact with LLM’s revised code, re-validate.
-        4. Repeat until success or max_attempts reached.
-        5. If still fail, mark artifact as invalid and return False.
+        1. Validate artifact. If success, return True.
+        2. If fail, summarize errors and ask LLM to fix code.
+        3. Update artifact code, re-validate, repeat until success or max attempts.
+        4. If still invalid, mark as invalid and return False.
+
+        Args:
+            artifact_id (int): The artifact to repair.
+            session (Session): SQLAlchemy session.
+            max_attempts (int): The maximum number of repair attempts.
+
+        Returns:
+            bool: True if repaired successfully, False otherwise.
         """
 
         artifact = session.scalars(
@@ -97,7 +109,7 @@ class SelfRepairService:
         # Call LLM
         for attempt in range(3):
             try:
-                response = LLMClient._generic_chat_call(system_message, user_message)  # We'll create _generic_chat_call below
+                response = GroqLLMClient()._generic_chat_call(system_message, user_message)  # We'll create _generic_chat_call below
                 code_content = response.strip()
                 return code_content
             except Exception as e:

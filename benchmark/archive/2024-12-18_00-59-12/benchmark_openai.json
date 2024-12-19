@@ -1,0 +1,517 @@
+{
+    "machine_info": {
+        "node": "d8ecef1fb3d4",
+        "processor": "aarch64",
+        "machine": "aarch64",
+        "python_compiler": "GCC 11.4.0",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.11.11",
+        "python_version": "3.11.11",
+        "python_build": [
+            "main",
+            "Dec  4 2024 08:55:07"
+        ],
+        "release": "6.10.14-linuxkit",
+        "system": "Linux",
+        "cpu": {
+            "python_version": "3.11.11.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "aarch64",
+            "flags": [
+                "aes",
+                "asimd",
+                "asimddp",
+                "asimdfhm",
+                "asimdhp",
+                "asimdrdm",
+                "atomics",
+                "cpuid",
+                "crc32",
+                "dcpodp",
+                "dcpop",
+                "dit",
+                "evtstrm",
+                "fcma",
+                "flagm",
+                "flagm2",
+                "fp",
+                "fphp",
+                "frint",
+                "ilrcpc",
+                "jscvt",
+                "lrcpc",
+                "paca",
+                "pacg",
+                "pmull",
+                "sb",
+                "sha1",
+                "sha2",
+                "sha3",
+                "sha512",
+                "ssbs",
+                "uscat"
+            ],
+            "vendor_id_raw": "Apple"
+        }
+    },
+    "commit_info": {
+        "id": "2d6fe520bfdd53b1e0762d42e208e740cafe97b0",
+        "time": "2024-12-15T20:44:48-05:00",
+        "author_time": "2024-12-15T20:44:48-05:00",
+        "dirty": true,
+        "project": "Multifact-V3",
+        "branch": "v2"
+    },
+    "benchmarks": [
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.]",
+            "params": {
+                "ni_content": "[Scene:Intro]\nThe user enters the application and should receive a friendly greeting.\n[Component:Greeting]\nDisplay a personalized greeting message to the user.\n[Function:displayGreeting]\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area."
+            },
+            "param": "[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.808324334997451,
+                "max": 4.21060196000326,
+                "mean": 2.49855071780039,
+                "stddev": 0.9697684184520761,
+                "rounds": 5,
+                "median": 2.185591209003178,
+                "iqr": 0.6761858439986099,
+                "q1": 2.022361396750057,
+                "q3": 2.698547240748667,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 1.808324334997451,
+                "hd15iqr": 4.21060196000326,
+                "ops": 0.400232019656721,
+                "total": 12.49275358900195,
+                "data": [
+                    4.21060196000326,
+                    2.185591209003178,
+                    2.0937070840009255,
+                    1.808324334997451,
+                    2.194529000997136
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.]",
+            "params": {
+                "ni_content": "[Scene:Login]\nThe user needs to authenticate to access their account.\n[Component:LoginForm]\nProvide fields for username and password entry.\n[Function:validateCredentials]\nVerify the entered username and password against the database.\n[Function:displayError]\nShow an error message if the credentials are incorrect."
+            },
+            "param": "[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.0953221259987913,
+                "max": 2.903641085002164,
+                "mean": 2.5197359596000752,
+                "stddev": 0.3606466490210531,
+                "rounds": 5,
+                "median": 2.640957502000674,
+                "iqr": 0.6455344275073003,
+                "q1": 2.161637844495999,
+                "q3": 2.8071722720032994,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.0953221259987913,
+                "hd15iqr": 2.903641085002164,
+                "ops": 0.3968669797285891,
+                "total": 12.598679798000376,
+                "data": [
+                    2.640957502000674,
+                    2.903641085002164,
+                    2.775016001003678,
+                    2.0953221259987913,
+                    2.1837430839950684
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.]",
+            "params": {
+                "ni_content": "[Scene:Dashboard]\nAfter logging in, the user should see an overview of their account.\n[Component:StatisticsPanel]\nDisplay key user statistics such as active projects and recent activity.\n[Function:fetchStatistics]\nRetrieve user statistics from the server and display them in charts.\n[Component:QuickActions]\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\n[Function:navigateToFeature]\nRedirect the user to the selected feature when a quick action is clicked."
+            },
+            "param": "[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.1170702509989496,
+                "max": 9.06136258799961,
+                "mean": 4.937916935399699,
+                "stddev": 2.5104893649947653,
+                "rounds": 5,
+                "median": 3.7561947089998284,
+                "iqr": 3.2820971160017507,
+                "q1": 3.1643644702489837,
+                "q3": 6.446461586250734,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.1170702509989496,
+                "hd15iqr": 9.06136258799961,
+                "ops": 0.20251454471237582,
+                "total": 24.689584676998493,
+                "data": [
+                    3.7561947089998284,
+                    5.574827919001109,
+                    9.06136258799961,
+                    3.1170702509989496,
+                    3.180129209998995
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.]",
+            "params": {
+                "ni_content": "[Scene:UserProfile]\nThe user wants to view and edit their personal information.\n[Component:ProfileDetails]\nShow the user's name, email, and contact information.\n[Function:editProfile]\nAllow the user to update their personal details and save changes.\n[Component:Preferences]\nEnable the user to set their preferences, such as notification settings and display options.\n[Function:savePreferences]\nStore the user's preference settings in the database."
+            },
+            "param": "[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.7603507099993294,
+                "max": 3.3699395849980647,
+                "mean": 3.108694701398781,
+                "stddev": 0.2207442227255151,
+                "rounds": 5,
+                "median": 3.1192500430042855,
+                "iqr": 0.20302896949760907,
+                "q1": 3.0249967404979543,
+                "q3": 3.2280257099955634,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.7603507099993294,
+                "hd15iqr": 3.3699395849980647,
+                "ops": 0.3216784200616556,
+                "total": 15.543473506993905,
+                "data": [
+                    3.1807210849947296,
+                    3.1192500430042855,
+                    2.7603507099993294,
+                    3.3699395849980647,
+                    3.113212083997496
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.]",
+            "params": {
+                "ni_content": "[Scene:Notifications]\nThe user should be informed about recent updates and messages.\n[Component:NotificationList]\nDisplay a list of unread and recent notifications.\n[Function:markAsRead]\nAllow the user to mark notifications as read.\n[Function:fetchNotifications]\nRetrieve the latest notifications from the server and update the list.\n[Component:NotificationSettings]\nProvide options for the user to customize their notification preferences.\n[Function:updateSettings]\nSave the user's notification preferences based on their selections."
+            },
+            "param": "[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.2070825429982506,
+                "max": 5.066840544001025,
+                "mean": 4.137759043600818,
+                "stddev": 0.7187895757807159,
+                "rounds": 5,
+                "median": 4.261698169000738,
+                "iqr": 1.0597019697488577,
+                "q1": 3.561829636752009,
+                "q3": 4.6215316065008665,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.2070825429982506,
+                "hd15iqr": 5.066840544001025,
+                "ops": 0.24167671182944628,
+                "total": 20.68879521800409,
+                "data": [
+                    4.473095294000814,
+                    5.066840544001025,
+                    4.261698169000738,
+                    3.6800786680032616,
+                    3.2070825429982506
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.]",
+            "params": {
+                "ni_content": "[Scene:WizardStep1]\nThe user begins the setup process with an introduction.\n[Component:Introduction]\nProvide an overview of what the setup will entail.\n[Function:proceedToStep2]\nMove the user to the next step when they click \"Next.\"\n\n[Scene:WizardStep2]\nThe user inputs their personal information.\n[Component:PersonalInfoForm]\nInclude fields for name, email, and phone number.\n[Function:validatePersonalInfo]\nEnsure all required fields are filled out correctly.\n[Function:savePersonalInfo]\nStore the entered personal information in the user's profile.\n\n[Scene:WizardStep3]\nThe user configures their preferences.\n[Component:PreferencesForm]\nAllow the user to select their preferred settings.\n[Function:applyPreferences]\nApply the selected preferences to the user's account.\n[Function:completeSetup]\nFinalize the setup process and redirect the user to the dashboard."
+            },
+            "param": "[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 6.021893960998568,
+                "max": 17.358636550001393,
+                "mean": 8.679924237199884,
+                "stddev": 4.885905398301916,
+                "rounds": 5,
+                "median": 6.4601838779999525,
+                "iqr": 3.869233367502602,
+                "q1": 6.07253967899851,
+                "q3": 9.941773046501112,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 6.021893960998568,
+                "hd15iqr": 17.358636550001393,
+                "ops": 0.11520837886052757,
+                "total": 43.39962118599942,
+                "data": [
+                    17.358636550001393,
+                    6.08942158499849,
+                    6.021893960998568,
+                    6.4601838779999525,
+                    7.469485212001018
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.]",
+            "params": {
+                "ni_content": "[Scene:CartReview]\nThe user reviews items in their shopping cart.\n[Component:CartItems]\nList all items with quantities and prices.\n[Function:updateQuantity]\nAllow the user to change the quantity of each item.\n[Function:removeItem]\nEnable the user to remove items from the cart.\n\n[Scene:ShippingDetails]\nThe user enters their shipping information.\n[Component:ShippingForm]\nProvide fields for address, city, state, and zip code.\n[Function:validateAddress]\nEnsure the shipping address is complete and valid.\n[Function:saveShippingInfo]\nStore the shipping details for order processing.\n\n[Scene:Payment]\nThe user selects a payment method and enters payment details.\n[Component:PaymentOptions]\nOffer various payment methods such as credit card, PayPal, and gift card.\n[Function:processPayment]\nHandle the payment transaction securely.\n[Function:displayReceipt]\nShow an order receipt upon successful payment."
+            },
+            "param": "[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 5.512648793999688,
+                "max": 7.066189962002682,
+                "mean": 5.996128152598976,
+                "stddev": 0.6120068649698931,
+                "rounds": 5,
+                "median": 5.797385002995725,
+                "iqr": 0.4612283535061579,
+                "q1": 5.693397044246012,
+                "q3": 6.15462539775217,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 5.512648793999688,
+                "hd15iqr": 7.066189962002682,
+                "ops": 0.1667742874318918,
+                "total": 29.98064076299488,
+                "data": [
+                    5.850770543002,
+                    7.066189962002682,
+                    5.797385002995725,
+                    5.512648793999688,
+                    5.753646460994787
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.]",
+            "params": {
+                "ni_content": "[Scene:AccountSettings]\nThe user wants to manage their account preferences and security.\n[Component:ChangePassword]\nProvide fields to enter the current password and the new password.\n[Function:validatePassword]\nEnsure the new password meets security requirements.\n[Function:updatePassword]\nUpdate the user's password in the system.\n\n[Component:TwoFactorAuth]\nEnable the user to set up two-factor authentication for added security.\n[Function:enable2FA]\nActivate two-factor authentication and send a verification code.\n[Function:verify2FA]\nConfirm the entered verification code to complete the setup."
+            },
+            "param": "[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.609700625995174,
+                "max": 4.572032668998872,
+                "mean": 4.097790185599297,
+                "stddev": 0.42987089191384636,
+                "rounds": 5,
+                "median": 4.114283086004434,
+                "iqr": 0.797548854499837,
+                "q1": 3.6962926897485886,
+                "q3": 4.493841544248426,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.609700625995174,
+                "hd15iqr": 4.572032668998872,
+                "ops": 0.2440339682383595,
+                "total": 20.488950927996484,
+                "data": [
+                    4.467777835998277,
+                    3.725156710999727,
+                    3.609700625995174,
+                    4.572032668998872,
+                    4.114283086004434
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.]",
+            "params": {
+                "ni_content": "[Scene:HelpCenter]\nThe user seeks assistance with using the application.\n[Component:FAQSection]\nDisplay a list of frequently asked questions and answers.\n[Function:searchFAQ]\nAllow the user to search for specific topics within the FAQs.\n[Component:ContactSupport]\nProvide options for the user to reach out to customer support.\n[Function:submitSupportTicket]\nAllow the user to submit a support ticket with their query or issue."
+            },
+            "param": "[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.9207480839977507,
+                "max": 6.0848080020005,
+                "mean": 3.9877431265995256,
+                "stddev": 1.3078294539571285,
+                "rounds": 5,
+                "median": 3.34448062699812,
+                "iqr": 1.7496754179937852,
+                "q1": 3.09661139675336,
+                "q3": 4.846286814747145,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 2.9207480839977507,
+                "hd15iqr": 6.0848080020005,
+                "ops": 0.25076840916098114,
+                "total": 19.938715632997628,
+                "data": [
+                    4.433446418996027,
+                    6.0848080020005,
+                    3.34448062699812,
+                    3.15523250100523,
+                    2.9207480839977507
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.]",
+            "fullname": "backend/test/services/openai/test_openai_performance.py::test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.]",
+            "params": {
+                "ni_content": "[Scene:Reports]\nThe user needs to generate and view various reports.\n[Component:ReportFilters]\nOffer filters such as date range, report type, and categories.\n[Function:applyFilters]\nFilter the available reports based on the selected criteria.\n[Component:ReportViewer]\nDisplay the generated report in a readable format with charts and tables.\n[Function:exportReport]\nAllow the user to export the report in formats like PDF or Excel."
+            },
+            "param": "[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.6333671679967665,
+                "max": 11.673027589000412,
+                "mean": 4.729847294000502,
+                "stddev": 3.8924475645880805,
+                "rounds": 5,
+                "median": 3.2046104190012557,
+                "iqr": 2.6831223857479927,
+                "q1": 2.748574887002178,
+                "q3": 5.431697272750171,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 2.6333671679967665,
+                "hd15iqr": 11.673027589000412,
+                "ops": 0.21142331619636726,
+                "total": 23.649236470002506,
+                "data": [
+                    3.2046104190012557,
+                    11.673027589000412,
+                    2.786977460003982,
+                    3.35125383400009,
+                    2.6333671679967665
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2024-12-18T06:08:06.673833+00:00",
+    "version": "5.1.0"
+}

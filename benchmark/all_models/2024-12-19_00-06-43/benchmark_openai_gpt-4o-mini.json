@@ -1,0 +1,1057 @@
+{
+    "machine_info": {
+        "node": "d8ecef1fb3d4",
+        "processor": "aarch64",
+        "machine": "aarch64",
+        "python_compiler": "GCC 11.4.0",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.11.11",
+        "python_version": "3.11.11",
+        "python_build": [
+            "main",
+            "Dec  4 2024 08:55:07"
+        ],
+        "release": "6.10.14-linuxkit",
+        "system": "Linux",
+        "cpu": {
+            "python_version": "3.11.11.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "aarch64",
+            "flags": [
+                "aes",
+                "asimd",
+                "asimddp",
+                "asimdfhm",
+                "asimdhp",
+                "asimdrdm",
+                "atomics",
+                "cpuid",
+                "crc32",
+                "dcpodp",
+                "dcpop",
+                "dit",
+                "evtstrm",
+                "fcma",
+                "flagm",
+                "flagm2",
+                "fp",
+                "fphp",
+                "frint",
+                "ilrcpc",
+                "jscvt",
+                "lrcpc",
+                "paca",
+                "pacg",
+                "pmull",
+                "sb",
+                "sha1",
+                "sha2",
+                "sha3",
+                "sha512",
+                "ssbs",
+                "uscat"
+            ],
+            "vendor_id_raw": "Apple"
+        }
+    },
+    "commit_info": {
+        "id": "2d6fe520bfdd53b1e0762d42e208e740cafe97b0",
+        "time": "2024-12-15T20:44:48-05:00",
+        "author_time": "2024-12-15T20:44:48-05:00",
+        "dirty": true,
+        "project": "Multifact-V3",
+        "branch": "v2"
+    },
+    "benchmarks": [
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.\\n[Function:logEntry]\\nLog the user's entry time and IP address for security auditing.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.\\n[Function:logEntry]\\nLog the user's entry time and IP address for security auditing.]",
+            "params": {
+                "ni_content": "[Scene:Intro]\nThe user enters the application and should receive a friendly greeting.\n[Component:Greeting]\nDisplay a personalized greeting message to the user.\n[Function:displayGreeting]\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.\n[Function:logEntry]\nLog the user's entry time and IP address for security auditing."
+            },
+            "param": "[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.\\n[Function:logEntry]\\nLog the user's entry time and IP address for security auditing.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 159,
+                "total_tokens": 228,
+                "cost": 0.000106
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.5234903759992449,
+                "max": 5.195633959992847,
+                "mean": 3.2451913347977097,
+                "stddev": 1.439293862089509,
+                "rounds": 5,
+                "median": 2.8830156679978245,
+                "iqr": 2.1629966469918145,
+                "q1": 2.2423234697525913,
+                "q3": 4.405320116744406,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 1.5234903759992449,
+                "hd15iqr": 5.195633959992847,
+                "ops": 0.308148240529656,
+                "total": 16.22595667398855,
+                "data": [
+                    2.8830156679978245,
+                    5.195633959992847,
+                    1.5234903759992449,
+                    2.481934501003707,
+                    4.1418821689949255
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\nIf credentials are invalid, increment failed login attempts.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.\\nIf failed attempts exceed 5, lock the account and notify the user via email.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\nIf credentials are invalid, increment failed login attempts.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.\\nIf failed attempts exceed 5, lock the account and notify the user via email.]",
+            "params": {
+                "ni_content": "[Scene:Login]\nThe user needs to authenticate to access their account.\n[Component:LoginForm]\nProvide fields for username and password entry.\n[Function:validateCredentials]\nVerify the entered username and password against the database.\nIf credentials are invalid, increment failed login attempts.\n[Function:displayError]\nShow an error message if the credentials are incorrect.\nIf failed attempts exceed 5, lock the account and notify the user via email."
+            },
+            "param": "[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\nIf credentials are invalid, increment failed login attempts.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.\\nIf failed attempts exceed 5, lock the account and notify the user via email.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 213,
+                "total_tokens": 282,
+                "cost": 0.000138
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.9898195429996122,
+                "max": 2.860604293004144,
+                "mean": 2.543959693002398,
+                "stddev": 0.33524463727686504,
+                "rounds": 5,
+                "median": 2.596147918004135,
+                "iqr": 0.3761850317550852,
+                "q1": 2.395670480249464,
+                "q3": 2.7718555120045494,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 1.9898195429996122,
+                "hd15iqr": 2.860604293004144,
+                "ops": 0.39308798907100345,
+                "total": 12.71979846501199,
+                "data": [
+                    2.7422725850046845,
+                    2.530954125999415,
+                    2.596147918004135,
+                    2.860604293004144,
+                    1.9898195429996122
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\nIf the user has no active projects, show a prompt to create one.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.\\nIf navigating to \"View Reports,\" ensure the user has the necessary permissions.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\nIf the user has no active projects, show a prompt to create one.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.\\nIf navigating to \"View Reports,\" ensure the user has the necessary permissions.]",
+            "params": {
+                "ni_content": "[Scene:Dashboard]\nAfter logging in, the user should see an overview of their account.\n[Component:StatisticsPanel]\nDisplay key user statistics such as active projects and recent activity.\n[Function:fetchStatistics]\nRetrieve user statistics from the server and display them in charts.\nIf the user has no active projects, show a prompt to create one.\n[Component:QuickActions]\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\n[Function:navigateToFeature]\nRedirect the user to the selected feature when a quick action is clicked.\nIf navigating to \"View Reports,\" ensure the user has the necessary permissions."
+            },
+            "param": "[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\nIf the user has no active projects, show a prompt to create one.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.\\nIf navigating to \"View Reports,\" ensure the user has the necessary permissions.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 192,
+                "total_tokens": 261,
+                "cost": 0.000126
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.54842533399642,
+                "max": 3.314602794001985,
+                "mean": 2.9436856761996752,
+                "stddev": 0.3461232148253979,
+                "rounds": 5,
+                "median": 2.873880459999782,
+                "iqr": 0.6366302082551556,
+                "q1": 2.6576333342472935,
+                "q3": 3.294263542502449,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.54842533399642,
+                "hd15iqr": 3.314602794001985,
+                "ops": 0.33971018308279743,
+                "total": 14.718428380998375,
+                "data": [
+                    2.54842533399642,
+                    3.314602794001985,
+                    2.873880459999782,
+                    3.287483792002604,
+                    2.694036000997585
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\nEnsure all mandatory fields are filled and email format is correct.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.\\n[Function:validatePreferences]\\nEnsure that preferences meet system constraints, such as notification frequency limits.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\nEnsure all mandatory fields are filled and email format is correct.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.\\n[Function:validatePreferences]\\nEnsure that preferences meet system constraints, such as notification frequency limits.]",
+            "params": {
+                "ni_content": "[Scene:UserProfile]\nThe user wants to view and edit their personal information.\n[Component:ProfileDetails]\nShow the user's name, email, and contact information.\n[Function:editProfile]\nAllow the user to update their personal details and save changes.\nEnsure all mandatory fields are filled and email format is correct.\n[Component:Preferences]\nEnable the user to set their preferences, such as notification settings and display options.\n[Function:savePreferences]\nStore the user's preference settings in the database.\n[Function:validatePreferences]\nEnsure that preferences meet system constraints, such as notification frequency limits."
+            },
+            "param": "[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\nEnsure all mandatory fields are filled and email format is correct.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.\\n[Function:validatePreferences]\\nEnsure that preferences meet system constraints, such as notification frequency limits.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 176,
+                "total_tokens": 245,
+                "cost": 0.000116
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.3563430850044824,
+                "max": 4.008947836002335,
+                "mean": 3.564816310000606,
+                "stddev": 0.2664228494000137,
+                "rounds": 5,
+                "median": 3.526431334998051,
+                "iqr": 0.3214664062488737,
+                "q1": 3.3595628972507257,
+                "q3": 3.6810293034995993,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.3563430850044824,
+                "hd15iqr": 4.008947836002335,
+                "ops": 0.28051936286159723,
+                "total": 17.82408155000303,
+                "data": [
+                    3.3563430850044824,
+                    4.008947836002335,
+                    3.5717231259986875,
+                    3.3606361679994734,
+                    3.526431334998051
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\nIf the server is unreachable, show a retry option.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.\\n[Function:pushNotification]\\nSend real-time push notifications for critical updates.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\nIf the server is unreachable, show a retry option.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.\\n[Function:pushNotification]\\nSend real-time push notifications for critical updates.]",
+            "params": {
+                "ni_content": "[Scene:Notifications]\nThe user should be informed about recent updates and messages.\n[Component:NotificationList]\nDisplay a list of unread and recent notifications.\n[Function:markAsRead]\nAllow the user to mark notifications as read.\n[Function:fetchNotifications]\nRetrieve the latest notifications from the server and update the list.\nIf the server is unreachable, show a retry option.\n[Component:NotificationSettings]\nProvide options for the user to customize their notification preferences.\n[Function:updateSettings]\nSave the user's notification preferences based on their selections.\n[Function:pushNotification]\nSend real-time push notifications for critical updates."
+            },
+            "param": "[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\nIf the server is unreachable, show a retry option.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.\\n[Function:pushNotification]\\nSend real-time push notifications for critical updates.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 186,
+                "total_tokens": 255,
+                "cost": 0.000122
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.250130460000946,
+                "max": 5.78379687800043,
+                "mean": 3.8770323099990494,
+                "stddev": 1.0775755078705898,
+                "rounds": 5,
+                "median": 3.465462626001681,
+                "iqr": 0.9131632910011831,
+                "q1": 3.254823616496651,
+                "q3": 4.167986907497834,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 3.250130460000946,
+                "hd15iqr": 5.78379687800043,
+                "ops": 0.2579292407290372,
+                "total": 19.385161549995246,
+                "data": [
+                    3.465462626001681,
+                    3.2563880019952194,
+                    3.250130460000946,
+                    5.78379687800043,
+                    3.629383583996969
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\nIf the email already exists, prompt the user to log in instead.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.\\nSend a confirmation email upon successful setup.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\nIf the email already exists, prompt the user to log in instead.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.\\nSend a confirmation email upon successful setup.]",
+            "params": {
+                "ni_content": "[Scene:WizardStep1]\nThe user begins the setup process with an introduction.\n[Component:Introduction]\nProvide an overview of what the setup will entail.\n[Function:proceedToStep2]\nMove the user to the next step when they click \"Next.\"\n\n[Scene:WizardStep2]\nThe user inputs their personal information.\n[Component:PersonalInfoForm]\nInclude fields for name, email, and phone number.\n[Function:validatePersonalInfo]\nEnsure all required fields are filled out correctly.\n[Function:savePersonalInfo]\nStore the entered personal information in the user's profile.\nIf the email already exists, prompt the user to log in instead.\n\n[Scene:WizardStep3]\nThe user configures their preferences.\n[Component:PreferencesForm]\nAllow the user to select their preferred settings.\n[Function:applyPreferences]\nApply the selected preferences to the user's account.\n[Function:completeSetup]\nFinalize the setup process and redirect the user to the dashboard.\nSend a confirmation email upon successful setup."
+            },
+            "param": "[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\nIf the email already exists, prompt the user to log in instead.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.\\nSend a confirmation email upon successful setup.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 180,
+                "total_tokens": 249,
+                "cost": 0.000118
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.670376167996437,
+                "max": 7.5463088789983885,
+                "mean": 5.734672186197713,
+                "stddev": 1.1371186818615573,
+                "rounds": 5,
+                "median": 5.589001795000513,
+                "iqr": 1.509284365503845,
+                "q1": 4.8478212314948905,
+                "q3": 6.357105596998736,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 4.670376167996437,
+                "hd15iqr": 7.5463088789983885,
+                "ops": 0.17437788377979366,
+                "total": 28.673360930988565,
+                "data": [
+                    5.960704502998851,
+                    4.906969585994375,
+                    5.589001795000513,
+                    4.670376167996437,
+                    7.5463088789983885
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\nEnsure that the requested quantity is available in inventory.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\nIf the address is invalid, prompt the user to correct it.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\nIf the payment fails, notify the user and allow retry.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.\\nInclude order summary and estimated delivery date.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\nEnsure that the requested quantity is available in inventory.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\nIf the address is invalid, prompt the user to correct it.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\nIf the payment fails, notify the user and allow retry.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.\\nInclude order summary and estimated delivery date.]",
+            "params": {
+                "ni_content": "[Scene:CartReview]\nThe user reviews items in their shopping cart.\n[Component:CartItems]\nList all items with quantities and prices.\n[Function:updateQuantity]\nAllow the user to change the quantity of each item.\nEnsure that the requested quantity is available in inventory.\n[Function:removeItem]\nEnable the user to remove items from the cart.\n\n[Scene:ShippingDetails]\nThe user enters their shipping information.\n[Component:ShippingForm]\nProvide fields for address, city, state, and zip code.\n[Function:validateAddress]\nEnsure the shipping address is complete and valid.\n[Function:saveShippingInfo]\nStore the shipping details for order processing.\nIf the address is invalid, prompt the user to correct it.\n\n[Scene:Payment]\nThe user selects a payment method and enters payment details.\n[Component:PaymentOptions]\nOffer various payment methods such as credit card, PayPal, and gift card.\n[Function:processPayment]\nHandle the payment transaction securely.\nIf the payment fails, notify the user and allow retry.\n[Function:displayReceipt]\nShow an order receipt upon successful payment.\nInclude order summary and estimated delivery date."
+            },
+            "param": "[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\nEnsure that the requested quantity is available in inventory.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\nIf the address is invalid, prompt the user to correct it.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\nIf the payment fails, notify the user and allow retry.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.\\nInclude order summary and estimated delivery date.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 178,
+                "total_tokens": 247,
+                "cost": 0.000117
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.6133320430017193,
+                "max": 5.083303251994948,
+                "mean": 3.954930310000782,
+                "stddev": 0.8871933912969412,
+                "rounds": 5,
+                "median": 4.030658626004879,
+                "iqr": 0.8776240210008837,
+                "q1": 3.5410265122500277,
+                "q3": 4.418650533250911,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.6133320430017193,
+                "hd15iqr": 5.083303251994948,
+                "ops": 0.25284895601606755,
+                "total": 19.77465155000391,
+                "data": [
+                    5.083303251994948,
+                    2.6133320430017193,
+                    3.850258001999464,
+                    4.030658626004879,
+                    4.197099627002899
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements (e.g., length, complexity).\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\nIf the current password is incorrect, notify the user.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.\\n[Function:disable2FA]\\nAllow the user to disable two-factor authentication after re-authentication.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements (e.g., length, complexity).\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\nIf the current password is incorrect, notify the user.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.\\n[Function:disable2FA]\\nAllow the user to disable two-factor authentication after re-authentication.]",
+            "params": {
+                "ni_content": "[Scene:AccountSettings]\nThe user wants to manage their account preferences and security.\n[Component:ChangePassword]\nProvide fields to enter the current password and the new password.\n[Function:validatePassword]\nEnsure the new password meets security requirements (e.g., length, complexity).\n[Function:updatePassword]\nUpdate the user's password in the system.\nIf the current password is incorrect, notify the user.\n\n[Component:TwoFactorAuth]\nEnable the user to set up two-factor authentication for added security.\n[Function:enable2FA]\nActivate two-factor authentication and send a verification code.\n[Function:verify2FA]\nConfirm the entered verification code to complete the setup.\n[Function:disable2FA]\nAllow the user to disable two-factor authentication after re-authentication."
+            },
+            "param": "[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements (e.g., length, complexity).\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\nIf the current password is incorrect, notify the user.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.\\n[Function:disable2FA]\\nAllow the user to disable two-factor authentication after re-authentication.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 223,
+                "total_tokens": 292,
+                "cost": 0.000144
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.074731877000886,
+                "max": 5.316306503002124,
+                "mean": 4.486088635600754,
+                "stddev": 0.5167108173949811,
+                "rounds": 5,
+                "median": 4.2146095860007335,
+                "iqr": 0.6852775010029291,
+                "q1": 4.140539251498922,
+                "q3": 4.825816752501851,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 4.074731877000886,
+                "hd15iqr": 5.316306503002124,
+                "ops": 0.22291133350870254,
+                "total": 22.43044317800377,
+                "data": [
+                    4.2146095860007335,
+                    5.316306503002124,
+                    4.6623201690017595,
+                    4.162475042998267,
+                    4.074731877000886
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Function:filterFAQ]\\nEnable filtering FAQs by categories or tags.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.\\n[Function:trackSupportTicket]\\nEnable users to track the status of their submitted support tickets.\\n[Function:provideFeedback]\\nAllow users to rate their support experience and provide feedback.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Function:filterFAQ]\\nEnable filtering FAQs by categories or tags.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.\\n[Function:trackSupportTicket]\\nEnable users to track the status of their submitted support tickets.\\n[Function:provideFeedback]\\nAllow users to rate their support experience and provide feedback.]",
+            "params": {
+                "ni_content": "[Scene:HelpCenter]\nThe user seeks assistance with using the application.\n[Component:FAQSection]\nDisplay a list of frequently asked questions and answers.\n[Function:searchFAQ]\nAllow the user to search for specific topics within the FAQs.\n[Function:filterFAQ]\nEnable filtering FAQs by categories or tags.\n[Component:ContactSupport]\nProvide options for the user to reach out to customer support.\n[Function:submitSupportTicket]\nAllow the user to submit a support ticket with their query or issue.\n[Function:trackSupportTicket]\nEnable users to track the status of their submitted support tickets.\n[Function:provideFeedback]\nAllow users to rate their support experience and provide feedback."
+            },
+            "param": "[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Function:filterFAQ]\\nEnable filtering FAQs by categories or tags.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.\\n[Function:trackSupportTicket]\\nEnable users to track the status of their submitted support tickets.\\n[Function:provideFeedback]\\nAllow users to rate their support experience and provide feedback.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 175,
+                "total_tokens": 244,
+                "cost": 0.000115
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.158425959998567,
+                "max": 9.05055483700562,
+                "mean": 5.134777860798931,
+                "stddev": 2.6305630519989123,
+                "rounds": 5,
+                "median": 3.4273796689958544,
+                "iqr": 3.9600586582510005,
+                "q1": 3.3101665847480035,
+                "q3": 7.270225242999004,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.158425959998567,
+                "hd15iqr": 9.05055483700562,
+                "ops": 0.19475039176172032,
+                "total": 25.673889303994656,
+                "data": [
+                    3.158425959998567,
+                    3.3607467929978156,
+                    3.4273796689958544,
+                    9.05055483700562,
+                    6.6767820449967985
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.\\n[Function:generateChart]\\nCreate visual charts based on the report data.\\n[Function:saveReportPreferences]\\nStore the user's preferred report settings for future use.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.\\n[Function:generateChart]\\nCreate visual charts based on the report data.\\n[Function:saveReportPreferences]\\nStore the user's preferred report settings for future use.]",
+            "params": {
+                "ni_content": "[Scene:Reports]\nThe user needs to generate and view various reports.\n[Component:ReportFilters]\nOffer filters such as date range, report type, and categories.\n[Function:applyFilters]\nFilter the available reports based on the selected criteria.\n[Component:ReportViewer]\nDisplay the generated report in a readable format with charts and tables.\n[Function:exportReport]\nAllow the user to export the report in formats like PDF or Excel.\n[Function:generateChart]\nCreate visual charts based on the report data.\n[Function:saveReportPreferences]\nStore the user's preferred report settings for future use."
+            },
+            "param": "[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.\\n[Function:generateChart]\\nCreate visual charts based on the report data.\\n[Function:saveReportPreferences]\\nStore the user's preferred report settings for future use.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 225,
+                "total_tokens": 294,
+                "cost": 0.000145
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.345035710000957,
+                "max": 17.44425284200406,
+                "mean": 6.739382720000867,
+                "stddev": 6.010409767960005,
+                "rounds": 5,
+                "median": 4.011961502001213,
+                "iqr": 4.230783690003591,
+                "q1": 3.819143053748121,
+                "q3": 8.049926743751712,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 3.345035710000957,
+                "hd15iqr": 17.44425284200406,
+                "ops": 0.14838154198191483,
+                "total": 33.696913600004336,
+                "data": [
+                    4.011961502001213,
+                    4.918484711000929,
+                    17.44425284200406,
+                    3.345035710000957,
+                    3.9771788349971757
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Registration]\\nA new user wants to create an account.\\n[Component:RegistrationForm]\\nProvide fields for username, email, password, and password confirmation.\\n[Function:validateRegistration]\\nEnsure all fields are filled out correctly and passwords match.\\n[Function:createUser]\\nCreate a new user account in the database.\\n[Function:sendWelcomeEmail]\\nSend a welcome email to the newly registered user.\\n[Function:verifyEmail]\\nConfirm the user's email address through a verification link.\\n[Function:displaySuccess]\\nShow a success message upon successful registration and email verification.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Registration]\\nA new user wants to create an account.\\n[Component:RegistrationForm]\\nProvide fields for username, email, password, and password confirmation.\\n[Function:validateRegistration]\\nEnsure all fields are filled out correctly and passwords match.\\n[Function:createUser]\\nCreate a new user account in the database.\\n[Function:sendWelcomeEmail]\\nSend a welcome email to the newly registered user.\\n[Function:verifyEmail]\\nConfirm the user's email address through a verification link.\\n[Function:displaySuccess]\\nShow a success message upon successful registration and email verification.]",
+            "params": {
+                "ni_content": "[Scene:Registration]\nA new user wants to create an account.\n[Component:RegistrationForm]\nProvide fields for username, email, password, and password confirmation.\n[Function:validateRegistration]\nEnsure all fields are filled out correctly and passwords match.\n[Function:createUser]\nCreate a new user account in the database.\n[Function:sendWelcomeEmail]\nSend a welcome email to the newly registered user.\n[Function:verifyEmail]\nConfirm the user's email address through a verification link.\n[Function:displaySuccess]\nShow a success message upon successful registration and email verification."
+            },
+            "param": "[Scene:Registration]\\nA new user wants to create an account.\\n[Component:RegistrationForm]\\nProvide fields for username, email, password, and password confirmation.\\n[Function:validateRegistration]\\nEnsure all fields are filled out correctly and passwords match.\\n[Function:createUser]\\nCreate a new user account in the database.\\n[Function:sendWelcomeEmail]\\nSend a welcome email to the newly registered user.\\n[Function:verifyEmail]\\nConfirm the user's email address through a verification link.\\n[Function:displaySuccess]\\nShow a success message upon successful registration and email verification.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 173,
+                "total_tokens": 242,
+                "cost": 0.000114
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.4536205420008628,
+                "max": 9.322789588004525,
+                "mean": 4.203442968601303,
+                "stddev": 2.893907002079251,
+                "rounds": 5,
+                "median": 2.9536043769985554,
+                "iqr": 2.405147011002555,
+                "q1": 2.62717788675036,
+                "q3": 5.032324897752915,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 2.4536205420008628,
+                "hd15iqr": 9.322789588004525,
+                "ops": 0.23790021833762393,
+                "total": 21.017214843006514,
+                "data": [
+                    3.602170001002378,
+                    2.6850303350001923,
+                    2.9536043769985554,
+                    2.4536205420008628,
+                    9.322789588004525
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:PasswordRecovery]\\nA user has forgotten their password and wants to reset it.\\n[Component:PasswordRecoveryForm]\\nProvide a field for the user to enter their registered email address.\\n[Function:validateEmail]\\nCheck if the entered email exists in the database.\\n[Function:sendRecoveryLink]\\nSend a password recovery link to the user's email.\\n[Function:displayRecoveryMessage]\\nShow a message indicating that a recovery link has been sent.\\n[Function:rateLimitRecovery]\\nLimit the number of recovery requests to prevent abuse.\\n[Function:handleRecoveryError]\\nDisplay appropriate messages if the recovery process fails.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:PasswordRecovery]\\nA user has forgotten their password and wants to reset it.\\n[Component:PasswordRecoveryForm]\\nProvide a field for the user to enter their registered email address.\\n[Function:validateEmail]\\nCheck if the entered email exists in the database.\\n[Function:sendRecoveryLink]\\nSend a password recovery link to the user's email.\\n[Function:displayRecoveryMessage]\\nShow a message indicating that a recovery link has been sent.\\n[Function:rateLimitRecovery]\\nLimit the number of recovery requests to prevent abuse.\\n[Function:handleRecoveryError]\\nDisplay appropriate messages if the recovery process fails.]",
+            "params": {
+                "ni_content": "[Scene:PasswordRecovery]\nA user has forgotten their password and wants to reset it.\n[Component:PasswordRecoveryForm]\nProvide a field for the user to enter their registered email address.\n[Function:validateEmail]\nCheck if the entered email exists in the database.\n[Function:sendRecoveryLink]\nSend a password recovery link to the user's email.\n[Function:displayRecoveryMessage]\nShow a message indicating that a recovery link has been sent.\n[Function:rateLimitRecovery]\nLimit the number of recovery requests to prevent abuse.\n[Function:handleRecoveryError]\nDisplay appropriate messages if the recovery process fails."
+            },
+            "param": "[Scene:PasswordRecovery]\\nA user has forgotten their password and wants to reset it.\\n[Component:PasswordRecoveryForm]\\nProvide a field for the user to enter their registered email address.\\n[Function:validateEmail]\\nCheck if the entered email exists in the database.\\n[Function:sendRecoveryLink]\\nSend a password recovery link to the user's email.\\n[Function:displayRecoveryMessage]\\nShow a message indicating that a recovery link has been sent.\\n[Function:rateLimitRecovery]\\nLimit the number of recovery requests to prevent abuse.\\n[Function:handleRecoveryError]\\nDisplay appropriate messages if the recovery process fails.",
+            "extra_info": {
+                "prompt_tokens": 198,
+                "completion_tokens": 220,
+                "total_tokens": 418,
+                "cost": 0.000162
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.567049084995233,
+                "max": 7.889970796000853,
+                "mean": 5.03900141879858,
+                "stddev": 1.8126523346752388,
+                "rounds": 5,
+                "median": 4.223681167997711,
+                "iqr": 2.5899047719994996,
+                "q1": 3.7050398659994244,
+                "q3": 6.294944637998924,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 3.567049084995233,
+                "hd15iqr": 7.889970796000853,
+                "ops": 0.19845201794732265,
+                "total": 25.1950070939929,
+                "data": [
+                    3.7510367930008215,
+                    3.567049084995233,
+                    5.763269251998281,
+                    7.889970796000853,
+                    4.223681167997711
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:RoleManagement]\\nAdministrators manage user roles and permissions.\\n[Component:RoleAssignment]\\nProvide options to assign roles (e.g., Admin, Editor, Viewer) to users.\\n[Function:assignRole]\\nAssign the selected role to the specified user.\\n[Function:validateRole]\\nEnsure that the role being assigned is valid and permitted.\\n[Component:PermissionSettings]\\nAllow administrators to customize permissions for each role.\\n[Function:updatePermissions]\\nUpdate the permissions associated with a specific role.\\n[Function:displayRoleUpdate]\\nShow a confirmation message after successfully updating roles or permissions.\\n[Function:logRoleChange]\\nLog all role and permission changes for auditing purposes.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:RoleManagement]\\nAdministrators manage user roles and permissions.\\n[Component:RoleAssignment]\\nProvide options to assign roles (e.g., Admin, Editor, Viewer) to users.\\n[Function:assignRole]\\nAssign the selected role to the specified user.\\n[Function:validateRole]\\nEnsure that the role being assigned is valid and permitted.\\n[Component:PermissionSettings]\\nAllow administrators to customize permissions for each role.\\n[Function:updatePermissions]\\nUpdate the permissions associated with a specific role.\\n[Function:displayRoleUpdate]\\nShow a confirmation message after successfully updating roles or permissions.\\n[Function:logRoleChange]\\nLog all role and permission changes for auditing purposes.]",
+            "params": {
+                "ni_content": "[Scene:RoleManagement]\nAdministrators manage user roles and permissions.\n[Component:RoleAssignment]\nProvide options to assign roles (e.g., Admin, Editor, Viewer) to users.\n[Function:assignRole]\nAssign the selected role to the specified user.\n[Function:validateRole]\nEnsure that the role being assigned is valid and permitted.\n[Component:PermissionSettings]\nAllow administrators to customize permissions for each role.\n[Function:updatePermissions]\nUpdate the permissions associated with a specific role.\n[Function:displayRoleUpdate]\nShow a confirmation message after successfully updating roles or permissions.\n[Function:logRoleChange]\nLog all role and permission changes for auditing purposes."
+            },
+            "param": "[Scene:RoleManagement]\\nAdministrators manage user roles and permissions.\\n[Component:RoleAssignment]\\nProvide options to assign roles (e.g., Admin, Editor, Viewer) to users.\\n[Function:assignRole]\\nAssign the selected role to the specified user.\\n[Function:validateRole]\\nEnsure that the role being assigned is valid and permitted.\\n[Component:PermissionSettings]\\nAllow administrators to customize permissions for each role.\\n[Function:updatePermissions]\\nUpdate the permissions associated with a specific role.\\n[Function:displayRoleUpdate]\\nShow a confirmation message after successfully updating roles or permissions.\\n[Function:logRoleChange]\\nLog all role and permission changes for auditing purposes.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 175,
+                "total_tokens": 244,
+                "cost": 0.000115
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.475210043005063,
+                "max": 4.753246878004575,
+                "mean": 4.194089385402913,
+                "stddev": 0.537037475070198,
+                "rounds": 5,
+                "median": 4.212121502001537,
+                "iqr": 0.9136959602492425,
+                "q1": 3.7704098240028543,
+                "q3": 4.684105784252097,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.475210043005063,
+                "hd15iqr": 4.753246878004575,
+                "ops": 0.23843077915325192,
+                "total": 20.970446927014564,
+                "data": [
+                    3.868809751002118,
+                    4.212121502001537,
+                    4.753246878004575,
+                    4.661058753001271,
+                    3.475210043005063
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:DataExport]\\nThe user wants to export their data for offline use.\\n[Component:ExportOptions]\\nProvide options for export formats (e.g., CSV, JSON, XML).\\n[Function:selectExportFormat]\\nAllow the user to choose their preferred export format.\\n[Function:generateExport]\\nGenerate the data export in the selected format.\\n[Function:handleLargeExports]\\nManage large data exports by splitting files or using compression.\\n[Function:downloadExport]\\nProvide a download link for the exported data.\\n[Function:notifyExportComplete]\\nNotify the user when the export is ready for download.\\n[Function:validateExport]\\nEnsure the exported data integrity before providing it to the user.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:DataExport]\\nThe user wants to export their data for offline use.\\n[Component:ExportOptions]\\nProvide options for export formats (e.g., CSV, JSON, XML).\\n[Function:selectExportFormat]\\nAllow the user to choose their preferred export format.\\n[Function:generateExport]\\nGenerate the data export in the selected format.\\n[Function:handleLargeExports]\\nManage large data exports by splitting files or using compression.\\n[Function:downloadExport]\\nProvide a download link for the exported data.\\n[Function:notifyExportComplete]\\nNotify the user when the export is ready for download.\\n[Function:validateExport]\\nEnsure the exported data integrity before providing it to the user.]",
+            "params": {
+                "ni_content": "[Scene:DataExport]\nThe user wants to export their data for offline use.\n[Component:ExportOptions]\nProvide options for export formats (e.g., CSV, JSON, XML).\n[Function:selectExportFormat]\nAllow the user to choose their preferred export format.\n[Function:generateExport]\nGenerate the data export in the selected format.\n[Function:handleLargeExports]\nManage large data exports by splitting files or using compression.\n[Function:downloadExport]\nProvide a download link for the exported data.\n[Function:notifyExportComplete]\nNotify the user when the export is ready for download.\n[Function:validateExport]\nEnsure the exported data integrity before providing it to the user."
+            },
+            "param": "[Scene:DataExport]\\nThe user wants to export their data for offline use.\\n[Component:ExportOptions]\\nProvide options for export formats (e.g., CSV, JSON, XML).\\n[Function:selectExportFormat]\\nAllow the user to choose their preferred export format.\\n[Function:generateExport]\\nGenerate the data export in the selected format.\\n[Function:handleLargeExports]\\nManage large data exports by splitting files or using compression.\\n[Function:downloadExport]\\nProvide a download link for the exported data.\\n[Function:notifyExportComplete]\\nNotify the user when the export is ready for download.\\n[Function:validateExport]\\nEnsure the exported data integrity before providing it to the user.",
+            "extra_info": {
+                "prompt_tokens": 214,
+                "completion_tokens": 248,
+                "total_tokens": 462,
+                "cost": 0.000181
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.742333210000652,
+                "max": 6.579806711000856,
+                "mean": 5.083050893999461,
+                "stddev": 1.1217604332740716,
+                "rounds": 5,
+                "median": 5.233648419998644,
+                "iqr": 1.7299702194941347,
+                "q1": 4.1225821787520545,
+                "q3": 5.852552398246189,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 3.742333210000652,
+                "hd15iqr": 6.579806711000856,
+                "ops": 0.19673224228002506,
+                "total": 25.415254469997308,
+                "data": [
+                    5.233648419998644,
+                    5.6101342939946335,
+                    3.742333210000652,
+                    6.579806711000856,
+                    4.249331835002522
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:ChatSupport]\\nThe user needs immediate assistance via live chat.\\n[Component:ChatWindow]\\nDisplay a real-time chat interface for user and support agent communication.\\n[Function:sendMessage]\\nSend the user's message to the support agent.\\n[Function:receiveMessage]\\nReceive and display the support agent's response.\\n[Function:handleTyping]\\nShow a typing indicator when the support agent is composing a response.\\n[Function:endChat]\\nAllow the user to end the chat session gracefully.\\n[Function:saveChatHistory]\\nSave the chat history for future reference.\\n[Function:validateSession]\\nEnsure that chat sessions are securely managed and isolated.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:ChatSupport]\\nThe user needs immediate assistance via live chat.\\n[Component:ChatWindow]\\nDisplay a real-time chat interface for user and support agent communication.\\n[Function:sendMessage]\\nSend the user's message to the support agent.\\n[Function:receiveMessage]\\nReceive and display the support agent's response.\\n[Function:handleTyping]\\nShow a typing indicator when the support agent is composing a response.\\n[Function:endChat]\\nAllow the user to end the chat session gracefully.\\n[Function:saveChatHistory]\\nSave the chat history for future reference.\\n[Function:validateSession]\\nEnsure that chat sessions are securely managed and isolated.]",
+            "params": {
+                "ni_content": "[Scene:ChatSupport]\nThe user needs immediate assistance via live chat.\n[Component:ChatWindow]\nDisplay a real-time chat interface for user and support agent communication.\n[Function:sendMessage]\nSend the user's message to the support agent.\n[Function:receiveMessage]\nReceive and display the support agent's response.\n[Function:handleTyping]\nShow a typing indicator when the support agent is composing a response.\n[Function:endChat]\nAllow the user to end the chat session gracefully.\n[Function:saveChatHistory]\nSave the chat history for future reference.\n[Function:validateSession]\nEnsure that chat sessions are securely managed and isolated."
+            },
+            "param": "[Scene:ChatSupport]\\nThe user needs immediate assistance via live chat.\\n[Component:ChatWindow]\\nDisplay a real-time chat interface for user and support agent communication.\\n[Function:sendMessage]\\nSend the user's message to the support agent.\\n[Function:receiveMessage]\\nReceive and display the support agent's response.\\n[Function:handleTyping]\\nShow a typing indicator when the support agent is composing a response.\\n[Function:endChat]\\nAllow the user to end the chat session gracefully.\\n[Function:saveChatHistory]\\nSave the chat history for future reference.\\n[Function:validateSession]\\nEnsure that chat sessions are securely managed and isolated.",
+            "extra_info": {
+                "prompt_tokens": 204,
+                "completion_tokens": 117,
+                "total_tokens": 321,
+                "cost": 0.000101
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.9512512090004748,
+                "max": 2.4602233760015224,
+                "mean": 2.208655417599948,
+                "stddev": 0.2208053941239201,
+                "rounds": 5,
+                "median": 2.1861086260032607,
+                "iqr": 0.3967541985002754,
+                "q1": 2.020192427748043,
+                "q3": 2.4169466262483184,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 1.9512512090004748,
+                "hd15iqr": 2.4602233760015224,
+                "ops": 0.4527641532632815,
+                "total": 11.04327708799974,
+                "data": [
+                    2.0431728339972324,
+                    2.1861086260032607,
+                    2.4025210429972503,
+                    2.4602233760015224,
+                    1.9512512090004748
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:FileUpload]\\nThe user needs to upload and manage files within the application.\\n[Component:UploadForm]\\nProvide fields for selecting and uploading files.\\n[Function:validateFile]\\nEnsure the uploaded file meets size and format requirements.\\n[Function:scanFileForViruses]\\nScan uploaded files for malware or viruses before saving.\\n[Function:uploadFile]\\nHandle the file upload process to the server.\\n[Component:FileList]\\nDisplay a list of uploaded files with options to view, download, or delete.\\n[Function:deleteFile]\\nAllow the user to delete selected files from their account.\\n[Function:downloadFile]\\nEnable the user to download their uploaded files.\\n[Function:displayUploadSuccess]\\nShow a success message after a file is successfully uploaded.\\n[Function:handleUploadError]\\nDisplay error messages if the upload fails due to security checks or server issues.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:FileUpload]\\nThe user needs to upload and manage files within the application.\\n[Component:UploadForm]\\nProvide fields for selecting and uploading files.\\n[Function:validateFile]\\nEnsure the uploaded file meets size and format requirements.\\n[Function:scanFileForViruses]\\nScan uploaded files for malware or viruses before saving.\\n[Function:uploadFile]\\nHandle the file upload process to the server.\\n[Component:FileList]\\nDisplay a list of uploaded files with options to view, download, or delete.\\n[Function:deleteFile]\\nAllow the user to delete selected files from their account.\\n[Function:downloadFile]\\nEnable the user to download their uploaded files.\\n[Function:displayUploadSuccess]\\nShow a success message after a file is successfully uploaded.\\n[Function:handleUploadError]\\nDisplay error messages if the upload fails due to security checks or server issues.]",
+            "params": {
+                "ni_content": "[Scene:FileUpload]\nThe user needs to upload and manage files within the application.\n[Component:UploadForm]\nProvide fields for selecting and uploading files.\n[Function:validateFile]\nEnsure the uploaded file meets size and format requirements.\n[Function:scanFileForViruses]\nScan uploaded files for malware or viruses before saving.\n[Function:uploadFile]\nHandle the file upload process to the server.\n[Component:FileList]\nDisplay a list of uploaded files with options to view, download, or delete.\n[Function:deleteFile]\nAllow the user to delete selected files from their account.\n[Function:downloadFile]\nEnable the user to download their uploaded files.\n[Function:displayUploadSuccess]\nShow a success message after a file is successfully uploaded.\n[Function:handleUploadError]\nDisplay error messages if the upload fails due to security checks or server issues."
+            },
+            "param": "[Scene:FileUpload]\\nThe user needs to upload and manage files within the application.\\n[Component:UploadForm]\\nProvide fields for selecting and uploading files.\\n[Function:validateFile]\\nEnsure the uploaded file meets size and format requirements.\\n[Function:scanFileForViruses]\\nScan uploaded files for malware or viruses before saving.\\n[Function:uploadFile]\\nHandle the file upload process to the server.\\n[Component:FileList]\\nDisplay a list of uploaded files with options to view, download, or delete.\\n[Function:deleteFile]\\nAllow the user to delete selected files from their account.\\n[Function:downloadFile]\\nEnable the user to download their uploaded files.\\n[Function:displayUploadSuccess]\\nShow a success message after a file is successfully uploaded.\\n[Function:handleUploadError]\\nDisplay error messages if the upload fails due to security checks or server issues.",
+            "extra_info": {
+                "prompt_tokens": 251,
+                "completion_tokens": 306,
+                "total_tokens": 557,
+                "cost": 0.000221
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 3.399301667996042,
+                "max": 11.861806881002849,
+                "mean": 5.97137565259909,
+                "stddev": 3.4004006772303312,
+                "rounds": 5,
+                "median": 5.3005963359973975,
+                "iqr": 3.167432834248757,
+                "q1": 3.809612168250169,
+                "q3": 6.977045002498926,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 3.399301667996042,
+                "hd15iqr": 11.861806881002849,
+                "ops": 0.16746559891350024,
+                "total": 29.85687826299545,
+                "data": [
+                    11.861806881002849,
+                    3.399301667996042,
+                    5.3005963359973975,
+                    3.9463823350015446,
+                    5.348791042997618
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Localization]\\nThe user prefers to use the application in a different language.\\n[Component:LanguageSelector]\\nProvide options for selecting the desired language (e.g., English, Spanish, French).\\n[Function:setLanguage]\\nSet the application's language based on user selection.\\n[Function:translateContent]\\nTranslate all user-facing text to the selected language.\\n[Function:loadLocaleResources]\\nLoad additional resources required for the selected language.\\n[Function:displayLanguageChange]\\nShow a confirmation message after successfully changing the language.\\n[Function:handleTranslationErrors]\\nGracefully handle any errors that occur during the translation process.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Localization]\\nThe user prefers to use the application in a different language.\\n[Component:LanguageSelector]\\nProvide options for selecting the desired language (e.g., English, Spanish, French).\\n[Function:setLanguage]\\nSet the application's language based on user selection.\\n[Function:translateContent]\\nTranslate all user-facing text to the selected language.\\n[Function:loadLocaleResources]\\nLoad additional resources required for the selected language.\\n[Function:displayLanguageChange]\\nShow a confirmation message after successfully changing the language.\\n[Function:handleTranslationErrors]\\nGracefully handle any errors that occur during the translation process.]",
+            "params": {
+                "ni_content": "[Scene:Localization]\nThe user prefers to use the application in a different language.\n[Component:LanguageSelector]\nProvide options for selecting the desired language (e.g., English, Spanish, French).\n[Function:setLanguage]\nSet the application's language based on user selection.\n[Function:translateContent]\nTranslate all user-facing text to the selected language.\n[Function:loadLocaleResources]\nLoad additional resources required for the selected language.\n[Function:displayLanguageChange]\nShow a confirmation message after successfully changing the language.\n[Function:handleTranslationErrors]\nGracefully handle any errors that occur during the translation process."
+            },
+            "param": "[Scene:Localization]\\nThe user prefers to use the application in a different language.\\n[Component:LanguageSelector]\\nProvide options for selecting the desired language (e.g., English, Spanish, French).\\n[Function:setLanguage]\\nSet the application's language based on user selection.\\n[Function:translateContent]\\nTranslate all user-facing text to the selected language.\\n[Function:loadLocaleResources]\\nLoad additional resources required for the selected language.\\n[Function:displayLanguageChange]\\nShow a confirmation message after successfully changing the language.\\n[Function:handleTranslationErrors]\\nGracefully handle any errors that occur during the translation process.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 209,
+                "total_tokens": 278,
+                "cost": 0.000136
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 1.4441694589986582,
+                "max": 52.9558223990025,
+                "mean": 11.857687964000798,
+                "stddev": 22.97497570600822,
+                "rounds": 5,
+                "median": 1.6986367510035052,
+                "iqr": 13.101126266250503,
+                "q1": 1.4456150532496395,
+                "q3": 14.546741319500143,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 1.4441694589986582,
+                "hd15iqr": 52.9558223990025,
+                "ops": 0.08433347234603725,
+                "total": 59.28843982000399,
+                "data": [
+                    1.4441694589986582,
+                    1.743714292999357,
+                    1.6986367510035052,
+                    1.4460969179999665,
+                    52.9558223990025
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:ActivityLogs]\\nAdministrators need to review user activity for auditing purposes.\\n[Component:LogViewer]\\nDisplay a list of user activities with filters for date range, user, and activity type.\\n[Function:fetchLogs]\\nRetrieve activity logs from the server based on selected filters.\\n[Function:filterLogs]\\nAllow administrators to apply additional filters to the displayed logs.\\n[Function:exportLogs]\\nEnable the export of activity logs in formats like CSV or PDF.\\n[Function:displayLogDetails]\\nShow detailed information about a selected log entry.\\n[Function:searchLogs]\\nProvide a search functionality to find specific log entries.\\n[Function:validateLogAccess]\\nEnsure that only authorized administrators can access and view activity logs.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:ActivityLogs]\\nAdministrators need to review user activity for auditing purposes.\\n[Component:LogViewer]\\nDisplay a list of user activities with filters for date range, user, and activity type.\\n[Function:fetchLogs]\\nRetrieve activity logs from the server based on selected filters.\\n[Function:filterLogs]\\nAllow administrators to apply additional filters to the displayed logs.\\n[Function:exportLogs]\\nEnable the export of activity logs in formats like CSV or PDF.\\n[Function:displayLogDetails]\\nShow detailed information about a selected log entry.\\n[Function:searchLogs]\\nProvide a search functionality to find specific log entries.\\n[Function:validateLogAccess]\\nEnsure that only authorized administrators can access and view activity logs.]",
+            "params": {
+                "ni_content": "[Scene:ActivityLogs]\nAdministrators need to review user activity for auditing purposes.\n[Component:LogViewer]\nDisplay a list of user activities with filters for date range, user, and activity type.\n[Function:fetchLogs]\nRetrieve activity logs from the server based on selected filters.\n[Function:filterLogs]\nAllow administrators to apply additional filters to the displayed logs.\n[Function:exportLogs]\nEnable the export of activity logs in formats like CSV or PDF.\n[Function:displayLogDetails]\nShow detailed information about a selected log entry.\n[Function:searchLogs]\nProvide a search functionality to find specific log entries.\n[Function:validateLogAccess]\nEnsure that only authorized administrators can access and view activity logs."
+            },
+            "param": "[Scene:ActivityLogs]\\nAdministrators need to review user activity for auditing purposes.\\n[Component:LogViewer]\\nDisplay a list of user activities with filters for date range, user, and activity type.\\n[Function:fetchLogs]\\nRetrieve activity logs from the server based on selected filters.\\n[Function:filterLogs]\\nAllow administrators to apply additional filters to the displayed logs.\\n[Function:exportLogs]\\nEnable the export of activity logs in formats like CSV or PDF.\\n[Function:displayLogDetails]\\nShow detailed information about a selected log entry.\\n[Function:searchLogs]\\nProvide a search functionality to find specific log entries.\\n[Function:validateLogAccess]\\nEnsure that only authorized administrators can access and view activity logs.",
+            "extra_info": {
+                "prompt_tokens": 69,
+                "completion_tokens": 191,
+                "total_tokens": 260,
+                "cost": 0.000125
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.467362919000152,
+                "max": 7.705767587001901,
+                "mean": 5.635977361002006,
+                "stddev": 1.2508238837246124,
+                "rounds": 5,
+                "median": 5.3083219610052765,
+                "iqr": 1.4250851674969454,
+                "q1": 4.821011606252796,
+                "q3": 6.246096773749741,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 4.467362919000152,
+                "hd15iqr": 7.705767587001901,
+                "ops": 0.17743151470399318,
+                "total": 28.179886805010028,
+                "data": [
+                    7.705767587001901,
+                    5.759539835999021,
+                    5.3083219610052765,
+                    4.467362919000152,
+                    4.938894502003677
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:APIIntegration]\\nThe application integrates with external third-party APIs.\\n[Component:APIConnector]\\nProvide fields to input API credentials and endpoints.\\n[Function:validateAPIKeys]\\nEnsure the provided API keys are valid and have necessary permissions.\\n[Function:connectToAPI]\\nEstablish a connection to the third-party API.\\n[Function:fetchAPIData]\\nRetrieve data from the connected API and display it within the application.\\n[Function:handleAPIError]\\nGracefully handle any errors or issues that arise during API communication.\\n[Function:retryAPIRequest]\\nImplement retry logic for transient API failures.\\n[Function:logAPIInteractions]\\nLog all interactions with the third-party API for monitoring and auditing.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:APIIntegration]\\nThe application integrates with external third-party APIs.\\n[Component:APIConnector]\\nProvide fields to input API credentials and endpoints.\\n[Function:validateAPIKeys]\\nEnsure the provided API keys are valid and have necessary permissions.\\n[Function:connectToAPI]\\nEstablish a connection to the third-party API.\\n[Function:fetchAPIData]\\nRetrieve data from the connected API and display it within the application.\\n[Function:handleAPIError]\\nGracefully handle any errors or issues that arise during API communication.\\n[Function:retryAPIRequest]\\nImplement retry logic for transient API failures.\\n[Function:logAPIInteractions]\\nLog all interactions with the third-party API for monitoring and auditing.]",
+            "params": {
+                "ni_content": "[Scene:APIIntegration]\nThe application integrates with external third-party APIs.\n[Component:APIConnector]\nProvide fields to input API credentials and endpoints.\n[Function:validateAPIKeys]\nEnsure the provided API keys are valid and have necessary permissions.\n[Function:connectToAPI]\nEstablish a connection to the third-party API.\n[Function:fetchAPIData]\nRetrieve data from the connected API and display it within the application.\n[Function:handleAPIError]\nGracefully handle any errors or issues that arise during API communication.\n[Function:retryAPIRequest]\nImplement retry logic for transient API failures.\n[Function:logAPIInteractions]\nLog all interactions with the third-party API for monitoring and auditing."
+            },
+            "param": "[Scene:APIIntegration]\\nThe application integrates with external third-party APIs.\\n[Component:APIConnector]\\nProvide fields to input API credentials and endpoints.\\n[Function:validateAPIKeys]\\nEnsure the provided API keys are valid and have necessary permissions.\\n[Function:connectToAPI]\\nEstablish a connection to the third-party API.\\n[Function:fetchAPIData]\\nRetrieve data from the connected API and display it within the application.\\n[Function:handleAPIError]\\nGracefully handle any errors or issues that arise during API communication.\\n[Function:retryAPIRequest]\\nImplement retry logic for transient API failures.\\n[Function:logAPIInteractions]\\nLog all interactions with the third-party API for monitoring and auditing.",
+            "extra_info": {
+                "prompt_tokens": 216,
+                "completion_tokens": 249,
+                "total_tokens": 465,
+                "cost": 0.000182
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.3537463760003448,
+                "max": 5.3036356270022225,
+                "mean": 3.357836210000096,
+                "stddev": 1.2550327104829897,
+                "rounds": 5,
+                "median": 2.621040168000036,
+                "iqr": 1.7670414689928293,
+                "q1": 2.51518659550311,
+                "q3": 4.282228064495939,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 2.3537463760003448,
+                "hd15iqr": 5.3036356270022225,
+                "ops": 0.2978108333640167,
+                "total": 16.78918105000048,
+                "data": [
+                    3.9417588769938448,
+                    5.3036356270022225,
+                    2.5690000020040316,
+                    2.621040168000036,
+                    2.3537463760003448
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Accessibility]\\nEnsure the application is accessible to all users, including those with disabilities.\\n[Component:AccessibilitySettings]\\nProvide options to adjust text size, contrast, and enable screen reader support.\\n[Function:adjustTextSize]\\nAllow users to increase or decrease the text size for better readability.\\n[Function:toggleContrast]\\nEnable high-contrast mode for users with visual impairments.\\n[Function:enableScreenReader]\\nActivate screen reader support to assist visually impaired users.\\n[Function:validateAccessibilitySettings]\\nEnsure that accessibility settings are applied correctly and persist across sessions.\\n[Function:displayAccessibilityConfirmation]\\nShow a confirmation message after successfully applying accessibility settings.\\n[Function:checkWCAGCompliance]\\nValidate that the application meets WCAG (Web Content Accessibility Guidelines) standards.\\n[Function:handleAccessibilityErrors]\\nProvide feedback if accessibility features fail to apply correctly.]",
+            "fullname": "backend/test/services/test_llm_performance.py::test_ni_creation_varied[[Scene:Accessibility]\\nEnsure the application is accessible to all users, including those with disabilities.\\n[Component:AccessibilitySettings]\\nProvide options to adjust text size, contrast, and enable screen reader support.\\n[Function:adjustTextSize]\\nAllow users to increase or decrease the text size for better readability.\\n[Function:toggleContrast]\\nEnable high-contrast mode for users with visual impairments.\\n[Function:enableScreenReader]\\nActivate screen reader support to assist visually impaired users.\\n[Function:validateAccessibilitySettings]\\nEnsure that accessibility settings are applied correctly and persist across sessions.\\n[Function:displayAccessibilityConfirmation]\\nShow a confirmation message after successfully applying accessibility settings.\\n[Function:checkWCAGCompliance]\\nValidate that the application meets WCAG (Web Content Accessibility Guidelines) standards.\\n[Function:handleAccessibilityErrors]\\nProvide feedback if accessibility features fail to apply correctly.]",
+            "params": {
+                "ni_content": "[Scene:Accessibility]\nEnsure the application is accessible to all users, including those with disabilities.\n[Component:AccessibilitySettings]\nProvide options to adjust text size, contrast, and enable screen reader support.\n[Function:adjustTextSize]\nAllow users to increase or decrease the text size for better readability.\n[Function:toggleContrast]\nEnable high-contrast mode for users with visual impairments.\n[Function:enableScreenReader]\nActivate screen reader support to assist visually impaired users.\n[Function:validateAccessibilitySettings]\nEnsure that accessibility settings are applied correctly and persist across sessions.\n[Function:displayAccessibilityConfirmation]\nShow a confirmation message after successfully applying accessibility settings.\n[Function:checkWCAGCompliance]\nValidate that the application meets WCAG (Web Content Accessibility Guidelines) standards.\n[Function:handleAccessibilityErrors]\nProvide feedback if accessibility features fail to apply correctly."
+            },
+            "param": "[Scene:Accessibility]\\nEnsure the application is accessible to all users, including those with disabilities.\\n[Component:AccessibilitySettings]\\nProvide options to adjust text size, contrast, and enable screen reader support.\\n[Function:adjustTextSize]\\nAllow users to increase or decrease the text size for better readability.\\n[Function:toggleContrast]\\nEnable high-contrast mode for users with visual impairments.\\n[Function:enableScreenReader]\\nActivate screen reader support to assist visually impaired users.\\n[Function:validateAccessibilitySettings]\\nEnsure that accessibility settings are applied correctly and persist across sessions.\\n[Function:displayAccessibilityConfirmation]\\nShow a confirmation message after successfully applying accessibility settings.\\n[Function:checkWCAGCompliance]\\nValidate that the application meets WCAG (Web Content Accessibility Guidelines) standards.\\n[Function:handleAccessibilityErrors]\\nProvide feedback if accessibility features fail to apply correctly.",
+            "extra_info": {
+                "prompt_tokens": 246,
+                "completion_tokens": 290,
+                "total_tokens": 536,
+                "cost": 0.000211
+            },
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 4.386704501994245,
+                "max": 7.508956379002484,
+                "mean": 5.101262627397955,
+                "stddev": 1.3573074787995798,
+                "rounds": 5,
+                "median": 4.419669877999695,
+                "iqr": 1.0904748762495728,
+                "q1": 4.388338563747311,
+                "q3": 5.478813439996884,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 4.386704501994245,
+                "hd15iqr": 7.508956379002484,
+                "ops": 0.19602989946629715,
+                "total": 25.506313136989775,
+                "data": [
+                    4.419669877999695,
+                    4.802099126995017,
+                    4.386704501994245,
+                    7.508956379002484,
+                    4.388883250998333
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2024-12-19T05:29:07.175517+00:00",
+    "version": "5.1.0"
+}

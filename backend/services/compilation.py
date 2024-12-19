@@ -2,12 +2,12 @@ from sqlalchemy.orm import Session
 from sqlalchemy import select
 from backend.entities.ni_token import NIToken
 from backend.entities.compiled_multifact import CompiledMultifact
-from backend.services.llm_client import LLMClient
+from backend.services.llm.groq_llm_client import GroqLLMClient
 from backend.services.artifact_cache import ArtifactCacheService
-
+from backend.services.llm.base_llm_client import BaseLLMClient
 class CompilationService:
     @staticmethod
-    def compile_token(token_id: int, session: Session) -> CompiledMultifact:
+    def compile_token(token_id: int, session: Session, llm_client: BaseLLMClient) -> CompiledMultifact:
         ni_token = session.get(NIToken, token_id)
         if not ni_token:
             raise ValueError(f"Token with id {token_id} not found")
@@ -29,8 +29,10 @@ class CompilationService:
             new_artifact = ArtifactCacheService.duplicate_artifact_for_token(token_id, cached_artifact, session)
             return new_artifact
 
+        if llm_client is None:
+            llm_client = OpenAILLMClient()
         # If we reach here, no cached artifact found, generate fresh code
-        code = LLMClient.generate_code(ni_token.content)
+        code = llm_client.generate_code(ni_token.content)
         artifact = CompiledMultifact(
             ni_token_id=token_id,
             language="typescript",

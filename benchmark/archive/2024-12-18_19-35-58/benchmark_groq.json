@@ -1,0 +1,517 @@
+{
+    "machine_info": {
+        "node": "d8ecef1fb3d4",
+        "processor": "aarch64",
+        "machine": "aarch64",
+        "python_compiler": "GCC 11.4.0",
+        "python_implementation": "CPython",
+        "python_implementation_version": "3.11.11",
+        "python_version": "3.11.11",
+        "python_build": [
+            "main",
+            "Dec  4 2024 08:55:07"
+        ],
+        "release": "6.10.14-linuxkit",
+        "system": "Linux",
+        "cpu": {
+            "python_version": "3.11.11.final.0 (64 bit)",
+            "cpuinfo_version": [
+                9,
+                0,
+                0
+            ],
+            "cpuinfo_version_string": "9.0.0",
+            "arch": "ARM_8",
+            "bits": 64,
+            "count": 8,
+            "arch_string_raw": "aarch64",
+            "flags": [
+                "aes",
+                "asimd",
+                "asimddp",
+                "asimdfhm",
+                "asimdhp",
+                "asimdrdm",
+                "atomics",
+                "cpuid",
+                "crc32",
+                "dcpodp",
+                "dcpop",
+                "dit",
+                "evtstrm",
+                "fcma",
+                "flagm",
+                "flagm2",
+                "fp",
+                "fphp",
+                "frint",
+                "ilrcpc",
+                "jscvt",
+                "lrcpc",
+                "paca",
+                "pacg",
+                "pmull",
+                "sb",
+                "sha1",
+                "sha2",
+                "sha3",
+                "sha512",
+                "ssbs",
+                "uscat"
+            ],
+            "vendor_id_raw": "Apple"
+        }
+    },
+    "commit_info": {
+        "id": "2d6fe520bfdd53b1e0762d42e208e740cafe97b0",
+        "time": "2024-12-15T20:44:48-05:00",
+        "author_time": "2024-12-15T20:44:48-05:00",
+        "dirty": true,
+        "project": "Multifact-V3",
+        "branch": "v2"
+    },
+    "benchmarks": [
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.]",
+            "params": {
+                "ni_content": "[Scene:Intro]\nThe user enters the application and should receive a friendly greeting.\n[Component:Greeting]\nDisplay a personalized greeting message to the user.\n[Function:displayGreeting]\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area."
+            },
+            "param": "[Scene:Intro]\\nThe user enters the application and should receive a friendly greeting.\\n[Component:Greeting]\\nDisplay a personalized greeting message to the user.\\n[Function:displayGreeting]\\nShow \"Welcome back, John! How can we assist you today?\" in the greeting area.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.4879388330009533,
+                "max": 0.7668618749958114,
+                "mean": 0.5960628082000767,
+                "stddev": 0.11201542402081341,
+                "rounds": 5,
+                "median": 0.573091000005661,
+                "iqr": 0.1646632607516949,
+                "q1": 0.5066768329979823,
+                "q3": 0.6713400937496772,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 0.4879388330009533,
+                "hd15iqr": 0.7668618749958114,
+                "ops": 1.6776755507019256,
+                "total": 2.9803140410003834,
+                "data": [
+                    0.7668618749958114,
+                    0.5129228329969919,
+                    0.573091000005661,
+                    0.4879388330009533,
+                    0.6394995000009658
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.]",
+            "params": {
+                "ni_content": "[Scene:Login]\nThe user needs to authenticate to access their account.\n[Component:LoginForm]\nProvide fields for username and password entry.\n[Function:validateCredentials]\nVerify the entered username and password against the database.\n[Function:displayError]\nShow an error message if the credentials are incorrect."
+            },
+            "param": "[Scene:Login]\\nThe user needs to authenticate to access their account.\\n[Component:LoginForm]\\nProvide fields for username and password entry.\\n[Function:validateCredentials]\\nVerify the entered username and password against the database.\\n[Function:displayError]\\nShow an error message if the credentials are incorrect.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.4149977500055684,
+                "max": 0.7205524169985438,
+                "mean": 0.5225189083997975,
+                "stddev": 0.12320572324281787,
+                "rounds": 5,
+                "median": 0.5008686249930179,
+                "iqr": 0.16576654174969008,
+                "q1": 0.42512640625136555,
+                "q3": 0.5908929480010556,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 0.4149977500055684,
+                "hd15iqr": 0.7205524169985438,
+                "ops": 1.9138063406403372,
+                "total": 2.6125945419989876,
+                "data": [
+                    0.5008686249930179,
+                    0.4285026249999646,
+                    0.4149977500055684,
+                    0.5476731250018929,
+                    0.7205524169985438
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.]",
+            "params": {
+                "ni_content": "[Scene:Dashboard]\nAfter logging in, the user should see an overview of their account.\n[Component:StatisticsPanel]\nDisplay key user statistics such as active projects and recent activity.\n[Function:fetchStatistics]\nRetrieve user statistics from the server and display them in charts.\n[Component:QuickActions]\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\n[Function:navigateToFeature]\nRedirect the user to the selected feature when a quick action is clicked."
+            },
+            "param": "[Scene:Dashboard]\\nAfter logging in, the user should see an overview of their account.\\n[Component:StatisticsPanel]\\nDisplay key user statistics such as active projects and recent activity.\\n[Function:fetchStatistics]\\nRetrieve user statistics from the server and display them in charts.\\n[Component:QuickActions]\\nProvide shortcuts to frequently used features like \"Create New Project\" and \"View Reports.\"\\n[Function:navigateToFeature]\\nRedirect the user to the selected feature when a quick action is clicked.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 0.5037326249948819,
+                "max": 2.6582693759992253,
+                "mean": 1.5358982923993607,
+                "stddev": 1.0655122186026325,
+                "rounds": 5,
+                "median": 1.2996370420005405,
+                "iqr": 2.093757625501894,
+                "q1": 0.555066094499125,
+                "q3": 2.648823720001019,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 0.5037326249948819,
+                "hd15iqr": 2.6582693759992253,
+                "ops": 0.6510847788220486,
+                "total": 7.679491461996804,
+                "data": [
+                    1.2996370420005405,
+                    0.5721772510005394,
+                    0.5037326249948819,
+                    2.645675168001617,
+                    2.6582693759992253
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.]",
+            "params": {
+                "ni_content": "[Scene:UserProfile]\nThe user wants to view and edit their personal information.\n[Component:ProfileDetails]\nShow the user's name, email, and contact information.\n[Function:editProfile]\nAllow the user to update their personal details and save changes.\n[Component:Preferences]\nEnable the user to set their preferences, such as notification settings and display options.\n[Function:savePreferences]\nStore the user's preference settings in the database."
+            },
+            "param": "[Scene:UserProfile]\\nThe user wants to view and edit their personal information.\\n[Component:ProfileDetails]\\nShow the user's name, email, and contact information.\\n[Function:editProfile]\\nAllow the user to update their personal details and save changes.\\n[Component:Preferences]\\nEnable the user to set their preferences, such as notification settings and display options.\\n[Function:savePreferences]\\nStore the user's preference settings in the database.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.2345177509996574,
+                "max": 3.148312960001931,
+                "mean": 2.8495663598005194,
+                "stddev": 0.3702475805862104,
+                "rounds": 5,
+                "median": 2.9196253350019106,
+                "iqr": 0.45487598999716283,
+                "q1": 2.674931751251279,
+                "q3": 3.1298077412484417,
+                "iqr_outliers": 0,
+                "stddev_outliers": 1,
+                "outliers": "1;0",
+                "ld15iqr": 2.2345177509996574,
+                "hd15iqr": 3.148312960001931,
+                "ops": 0.350930588635249,
+                "total": 14.247831799002597,
+                "data": [
+                    2.9196253350019106,
+                    2.8217364180018194,
+                    3.148312960001931,
+                    3.1236393349972786,
+                    2.2345177509996574
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.]",
+            "params": {
+                "ni_content": "[Scene:Notifications]\nThe user should be informed about recent updates and messages.\n[Component:NotificationList]\nDisplay a list of unread and recent notifications.\n[Function:markAsRead]\nAllow the user to mark notifications as read.\n[Function:fetchNotifications]\nRetrieve the latest notifications from the server and update the list.\n[Component:NotificationSettings]\nProvide options for the user to customize their notification preferences.\n[Function:updateSettings]\nSave the user's notification preferences based on their selections."
+            },
+            "param": "[Scene:Notifications]\\nThe user should be informed about recent updates and messages.\\n[Component:NotificationList]\\nDisplay a list of unread and recent notifications.\\n[Function:markAsRead]\\nAllow the user to mark notifications as read.\\n[Function:fetchNotifications]\\nRetrieve the latest notifications from the server and update the list.\\n[Component:NotificationSettings]\\nProvide options for the user to customize their notification preferences.\\n[Function:updateSettings]\\nSave the user's notification preferences based on their selections.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.711945333998301,
+                "max": 3.0010432100025355,
+                "mean": 2.7957881594018543,
+                "stddev": 0.11657531919293915,
+                "rounds": 5,
+                "median": 2.755549127003178,
+                "iqr": 0.09021943700281554,
+                "q1": 2.7354150217506685,
+                "q3": 2.825634458753484,
+                "iqr_outliers": 1,
+                "stddev_outliers": 1,
+                "outliers": "1;1",
+                "ld15iqr": 2.711945333998301,
+                "hd15iqr": 3.0010432100025355,
+                "ops": 0.35768089103501505,
+                "total": 13.978940797009273,
+                "data": [
+                    2.755549127003178,
+                    2.711945333998301,
+                    2.7432382510014577,
+                    3.0010432100025355,
+                    2.7671648750038003
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.]",
+            "params": {
+                "ni_content": "[Scene:WizardStep1]\nThe user begins the setup process with an introduction.\n[Component:Introduction]\nProvide an overview of what the setup will entail.\n[Function:proceedToStep2]\nMove the user to the next step when they click \"Next.\"\n\n[Scene:WizardStep2]\nThe user inputs their personal information.\n[Component:PersonalInfoForm]\nInclude fields for name, email, and phone number.\n[Function:validatePersonalInfo]\nEnsure all required fields are filled out correctly.\n[Function:savePersonalInfo]\nStore the entered personal information in the user's profile.\n\n[Scene:WizardStep3]\nThe user configures their preferences.\n[Component:PreferencesForm]\nAllow the user to select their preferred settings.\n[Function:applyPreferences]\nApply the selected preferences to the user's account.\n[Function:completeSetup]\nFinalize the setup process and redirect the user to the dashboard."
+            },
+            "param": "[Scene:WizardStep1]\\nThe user begins the setup process with an introduction.\\n[Component:Introduction]\\nProvide an overview of what the setup will entail.\\n[Function:proceedToStep2]\\nMove the user to the next step when they click \"Next.\"\\n\\n[Scene:WizardStep2]\\nThe user inputs their personal information.\\n[Component:PersonalInfoForm]\\nInclude fields for name, email, and phone number.\\n[Function:validatePersonalInfo]\\nEnsure all required fields are filled out correctly.\\n[Function:savePersonalInfo]\\nStore the entered personal information in the user's profile.\\n\\n[Scene:WizardStep3]\\nThe user configures their preferences.\\n[Component:PreferencesForm]\\nAllow the user to select their preferred settings.\\n[Function:applyPreferences]\\nApply the selected preferences to the user's account.\\n[Function:completeSetup]\\nFinalize the setup process and redirect the user to the dashboard.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.8917982099956134,
+                "max": 3.2505964180018054,
+                "mean": 3.0749824515994986,
+                "stddev": 0.13290147388935952,
+                "rounds": 5,
+                "median": 3.047061668999959,
+                "iqr": 0.16352864525651967,
+                "q1": 3.005580991246461,
+                "q3": 3.1691096365029807,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.8917982099956134,
+                "hd15iqr": 3.2505964180018054,
+                "ops": 0.3252051079120256,
+                "total": 15.374912257997494,
+                "data": [
+                    2.8917982099956134,
+                    3.047061668999959,
+                    3.1419473760033725,
+                    3.2505964180018054,
+                    3.0435085849967436
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.]",
+            "params": {
+                "ni_content": "[Scene:CartReview]\nThe user reviews items in their shopping cart.\n[Component:CartItems]\nList all items with quantities and prices.\n[Function:updateQuantity]\nAllow the user to change the quantity of each item.\n[Function:removeItem]\nEnable the user to remove items from the cart.\n\n[Scene:ShippingDetails]\nThe user enters their shipping information.\n[Component:ShippingForm]\nProvide fields for address, city, state, and zip code.\n[Function:validateAddress]\nEnsure the shipping address is complete and valid.\n[Function:saveShippingInfo]\nStore the shipping details for order processing.\n\n[Scene:Payment]\nThe user selects a payment method and enters payment details.\n[Component:PaymentOptions]\nOffer various payment methods such as credit card, PayPal, and gift card.\n[Function:processPayment]\nHandle the payment transaction securely.\n[Function:displayReceipt]\nShow an order receipt upon successful payment."
+            },
+            "param": "[Scene:CartReview]\\nThe user reviews items in their shopping cart.\\n[Component:CartItems]\\nList all items with quantities and prices.\\n[Function:updateQuantity]\\nAllow the user to change the quantity of each item.\\n[Function:removeItem]\\nEnable the user to remove items from the cart.\\n\\n[Scene:ShippingDetails]\\nThe user enters their shipping information.\\n[Component:ShippingForm]\\nProvide fields for address, city, state, and zip code.\\n[Function:validateAddress]\\nEnsure the shipping address is complete and valid.\\n[Function:saveShippingInfo]\\nStore the shipping details for order processing.\\n\\n[Scene:Payment]\\nThe user selects a payment method and enters payment details.\\n[Component:PaymentOptions]\\nOffer various payment methods such as credit card, PayPal, and gift card.\\n[Function:processPayment]\\nHandle the payment transaction securely.\\n[Function:displayReceipt]\\nShow an order receipt upon successful payment.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.7559355849953135,
+                "max": 3.1804214599978877,
+                "mean": 2.973910951797734,
+                "stddev": 0.1518192164192289,
+                "rounds": 5,
+                "median": 2.960764751995157,
+                "iqr": 0.14802456275538134,
+                "q1": 2.9076947099965764,
+                "q3": 3.0557192727519578,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.7559355849953135,
+                "hd15iqr": 3.1804214599978877,
+                "ops": 0.3362575464458673,
+                "total": 14.86955475898867,
+                "data": [
+                    3.0141518770033144,
+                    2.9582810849969974,
+                    2.7559355849953135,
+                    3.1804214599978877,
+                    2.960764751995157
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.]",
+            "params": {
+                "ni_content": "[Scene:AccountSettings]\nThe user wants to manage their account preferences and security.\n[Component:ChangePassword]\nProvide fields to enter the current password and the new password.\n[Function:validatePassword]\nEnsure the new password meets security requirements.\n[Function:updatePassword]\nUpdate the user's password in the system.\n\n[Component:TwoFactorAuth]\nEnable the user to set up two-factor authentication for added security.\n[Function:enable2FA]\nActivate two-factor authentication and send a verification code.\n[Function:verify2FA]\nConfirm the entered verification code to complete the setup."
+            },
+            "param": "[Scene:AccountSettings]\\nThe user wants to manage their account preferences and security.\\n[Component:ChangePassword]\\nProvide fields to enter the current password and the new password.\\n[Function:validatePassword]\\nEnsure the new password meets security requirements.\\n[Function:updatePassword]\\nUpdate the user's password in the system.\\n\\n[Component:TwoFactorAuth]\\nEnable the user to set up two-factor authentication for added security.\\n[Function:enable2FA]\\nActivate two-factor authentication and send a verification code.\\n[Function:verify2FA]\\nConfirm the entered verification code to complete the setup.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.7202261260026717,
+                "max": 3.1855191259965068,
+                "mean": 2.9586701510022975,
+                "stddev": 0.17165401771506422,
+                "rounds": 5,
+                "median": 2.957902168003784,
+                "iqr": 0.2195260002517898,
+                "q1": 2.8520939070021996,
+                "q3": 3.0716199072539894,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.7202261260026717,
+                "hd15iqr": 3.1855191259965068,
+                "ops": 0.33798968758353604,
+                "total": 14.793350755011488,
+                "data": [
+                    2.957902168003784,
+                    2.7202261260026717,
+                    3.0336535010064836,
+                    3.1855191259965068,
+                    2.896049834002042
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.]",
+            "params": {
+                "ni_content": "[Scene:HelpCenter]\nThe user seeks assistance with using the application.\n[Component:FAQSection]\nDisplay a list of frequently asked questions and answers.\n[Function:searchFAQ]\nAllow the user to search for specific topics within the FAQs.\n[Component:ContactSupport]\nProvide options for the user to reach out to customer support.\n[Function:submitSupportTicket]\nAllow the user to submit a support ticket with their query or issue."
+            },
+            "param": "[Scene:HelpCenter]\\nThe user seeks assistance with using the application.\\n[Component:FAQSection]\\nDisplay a list of frequently asked questions and answers.\\n[Function:searchFAQ]\\nAllow the user to search for specific topics within the FAQs.\\n[Component:ContactSupport]\\nProvide options for the user to reach out to customer support.\\n[Function:submitSupportTicket]\\nAllow the user to submit a support ticket with their query or issue.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.8149907089973567,
+                "max": 3.0869102509968798,
+                "mean": 2.9741150261979783,
+                "stddev": 0.10319004174293604,
+                "rounds": 5,
+                "median": 3.004781251998793,
+                "iqr": 0.13060688574660162,
+                "q1": 2.908894021749802,
+                "q3": 3.0395009074964037,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.8149907089973567,
+                "hd15iqr": 3.0869102509968798,
+                "ops": 0.33623447351273794,
+                "total": 14.870575130989891,
+                "data": [
+                    2.8149907089973567,
+                    3.023697792996245,
+                    3.0869102509968798,
+                    3.004781251998793,
+                    2.940195126000617
+                ],
+                "iterations": 1
+            }
+        },
+        {
+            "group": "ni_creation_varied",
+            "name": "test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.]",
+            "fullname": "backend/test/services/groq/test_groq_performance.py::test_ni_creation_varied[[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.]",
+            "params": {
+                "ni_content": "[Scene:Reports]\nThe user needs to generate and view various reports.\n[Component:ReportFilters]\nOffer filters such as date range, report type, and categories.\n[Function:applyFilters]\nFilter the available reports based on the selected criteria.\n[Component:ReportViewer]\nDisplay the generated report in a readable format with charts and tables.\n[Function:exportReport]\nAllow the user to export the report in formats like PDF or Excel."
+            },
+            "param": "[Scene:Reports]\\nThe user needs to generate and view various reports.\\n[Component:ReportFilters]\\nOffer filters such as date range, report type, and categories.\\n[Function:applyFilters]\\nFilter the available reports based on the selected criteria.\\n[Component:ReportViewer]\\nDisplay the generated report in a readable format with charts and tables.\\n[Function:exportReport]\\nAllow the user to export the report in formats like PDF or Excel.",
+            "extra_info": {},
+            "options": {
+                "disable_gc": false,
+                "timer": "perf_counter",
+                "min_rounds": 5,
+                "max_time": 1.0,
+                "min_time": 5e-06,
+                "warmup": false
+            },
+            "stats": {
+                "min": 2.821390042998246,
+                "max": 3.240938376999111,
+                "mean": 3.0536285018009948,
+                "stddev": 0.1648151484297467,
+                "rounds": 5,
+                "median": 3.0695159180031624,
+                "iqr": 0.2509440207559237,
+                "q1": 2.9334308562483784,
+                "q3": 3.184374877004302,
+                "iqr_outliers": 0,
+                "stddev_outliers": 2,
+                "outliers": "2;0",
+                "ld15iqr": 2.821390042998246,
+                "hd15iqr": 3.240938376999111,
+                "ops": 0.3274792593173045,
+                "total": 15.268142509004974,
+                "data": [
+                    3.1655203770060325,
+                    3.240938376999111,
+                    3.0695159180031624,
+                    2.821390042998246,
+                    2.9707777939984226
+                ],
+                "iterations": 1
+            }
+        }
+    ],
+    "datetime": "2024-12-19T00:50:23.001826+00:00",
+    "version": "5.1.0"
+}

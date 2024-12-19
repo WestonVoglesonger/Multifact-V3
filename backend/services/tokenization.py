@@ -1,7 +1,68 @@
+"""
+Represents a token parsed from narrative instructions when using a traditional parser.
+If using LLM-based parsing, this may no longer be needed.
+"""
+
 import re
 import uuid
 from typing import List
-from backend.models.token_types import AdvancedToken
+import hashlib
+
+# AdvancedToken class
+class AdvancedToken:
+    """
+    A token representing scenes, components, or functions extracted from narrative instructions.
+    Holds lines of text and may have children tokens (e.g. functions in a component).
+    """
+    def __init__(self, token_type: str, name: str):
+        """
+        Initialize a new AdvancedToken.
+
+        Args:
+            token_type (str): The type of the token, e.g. "scene", "component", "function".
+            name (str): The name of this token (e.g. scene name, component name).
+        """
+        self.token_type = token_type  # "scene", "component", "function"
+        self.name = name
+        self.lines = []
+        self.children: List['AdvancedToken'] = []
+
+    def add_line(self, line: str):
+        """
+        Add a narrative line to this token.
+
+        Args:
+            line (str): The narrative line to add.
+        """
+        self.lines.append(line.strip('\n'))
+
+    def add_child(self, child: 'AdvancedToken'):
+        """
+        Add a child token (e.g. function within a component).
+
+        Args:
+            child (AdvancedToken): The child token to add.
+        """
+        self.children.append(child)
+
+    def get_full_text(self) -> str:
+        """
+        Get the full aggregated text lines of this token.
+
+        Returns:
+            str: The concatenated text lines.
+        """
+        return "\n".join(self.lines)
+
+    def compute_hash(self) -> str:
+        """
+        Compute a hash of the token's textual content.
+
+        Returns:
+            str: The SHA-256 hash of the token content.
+        """
+        content = self.get_full_text()
+        return hashlib.sha256(content.encode('utf-8')).hexdigest()
 
 class TokenTreeBuilder:
     @staticmethod
