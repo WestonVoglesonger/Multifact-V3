@@ -3,6 +3,7 @@ import os
 import sys
 from statistics import mean
 from typing import Dict, List, Any, Tuple
+from math import nan
 
 """
 Script: compare_benchmarks.py
@@ -33,15 +34,16 @@ which model (from each file) generally performs better on average, considering b
 time and cost.
 """
 
+
 def load_benchmarks_from_file(file_path: str) -> Dict[str, Dict[str, Any]]:
     """
     Load and return benchmark data from a single JSON file.
     Returns a dict of {scenario_name: stats_data}.
     Each stats_data includes timing stats and we will also retrieve cost from extra_info.
     """
-    with open(file_path, 'r') as f:
+    with open(file_path, "r") as f:
         data = json.load(f)
-    
+
     benchmarks = data.get("benchmarks", [])
     scenario_data = {}
 
@@ -49,17 +51,17 @@ def load_benchmarks_from_file(file_path: str) -> Dict[str, Dict[str, Any]]:
         name = bench.get("name")
         stats = bench.get("stats", {})
         extra_info = bench.get("extra_info", {})
-        
+
         # Include cost in the stats_data for later aggregation
         # We'll keep 'mean' execution time and 'cost' side-by-side.
-        scenario_stats = {
-            'mean': stats.get('mean'),
-            'cost': extra_info.get('cost')
-        }
+        scenario_stats = {"mean": stats.get("mean"), "cost": extra_info.get("cost")}
         scenario_data[name] = scenario_stats
     return scenario_data
 
-def aggregate_benchmarks(files: List[str]) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, Dict[str, List[float]]]]:
+
+def aggregate_benchmarks(
+    files: List[str],
+) -> Tuple[Dict[str, List[Dict[str, Any]]], Dict[str, Dict[str, List[float]]]]:
     """
     Given a list of JSON files, load and combine their benchmark data.
     Returns:
@@ -78,7 +80,7 @@ def aggregate_benchmarks(files: List[str]) -> Tuple[Dict[str, List[Dict[str, Any
         model_name = os.path.splitext(os.path.basename(fpath))[0]
 
         if model_name not in model_data:
-            model_data[model_name] = {'means': [], 'costs': []}
+            model_data[model_name] = {"means": [], "costs": []}
 
         scenario_data = load_benchmarks_from_file(fpath)
         for scenario_name, stats in scenario_data.items():
@@ -87,37 +89,42 @@ def aggregate_benchmarks(files: List[str]) -> Tuple[Dict[str, List[Dict[str, Any
             combined[scenario_name].append(stats)
 
             # If we have a mean and cost, add them to the model_data
-            scenario_mean = stats.get('mean')
-            scenario_cost = stats.get('cost')
+            scenario_mean = stats.get("mean")
+            scenario_cost = stats.get("cost")
             if scenario_mean is not None:
-                model_data[model_name]['means'].append(scenario_mean)
+                model_data[model_name]["means"].append(scenario_mean)
             if scenario_cost is not None:
-                model_data[model_name]['costs'].append(scenario_cost)
+                model_data[model_name]["costs"].append(scenario_cost)
 
     return combined, model_data
 
-def compare_scenarios(combined_data: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Dict[str, Any]]:
+
+def compare_scenarios(
+    combined_data: Dict[str, List[Dict[str, Any]]]
+) -> Dict[str, Dict[str, Any]]:
     """
     Compare scenarios across multiple runs scenario-wise.
     This computes the combined mean of scenario means, min, and max.
     """
     comparison_results = {}
     for scenario, stats_list in combined_data.items():
-        means = [s.get('mean') for s in stats_list if s.get('mean') is not None]
+        means = [s.get("mean") for s in stats_list if s.get("mean") is not None]
+        means = [m for m in means if m is not None]
 
         if means:
             comparison_results[scenario] = {
-                'num_runs': len(means),
-                'combined_mean': mean(means),
-                'min_of_means': min(means),
-                'max_of_means': max(means)
+                "num_runs": len(means),
+                "combined_mean": mean(means),
+                "min_of_means": min(means),
+                "max_of_means": max(means),
             }
         else:
             comparison_results[scenario] = {
-                'num_runs': len(stats_list),
-                'error': "No mean execution time found in these results"
+                "num_runs": len(stats_list),
+                "error": "No mean execution time found in these results",
             }
     return comparison_results
+
 
 def print_scenario_comparison(comparison_results: Dict[str, Dict[str, Any]]):
     """
@@ -126,7 +133,7 @@ def print_scenario_comparison(comparison_results: Dict[str, Dict[str, Any]]):
     print("Scenario Comparison Results:\n")
     for scenario, data in comparison_results.items():
         print(f"Scenario: {scenario}")
-        if 'error' in data:
+        if "error" in data:
             print(f"  Runs: {data['num_runs']} - {data['error']}")
         else:
             print(f"  Runs: {data['num_runs']}")
@@ -135,39 +142,49 @@ def print_scenario_comparison(comparison_results: Dict[str, Dict[str, Any]]):
             print(f"  Max of means: {data['max_of_means']:.6f}s")
         print("")
 
+
 def print_model_summary(model_data: Dict[str, Dict[str, List[float]]]):
     """
     Print a summary per model, showing average execution time and average cost.
     """
     print("Model-Level Summary:\n")
     for model_name, data in model_data.items():
-        means = data['means']
-        costs = data['costs']
+        means = data["means"]
+        costs = data["costs"]
         if means:
             avg_mean_time = mean(means)
         else:
-            avg_mean_time = float('nan')
+            avg_mean_time = nan
 
         if costs:
             avg_cost = mean(costs)
         else:
-            avg_cost = float('nan')
+            avg_cost = float("nan")
 
         num_scenarios = len(means)  # Counting scenarios that had a mean time
         # Note: If some scenarios have no mean time but have costs, this logic could be adjusted.
         # For now, we tie scenario count to those that have mean times.
-        
+
         print(f"Model: {model_name}")
         print(f"  Number of scenarios: {num_scenarios}")
-        print(f"  Average Mean Time: {avg_mean_time:.6f}s" if not (avg_mean_time is float('nan')) else "  Average Mean Time: N/A")
-        print(f"  Average Cost: {avg_cost:.6f}" if not (avg_cost is float('nan')) else "  Average Cost: N/A")
+        print(
+            f"  Average Mean Time: {avg_mean_time:.6f}s"
+            if not (avg_mean_time is float("nan"))
+            else "  Average Mean Time: N/A"
+        )
+        print(
+            f"  Average Cost: {avg_cost:.6f}"
+            if not (avg_cost is float("nan"))
+            else "  Average Cost: N/A"
+        )
         print("")
+
 
 def main():
     if len(sys.argv) < 2:
         print("Usage: python compare_benchmarks.py results_dir_or_files...")
         sys.exit(1)
-    
+
     inputs = sys.argv[1:]
     # If a single directory is provided, read all *.json files from it.
     files = []
@@ -179,15 +196,16 @@ def main():
                     files.append(os.path.join(inp, fname))
         else:
             files.append(inp)
-    
+
     if not files:
         print("No JSON files found to process.")
         sys.exit(1)
-    
+
     combined_data, model_data = aggregate_benchmarks(files)
     comparison = compare_scenarios(combined_data)
     print_scenario_comparison(comparison)
     print_model_summary(model_data)
+
 
 if __name__ == "__main__":
     main()

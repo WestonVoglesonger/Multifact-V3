@@ -16,7 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from ..database import engine
 from ..env import getenv
-from .. import entities
+from ..infrastructure import entities
 
 
 __authors__ = ["Kris Jordan", "Ajay Gandecha"]

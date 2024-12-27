@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 import csv
 import sys
-from typing import List, Dict
+from typing import List, Dict, Any, Union
 import argparse
 from datetime import datetime
 import logging
@@ -41,13 +41,26 @@ This script is useful for quickly determining which of two models is faster or m
 on a given test suite.
 """
 
-parser = argparse.ArgumentParser(description="Run and compare benchmarks between two LLM models.")
-parser.add_argument("--client1", type=str, required=True, help="First LLM client type (e.g., 'openai' or 'groq').")
+parser = argparse.ArgumentParser(
+    description="Run and compare benchmarks between two LLM models."
+)
+parser.add_argument(
+    "--client1",
+    type=str,
+    required=True,
+    help="First LLM client type (e.g., 'openai' or 'groq').",
+)
 parser.add_argument("--model1", type=str, required=True, help="First LLM model type.")
-parser.add_argument("--client2", type=str, required=True, help="Second LLM client type.")
+parser.add_argument(
+    "--client2", type=str, required=True, help="Second LLM client type."
+)
 parser.add_argument("--model2", type=str, required=True, help="Second LLM model type.")
-parser.add_argument("--test_path", type=str, default="backend/test/services/test_llm_performance.py",
-                    help="Path to the performance test file.")
+parser.add_argument(
+    "--test_path",
+    type=str,
+    default="backend/test/test_performance/test_llm_performance.py",
+    help="Path to the performance test file.",
+)
 args = parser.parse_args()
 
 now_str = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -57,6 +70,7 @@ output_dir.mkdir(parents=True, exist_ok=True)
 MODEL1_BENCH_JSON = output_dir / f"benchmark_{args.client1}_{args.model1}.json"
 MODEL2_BENCH_JSON = output_dir / f"benchmark_{args.client2}_{args.model2}.json"
 CSV_REPORT_PATH = output_dir / "benchmark_comparison_report.csv"
+
 
 def run_pytest_benchmark(test_path: str, json_path: Path, client: str, model: str):
     env = os.environ.copy()
@@ -72,9 +86,14 @@ def run_pytest_benchmark(test_path: str, json_path: Path, client: str, model: st
     logging.info(f"Running benchmarks for {client}/{model} on {test_path}...")
     result = subprocess.run(cmd, capture_output=True, text=True, env=env)
     if result.returncode != 0:
-        logging.error(f"Error running benchmarks for {client}/{model}:\n{result.stderr}")
+        logging.error(
+            f"Error running benchmarks for {client}/{model}:\n{result.stderr}"
+        )
         sys.exit(1)
-    logging.info(f"Benchmarks for {client}/{model} completed. Results saved to {json_path}.\n")
+    logging.info(
+        f"Benchmarks for {client}/{model} completed. Results saved to {json_path}.\n"
+    )
+
 
 def load_benchmark_data(json_path: Path) -> List[Dict]:
     if not json_path.exists():
@@ -84,6 +103,7 @@ def load_benchmark_data(json_path: Path) -> List[Dict]:
         data = json.load(f)
     return data.get("benchmarks", [])
 
+
 def determine_status(percentage_change: float) -> str:
     if percentage_change > 5:
         return "⬆️ Slower"
@@ -92,11 +112,14 @@ def determine_status(percentage_change: float) -> str:
     else:
         return "➡️ No Significant Change"
 
-def compare_benchmarks(benchmarks_1: List[Dict], benchmarks_2: List[Dict]) -> List[Dict]:
+
+def compare_benchmarks(
+    benchmarks_1: List[Dict], benchmarks_2: List[Dict]
+) -> List[Dict]:
     comparison_results = []
     map1 = {bench["name"]: bench for bench in benchmarks_1}
 
-    def safe_get(d: Dict, k: str, default: int =0):
+    def safe_get(d: Dict, k: str, default: Union[int, float] = 0) -> Union[int, float]:
         return d.get(k, default)
 
     for bench2 in benchmarks_2:
@@ -111,21 +134,36 @@ def compare_benchmarks(benchmarks_1: List[Dict], benchmarks_2: List[Dict]) -> Li
         b1_extra = bench1.get("extra_info", {})
         b2_extra = bench2.get("extra_info", {})
 
-        percentage_change = ((b2_stats.get("mean",0) - b1_stats.get("mean",0)) / (b1_stats.get("mean",1))) * 100
+        percentage_change = (
+            (b2_stats.get("mean", 0) - b1_stats.get("mean", 0))
+            / (b1_stats.get("mean", 1))
+        ) * 100
 
         comparison = {
             "Benchmark": name,
             f"{args.client1}/{args.model1} Mean (s)": b1_stats.get("mean", 0),
             f"{args.client2}/{args.model2} Mean (s)": b2_stats.get("mean", 0),
             "Percentage Change (%)": percentage_change,
-            f"{args.client1}/{args.model1} Prompt Tokens": safe_get(b1_extra,"prompt_tokens"),
-            f"{args.client2}/{args.model2} Prompt Tokens": safe_get(b2_extra,"prompt_tokens"),
-            f"{args.client1}/{args.model1} Completion Tokens": safe_get(b1_extra,"completion_tokens"),
-            f"{args.client2}/{args.model2} Completion Tokens": safe_get(b2_extra,"completion_tokens"),
-            f"{args.client1}/{args.model1} Total Tokens": safe_get(b1_extra,"total_tokens"),
-            f"{args.client2}/{args.model2} Total Tokens": safe_get(b2_extra,"total_tokens"),
-            f"{args.client1}/{args.model1} Cost": safe_get(b1_extra,"cost",0.0),
-            f"{args.client2}/{args.model2} Cost": safe_get(b2_extra,"cost",0.0),
+            f"{args.client1}/{args.model1} Prompt Tokens": safe_get(
+                b1_extra, "prompt_tokens"
+            ),
+            f"{args.client2}/{args.model2} Prompt Tokens": safe_get(
+                b2_extra, "prompt_tokens"
+            ),
+            f"{args.client1}/{args.model1} Completion Tokens": safe_get(
+                b1_extra, "completion_tokens"
+            ),
+            f"{args.client2}/{args.model2} Completion Tokens": safe_get(
+                b2_extra, "completion_tokens"
+            ),
+            f"{args.client1}/{args.model1} Total Tokens": safe_get(
+                b1_extra, "total_tokens"
+            ),
+            f"{args.client2}/{args.model2} Total Tokens": safe_get(
+                b2_extra, "total_tokens"
+            ),
+            f"{args.client1}/{args.model1} Cost": safe_get(b1_extra, "cost", 0.0),
+            f"{args.client2}/{args.model2} Cost": safe_get(b2_extra, "cost", 0.0),
             f"{args.client1}/{args.model1} Median (s)": b1_stats.get("median", 0),
             f"{args.client2}/{args.model2} Median (s)": b2_stats.get("median", 0),
             f"{args.client1}/{args.model1} Std Dev (s)": b1_stats.get("stddev", 0),
@@ -134,14 +172,19 @@ def compare_benchmarks(benchmarks_1: List[Dict], benchmarks_2: List[Dict]) -> Li
             f"{args.client2}/{args.model2} Min (s)": b2_stats.get("min", 0),
             f"{args.client1}/{args.model1} Max (s)": b1_stats.get("max", 0),
             f"{args.client2}/{args.model2} Max (s)": b2_stats.get("max", 0),
-            f"{args.client1}/{args.model1} 95th Percentile (s)": b1_stats.get("percentile95", 0),
-            f"{args.client2}/{args.model2} 95th Percentile (s)": b2_stats.get("percentile95", 0),
+            f"{args.client1}/{args.model1} 95th Percentile (s)": b1_stats.get(
+                "percentile95", 0
+            ),
+            f"{args.client2}/{args.model2} 95th Percentile (s)": b2_stats.get(
+                "percentile95", 0
+            ),
             "Status": determine_status(percentage_change),
         }
 
         comparison_results.append(comparison)
 
     return comparison_results
+
 
 def print_comparison_report(comparisons: List[Dict]):
     logging.info("Benchmark Comparison Report\n")
@@ -158,7 +201,10 @@ def print_comparison_report(comparisons: List[Dict]):
     logging.info("\nLegend:")
     logging.info("⬆️ Slower: Second model is significantly slower than first.")
     logging.info("⬇️ Faster: Second model is significantly faster than first.")
-    logging.info("➡️ No Significant Change: Performance difference is within acceptable range.")
+    logging.info(
+        "➡️ No Significant Change: Performance difference is within acceptable range."
+    )
+
 
 def save_to_csv(comparisons: List[Dict], csv_path: Path):
     if not comparisons:
@@ -172,6 +218,7 @@ def save_to_csv(comparisons: List[Dict], csv_path: Path):
             writer.writerow(comp)
     logging.info(f"Comparison report saved to {csv_path}.")
 
+
 def main():
     run_pytest_benchmark(args.test_path, MODEL1_BENCH_JSON, args.client1, args.model1)
     run_pytest_benchmark(args.test_path, MODEL2_BENCH_JSON, args.client2, args.model2)
@@ -182,6 +229,7 @@ def main():
     comparisons = compare_benchmarks(model1_benchmarks, model2_benchmarks)
     print_comparison_report(comparisons)
     save_to_csv(comparisons, CSV_REPORT_PATH)
+
 
 if __name__ == "__main__":
     main()

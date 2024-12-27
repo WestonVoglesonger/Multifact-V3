@@ -10,13 +10,13 @@ The development container's `.devcontainer/docker-compose.yml` file specifies th
 
 By convention, our development database's environment settings are:
 
-~~~
+```
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres
 POSTGRES_HOST=db
 POSTGRES_PORT=5432
 POSTGRES_DATABASE=csxl
-~~~
+```
 
 ### Creating a Database
 
@@ -38,7 +38,7 @@ Finally, complete the steps below to reload development data into the database.
 
 ### Resetting the Database's Data
 
-There are two scripts for loading database data: 
+There are two scripts for loading database data:
 
 #### 1. Reset to Demo Data
 
@@ -58,18 +58,18 @@ To reset your development environment with testing data: `python3 -m backend.scr
 
 ### Using PostgreSQL Viewer (VSCode Plugin)
 
-* The VSCode PostgreSQL Extension by Chris Kolkman works well for viewing database tables and queries
-* Open the Tool from Sidebar
-* First time connecting? Add a connection to the database!
-    1. From VSCode Command Palette- PostgreSQL: Add Connection 
-    2. Add the connection using the environment settings above:
-        * Hostname: `db`
-        * Username: `postgres`
-        * Password: `postgres`
-        * Port: `5432`
-        * Connection: `Standard`
-        * Database: `innovation`
-        * Display Name: `db`
-* Common uses:
-    * Expand a table to see its columns
-    * Right click a table to run a query (such as selecting first 1000 rows)
+- The VSCode PostgreSQL Extension by Chris Kolkman works well for viewing database tables and queries
+- Open the Tool from Sidebar
+- First time connecting? Add a connection to the database!
+  1. From VSCode Command Palette- PostgreSQL: Add Connection
+  2. Add the connection using the environment settings above:
+     - Hostname: `db`
+     - Username: `postgres`
+     - Password: `postgres`
+     - Port: `5432`
+     - Connection: `Standard`
+     - Database: `innovation`
+     - Display Name: `db`
+- Common uses:
+  - Expand a table to see its columns
+  - Right click a table to run a query (such as selecting first 1000 rows)

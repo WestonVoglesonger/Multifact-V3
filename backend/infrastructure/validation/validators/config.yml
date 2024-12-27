@@ -1,0 +1,5 @@
+validators:
+  typescript:
+    class: "TypeScriptValidator"
+    tool: "tsc"
+  # Add more languages/validators as needed

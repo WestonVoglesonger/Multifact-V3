@@ -38,7 +38,7 @@ from statistics import mean
 logging.basicConfig(level=logging.INFO)
 
 # Define test path
-TEST_PATH = Path("backend/test/services/test_llm_performance.py")
+TEST_PATH = Path("backend/test/test_performance/test_llm_performance.py")
 
 # Define the sets of models for OpenAI and Groq
 # Not including o1 and o1-mini because I do not have access to them

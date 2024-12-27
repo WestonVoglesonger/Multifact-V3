@@ -5,16 +5,8 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.cors import CORSMiddleware
-
-from .api import (
-    static_files,
-    ni,
-    compilation,
-    generate,
-    user_intervention,
-    token,
-)
-
+from .api.test_api import api as test_api
+from .api.debug_routes import api as debug_api
 __authors__ = ["Weston Voglesonger"]
 __copyright__ = "Copyright 2023"
 __license__ = "MIT"
@@ -28,10 +20,7 @@ app = FastAPI(
     title="Edge Carolina API",
     version="0.0.1",
     description=description,
-    openapi_tags=[
-        ni.openapi_tags,
-        compilation.openapi_tags,
-    ],
+    openapi_tags=[]
 )
 
 # Use GZip middleware for compressing HTML responses over the network
@@ -46,12 +35,9 @@ app.add_middleware(
 )
 # Plugging in each of the router APIs
 feature_apis = [
-    ni,
-    compilation,
-    generate,
-    user_intervention,
-    token,
+    test_api,
+    debug_api,
 ]
 
 for feature_api in feature_apis:
-    app.include_router(feature_api.api)
+    app.include_router(feature_api)
