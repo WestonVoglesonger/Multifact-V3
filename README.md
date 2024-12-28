@@ -1,17 +1,85 @@
-# Edge Carolina
+# System Narrative Compiler (SNC)
 
-Welcome to the official repository for the Edge Carolina Starter website. At Edge Carolina, we are dedicated to fostering a community of innovation and collaboration. Our mission is to inspire and support our members as they work in teams to develop groundbreaking products and technologies. By nurturing a diverse network of talented individuals, we aim to cultivate a vibrant ecosystem of exceptional thinkers and innovators.
+A tool for narrative-driven code generation that transforms natural language descriptions into functional code components.
 
-# Getting Started
+## Installation
 
-The first thing you need to do when starting a new web application using the Edge Carolina Starter Website is to create a new repository and add this repository as a template. This will import all of the files from this repository into your own repository with a clean commit history. Once you've done this you are free to modify it to your liking!
+```bash
+pip install snc
+```
 
+## Quick Start
 
-* [Get Started with a Development Environment](docs/get_started.md)
+1. Set up your environment variables in a `.env` file:
 
-## Developer Docs
+```env
+OPENAI_API_KEY=your_api_key_here
+```
 
-* [Branch, Pull Request, and Code Review Practices](docs/branches.md)
-* [Database Concerns](docs/database.md)
-* [Testing Tools](docs/testing.md)
-* [Debugging Tools](docs/debugging.md)
+2. Create a simple script:
+
+```python
+from snc.application.services.ni_orchestrator import NIOrchestrator
+from snc.infrastructure.repositories.setup import setup_repositories
+from snc.infrastructure.services.setup import setup_services
+from snc.infrastructure.llm.model_factory import OpenAIModelType
+
+# Quick setup
+session, repositories = setup_repositories()
+services = setup_services(session, repositories)
+
+# Initialize orchestrator
+orchestrator = NIOrchestrator(
+    doc_repo=repositories.document_repo,
+    token_repo=repositories.token_repo,
+    artifact_repo=repositories.artifact_repo,
+    llm_parser=services.llm_service,
+    token_diff_service=services.token_diff_service,
+    document_updater=services.document_updater,
+    token_compiler=services.token_compiler,
+    code_fixer_service=services.llm_service,
+)
+
+# Create a narrative document
+content = """
+[Component:HelloWorld]
+This component displays a simple greeting message.
+It should show "Hello, World!" in a centered div with a blue background.
+"""
+
+# Create and compile
+doc = orchestrator.create_ni_document(content, version="v1.0")
+tokens = orchestrator.get_document_tokens(doc.id)
+orchestrator.compile_tokens(tokens, OpenAIModelType.GPT_4O_MINI)
+```
+
+## Features
+
+- Natural language to code transformation
+- Component-based architecture
+- Automatic dependency resolution
+- Code validation and self-repair
+- Support for multiple LLM providers
+
+## Development Setup
+
+1. Clone the repository
+2. Install development dependencies:
+
+```bash
+pip install -e ".[dev]"
+```
+
+3. Run tests:
+
+```bash
+pytest
+```
+
+## Documentation
+
+For detailed documentation, examples, and API reference, visit our [documentation site](https://snc.readthedocs.io/).
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
