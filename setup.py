@@ -6,12 +6,12 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="snc",
     version="0.1.0",
-    author="Your Name",
-    author_email="your.email@example.com",
-    description="System Narrative Compiler - A tool for narrative-driven code generation",
+    author="Weston Voglesonger",
+    author_email="weston@voglesonger.com",
+    description="System Narrative Compiler",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/snc",
+    url="https://github.com/WestonVoglesonger/System-Narrative-Compiler",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -39,19 +39,6 @@ setup(
         "lark-parser>=0.12.0,<0.13.0",
         "click>=8.0.0,<9.0.0",
     ],
-    extras_require={
-        "dev": [
-            "pytest>=7.0.0",
-            "pytest-cov>=4.0.0",
-            "black>=22.0.0",
-            "isort>=5.0.0",
-            "flake8>=4.0.0",
-            "mypy>=0.900",
-            "sphinx>=4.0.0",
-            "sphinx-rtd-theme>=1.0.0",
-            "myst-parser>=1.0.0",
-        ]
-    },
     entry_points={
         "console_scripts": [
             "snc=snc.cli.main:cli",
@@ -59,10 +46,5 @@ setup(
             "snc-validate=snc.cli.validate_cmd:validate",
             "snc-repl=snc.script.repl:main",
         ],
-    },
-    options={
-        "install": {
-            "install_layout": "deb",
-        }
     },
 )

@@ -1,6 +1,4 @@
-"""
-Domain repositories package.
-"""
+"""Domain repositories package."""
 
 from .artifact import ArtifactRepository
 

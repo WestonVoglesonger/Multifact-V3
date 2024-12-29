@@ -389,18 +389,19 @@ class OpenAILLMClient(BaseLLMClient):
                 if self.last_usage is not None:
                     self.last_cost = self.compute_cost_from_model(self.last_usage)
                 else:
-                    self.last_usage = {
-                        "prompt_tokens": 0,
-                        "completion_tokens": 0,
-                        "total_tokens": 0,
-                    }
+                    self.last_usage = CompletionUsage(
+                        prompt_tokens=0,
+                        completion_tokens=0,
+                        total_tokens=0
+                    )
                     self.last_cost = 0.0
 
                 # Return the text content
                 if hasattr(response.choices[0], "message") and hasattr(
                     response.choices[0].message, "content"
                 ):
-                    return response.choices[0].message.content.strip()
+                    content = response.choices[0].message.content
+                    return content.strip() if content is not None else ""
                 else:
                     raise RuntimeError("Missing message content in response.")
 

@@ -10,5 +10,8 @@
         "pylint",
         "tsimporter"
     ],
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.linting.enabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pylintEnabled": false
 }

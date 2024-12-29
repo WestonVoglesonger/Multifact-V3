@@ -1,14 +1,17 @@
+"""Logging configuration for the System Narrative Compiler."""
+
 import logging
 import sys
 from typing import Optional
 
 
-def configure_logging(log_level: str = "INFO", log_file: Optional[str] = None) -> None:
-    """
-    Configure logging for the application.
+def configure_logging(
+    log_level: str = "INFO", log_file: Optional[str] = None
+) -> None:
+    """Configure logging for the application.
 
     Args:
-        log_level: The logging level to use (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+        log_level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
         log_file: Optional file path to write logs to
     """
     # Create formatter
@@ -38,4 +41,5 @@ def configure_logging(log_level: str = "INFO", log_file: Optional[str] = None) -
     logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
 
     # Log the configuration
-    root_logger.debug(f"Logging configured with level={log_level}, file={log_file}")
+    msg = "Logging configured with level={}, file={}"
+    root_logger.debug(msg.format(log_level, log_file))

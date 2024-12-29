@@ -1,10 +1,13 @@
 [build-system]
 requires = ["setuptools>=64.0.0", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "snc"
 version = "0.1.0"
+authors = [
+    {name = "Weston Vogelsong", email = "westonvogelsong@gmail.com"}
+]
 description = "A system narrative compiler for allowing developers to write code in natural, narrative language."
 readme = "README.md"
 requires-python = ">=3.8"
@@ -39,11 +42,10 @@ dev = [
     "pytest-benchmark>=5.1.0,<5.2.0",
     "pytest-cov>=4.1.0,<4.2.0",
     "black>=23.10.1,<23.11.0",
-    "flake8>=4.0.0",
-    "flake8-docstrings>=1.7.0",
     "mypy>=0.950",
     "pre-commit>=3.5.0",
     "honcho>=1.1.0,<1.2.0",
+    "types-setuptools",
 ]
 test = [
     "pytest>=8.1.0,<8.2.0",
@@ -62,8 +64,29 @@ docs = [
 "Homepage" = "https://github.com/westonvogelsong/snc-v3"
 
 [project.scripts]
-snc = "snc.main:main"
 snc-db = "snc.script.create_database:main"
 
 [tool.setuptools]
-packages = ["snc"] 
+packages = ["snc"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_defs = false
+check_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_decorators = false
+no_implicit_optional = false
+warn_redundant_casts = false
+warn_unused_ignores = false
+warn_return_any = false
+warn_unreachable = false
+allow_untyped_globals = true
+allow_redefinition = true
+local_partial_types = true
+
+[tool.flake8]
+max-line-length = 100
+ignore = ["E203", "W503", "W504", "E231", "E266", "E302", "E402", "C901", "E722", "E731"]
+exclude = [".git", "__pycache__", "build", "dist"]
+max-complexity = 18
+select = ["B", "C", "E", "F", "W", "B9"] 

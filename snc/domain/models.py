@@ -1,9 +1,16 @@
+"""Core domain models for the System Narrative Compiler."""
+
 from datetime import datetime
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Literal
 from dataclasses import dataclass
+
+# Type alias for supported client types
+ClientType = Literal["openai", "groq", "anthropic"]
 
 
 class DomainToken:
+    """A token representing a discrete unit of narrative instruction."""
+
     def __init__(
         self,
         id: Optional[int],
@@ -18,6 +25,21 @@ class DomainToken:
         order: int = 0,
         dependencies: Optional[List["DomainToken"]] = None,
     ):
+        """Initialize a domain token.
+
+        Args:
+            id: Database ID if persisted
+            token_uuid: Unique identifier
+            token_name: Display name
+            token_type: Type of token
+            content: Narrative content
+            hash: Content hash
+            scene_name: Optional scene name
+            component_name: Optional component name
+            function_name: Optional function name
+            order: Token order in document
+            dependencies: List of dependent tokens
+        """
         self.id = id
         self.token_uuid = token_uuid
         self.token_name = token_name
@@ -31,13 +53,17 @@ class DomainToken:
         self.dependencies = dependencies if dependencies else []
 
     def add_dependency(self, token: "DomainToken"):
+        """Add a dependency token to this token."""
         self.dependencies.append(token)
 
     def get_dependency_uuids(self) -> List[str]:
+        """Get UUIDs of all dependency tokens."""
         return [dep.token_uuid for dep in self.dependencies]
 
 
 class DomainDocument:
+    """A document containing narrative instructions and their tokens."""
+
     def __init__(
         self,
         doc_id: int,
@@ -47,6 +73,16 @@ class DomainDocument:
         updated_at: datetime,
         tokens: Optional[List[DomainToken]] = None,
     ):
+        """Initialize a domain document.
+
+        Args:
+            doc_id: Database ID
+            content: Document content
+            version: Optional version string
+            created_at: Creation timestamp
+            updated_at: Last update timestamp
+            tokens: List of tokens in document
+        """
         self.id = doc_id
         self.content = content
         self.version = version
@@ -55,10 +91,13 @@ class DomainDocument:
         self.tokens = tokens if tokens else []
 
     def add_token(self, token: DomainToken):
+        """Add a token to this document."""
         self.tokens.append(token)
 
 
 class DomainCompiledMultifact:
+    """A compiled artifact representing generated code from a token."""
+
     def __init__(
         self,
         artifact_id: int,
@@ -72,6 +111,20 @@ class DomainCompiledMultifact:
         score: Optional[float] = None,
         feedback: Optional[str] = None,
     ):
+        """Initialize a compiled artifact.
+
+        Args:
+            artifact_id: Database ID
+            ni_token_id: ID of source token
+            language: Programming language
+            framework: Framework used
+            code: Generated code
+            valid: Whether code is valid
+            cache_hit: Whether from cache
+            created_at: Creation timestamp
+            score: Optional quality score
+            feedback: Optional feedback
+        """
         self.id = artifact_id
         self.ni_token_id = ni_token_id
         self.language = language
@@ -84,23 +137,21 @@ class DomainCompiledMultifact:
         self.feedback = feedback
 
     def set_evaluation_results(self, score: float, feedback: str):
-        """
-        Updates the artifact with the evaluation results.
-        """
+        """Update the artifact with evaluation results."""
         self.score = score
         self.feedback = feedback
 
     def get_evaluation_summary(self) -> str:
-        """
-        Returns a string summary of the evaluation results.
-        """
+        """Get a summary of the evaluation results."""
         return f"Score: {self.score}, Feedback: {self.feedback}"
 
 
 class Model:
+    """Configuration for a specific language model."""
+
     def __init__(
         self,
-        client_type: "ClientType",
+        client_type: ClientType,
         name: str,
         context_window: int,
         max_output_tokens: int,
@@ -113,6 +164,22 @@ class Model:
         supports_video: bool = False,
         supports_reasoning: bool = False,
     ):
+        """Initialize a model configuration.
+
+        Args:
+            client_type: Type of LLM client
+            name: Model name
+            context_window: Max context length
+            max_output_tokens: Max generation length
+            prompt_cost_per_1k: Input cost per 1k tokens
+            completion_cost_per_1k: Output cost per 1k tokens
+            supports_images: Whether model handles images
+            reasoning_tokens: Optional reasoning capacity
+            knowledge_cutoff_date: Optional training cutoff
+            supports_audio: Whether model handles audio
+            supports_video: Whether model handles video
+            supports_reasoning: Whether model can reason
+        """
         self.client_type = client_type
         self.name = name
         self.context_window = context_window
@@ -129,9 +196,7 @@ class Model:
 
 @dataclass
 class TokenDiffResult:
-    """
-    Result of a token diff operation.
-    """
+    """Result of comparing tokens between document versions."""
 
     removed: List[Tuple[DomainToken, Optional[DomainCompiledMultifact]]]
     changed: List[Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]]

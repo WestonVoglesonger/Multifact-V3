@@ -1,9 +1,9 @@
-"""
-Reset the database with testing data.
+"""Reset the database with testing data.
+
 This script resets the SQLAlchemy database to contain the same data that
 is used when running the pytests.
 
-Usage: python3 -m backend.script.reset_testing
+Usage: python3 -m snc.script.reset_testing
 """
 
 from .reset_base import check_development_mode, reset_database

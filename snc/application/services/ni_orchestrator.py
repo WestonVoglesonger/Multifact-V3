@@ -1,55 +1,46 @@
+"""Service for orchestrating the NI-to-code workflow."""
+
 import logging
-import hashlib
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Union
 from datetime import datetime
 
 from snc.domain.models import DomainToken, DomainDocument
-from snc.application.interfaces.illm_service import ILLMService
-from snc.application.interfaces.ivalidation_service import IValidationService
-from snc.application.interfaces.icompilation_service import ICompilationService
 from snc.application.interfaces.icode_fixer_service import ICodeFixerService
-from snc.application.interfaces.iartifact_repository import IArtifactRepository
 from snc.application.interfaces.idocument_repository import IDocumentRepository
 from snc.application.interfaces.itoken_repository import ITokenRepository
-from snc.application.services.tokenization_service import TokenizationService
 from snc.application.services.token_compiler import TokenCompiler
 from snc.application.services.document_updater import DocumentUpdater
-from snc.application.services.dependency_graph_service import DependencyGraphService
-from snc.application.services.code_evaluation_service import CodeEvaluationService
-from snc.application.services.self_repair_service import SelfRepairService
 from snc.application.services.token_diff_service import TokenDiffService
 from snc.application.services.exceptions import (
-    TokenizationError,
-    CompilationError,
-    ValidationError,
-    CodeFixerError,
-    SelfRepairError,
     DocumentNotFoundError,
     LLMParsingError,
     ArtifactNotFoundError,
-    TokenNotFoundError,
+    TokenNotFoundError
 )
 from snc.infrastructure.llm.llm_service_impl import ConcreteLLMService
 from snc.infrastructure.llm.model_factory import (
     GroqModelType,
     OpenAIModelType,
     ClientType,
+    ModelFactory,
 )
-from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
-from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
+from snc.infrastructure.repositories.artifact_repository import (
+    ArtifactRepository
+)
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
-from snc.infrastructure.llm.model_factory import ModelFactory
 from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
+from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
 
 
 class NIOrchestrator:
-    """
-    Orchestrates the full NI-to-code workflow:
-      - Create new NI docs
-      - Update them with new content
-      - Parse/diff/compile
-      - Optionally handle code fixes if validation fails
-      - Retrieve artifacts or error details
+    """Service for orchestrating the NI-to-code workflow.
+
+    Handles the full workflow from NI document to code:
+    - Creating and updating NI documents
+    - Parsing and diffing document content
+    - Compiling tokens to code
+    - Validating and fixing code if needed
+    - Managing artifacts and error details
     """
 
     def __init__(
@@ -62,7 +53,19 @@ class NIOrchestrator:
         document_updater: DocumentUpdater,
         token_compiler: TokenCompiler,
         code_fixer_service: Optional[ICodeFixerService] = None,
-    ):
+    ) -> None:
+        """Initialize the orchestrator.
+
+        Args:
+            doc_repo: Repository for document operations
+            token_repo: Repository for token operations
+            artifact_repo: Repository for artifact operations
+            llm_parser: Service for parsing NI with LLM
+            token_diff_service: Service for diffing tokens
+            document_updater: Service for updating documents
+            token_compiler: Service for compiling tokens
+            code_fixer_service: Optional service for fixing invalid code
+        """
         self.doc_repo = doc_repo
         self.token_repo = token_repo
         self.artifact_repo = artifact_repo
@@ -70,20 +73,26 @@ class NIOrchestrator:
         self.token_diff_service = token_diff_service
         self.document_updater = document_updater
         self.token_compiler = token_compiler
-        self.code_fixer_service = code_fixer_service  # optional
+        self.code_fixer_service = code_fixer_service
         self.logger = logging.getLogger(__name__)
 
-    #
-    # ------------------ 1) Creation / Basic Methods --------------------
-    #
     def create_ni_document(
         self,
         initial_content: str,
         version: str = "v1",
     ) -> DomainDocument:
-        """
-        Creates and persists a new NI document with `initial_content`.
-        Returns the newly created DomainDocument.
+        """Create and persist a new NI document.
+
+        Args:
+            initial_content: Initial document content
+            version: Document version string
+
+        Returns:
+            Newly created domain document
+
+        Raises:
+            DocumentNotFoundError: If document creation fails
+            LLMParsingError: If content parsing fails
         """
         new_doc = DomainDocument(
             doc_id=0,  # 0 => means not yet in DB
@@ -97,107 +106,133 @@ class NIOrchestrator:
         if not saved_doc:
             raise DocumentNotFoundError("Failed to create new document")
 
-        # 2) Parse the content, flattent it, and add tokens to DB
+        # Parse the content, flatten it, and add tokens to DB
         parsed_doc = self.llm_parser.parse_document(initial_content)
         flattened_doc = self._flatten_llm_output(parsed_doc)
         self.token_repo.add_new_tokens(saved_doc.id, flattened_doc)
 
-        doc_ent = self.doc_repo.get_document(saved_doc.id)
-
         if not saved_doc:
             raise DocumentNotFoundError("Failed to create new document")
         self.logger.info(
-            f"Created new NI document id={saved_doc.id}, version={version}"
+            "Created new NI document id=%d, version=%s",
+            saved_doc.id,
+            version
         )
         return saved_doc
 
     def get_ni_document(self, ni_id: int) -> DomainDocument:
-        """
-        Retrieve a DomainDocument from the repository by ID.
-        Raises DocumentNotFoundError if not found.
+        """Retrieve a document from the repository.
+
+        Args:
+            ni_id: Document ID to retrieve
+
+        Returns:
+            Retrieved domain document
+
+        Raises:
+            DocumentNotFoundError: If document not found
         """
         doc = self.doc_repo.get_document(ni_id)
         if not doc:
             raise DocumentNotFoundError(f"NI document {ni_id} not found.")
         return doc
 
-    #
-    # ------------------ 2) Update + Compile Workflow --------------------
-    #
     def update_ni_and_compile(
         self,
         ni_id: int,
         new_content: str,
-        model_type: GroqModelType | OpenAIModelType,
+        model_type: Union[GroqModelType, OpenAIModelType],
         revalidate: bool = True,
     ) -> None:
-        """
-        Replaces the existing doc’s content with `new_content` and compiles.
-        - LLM is used to parse the new content
-        - The diff is applied (update / remove / add tokens)
-        - The newly changed or added tokens are compiled
-        - If revalidate=True, each compiled artifact is validated
+        """Update document content and compile affected tokens.
+
+        Args:
+            ni_id: Document ID to update
+            new_content: New document content
+            model_type: LLM model type to use
+            revalidate: Whether to validate compiled artifacts
 
         Raises:
-          - DocumentNotFoundError if doc doesn’t exist
-          - LLMParsingError if LLM parse fails
-          - etc.
+            DocumentNotFoundError: If document not found
+            LLMParsingError: If content parsing fails
+            CompilationError: If compilation fails
+            ValidationError: If validation fails
         """
-        # 1) Ensure the doc exists
-        ni_doc = self.get_ni_document(ni_id)
+        # Ensure the doc exists
+        self.get_ni_document(ni_id)
 
-        # 2) Parse new content with the LLM
+        # Parse new content with the LLM
         try:
             structured_data = self.llm_parser.parse_document(new_content)
         except Exception as e:
-            self.logger.error(f"Failed to parse NI {ni_id} with LLM: {e}")
+            self.logger.error("Failed to parse NI %d with LLM: %s", ni_id, e)
             raise LLMParsingError(str(e))
 
-        # 3) Flatten LLM output => data for tokens
+        # Flatten LLM output => data for tokens
         new_tokens_data = self._flatten_llm_output(structured_data)
 
-        # 4) Grab old tokens + diff
+        # Grab old tokens + diff
         old_tokens = self.token_repo.get_tokens_with_artifacts(ni_id)
-        diff_result = self.token_diff_service.diff_tokens(old_tokens, new_tokens_data)
+        diff_result = self.token_diff_service.diff_tokens(
+            old_tokens, new_tokens_data
+        )
 
-        # 5) Update DB: doc content + tokens changes
+        # Update DB: doc content + tokens changes
         newly_added_tokens = self.document_updater.apply_diff(
             ni_id, new_content, diff_result
         )
 
-        # 6) Compile changed + newly added
+        # Compile changed + newly added
         changed_tokens = [c[0] for c in diff_result.changed]
         tokens_to_compile = changed_tokens + newly_added_tokens
         self.token_compiler.compile_and_validate(
-            tokens_to_compile, self._get_llm_client(model_type), revalidate
+            tokens_to_compile,
+            self._get_llm_client(model_type),
+            revalidate
         )
 
         self.logger.info(
-            f"NI doc {ni_id} updated with new content. "
-            f"Compiled {len(tokens_to_compile)} changed/new tokens."
+            "NI doc %d updated. Compiled %d tokens.",
+            ni_id,
+            len(tokens_to_compile)
         )
 
     def compile_tokens(
-        self, tokens: List[DomainToken], model_type: GroqModelType | OpenAIModelType
+        self,
+        tokens: List[DomainToken],
+        model_type: Union[GroqModelType, OpenAIModelType]
     ) -> None:
-        """
-        Compiles a list of tokens and validates them.
+        """Compile and validate a list of tokens.
+
+        Args:
+            tokens: List of tokens to compile
+            model_type: LLM model type to use
+
+        Raises:
+            CompilationError: If compilation fails
+            ValidationError: If validation fails
         """
         self.token_compiler.compile_and_validate(
-            tokens, self._get_llm_client(model_type), revalidate=True
+            tokens,
+            self._get_llm_client(model_type),
+            revalidate=True
         )
 
-    #
-    # ------------------ 3) Handling Validation Errors (Optional) --------------------
-    #
-    def fix_artifact_code(self, artifact_id: int, max_attempts: int = 2) -> bool:
-        """
-        If code_fixer_service is configured, tries to fix an artifact’s code
-        if it fails validation. This is an optional step if you want automated
-        code repair.
+    def fix_artifact_code(
+        self, artifact_id: int, max_attempts: int = 2
+    ) -> bool:
+        """Try to fix invalid artifact code.
 
-        Returns True if the artifact is valid after fix attempts, else False.
-        Raises if artifact doesn’t exist or no code_fixer_service is present.
+        Args:
+            artifact_id: ID of artifact to fix
+            max_attempts: Maximum number of fix attempts
+
+        Returns:
+            True if artifact is valid after fixes, False otherwise
+
+        Raises:
+            RuntimeError: If no code fixer service configured
+            ArtifactNotFoundError: If artifact not found
         """
         if not self.code_fixer_service:
             raise RuntimeError(
@@ -216,46 +251,69 @@ class NIOrchestrator:
                 return True
             # If not success, fix code with code_fixer
             error_summary = self._summarize_errors(result.errors)
-            new_code = self.code_fixer_service.fix_code(artifact.code, error_summary)
+            new_code = self.code_fixer_service.fix_code(
+                artifact.code,
+                error_summary
+            )
 
             # Update artifact code in DB (mark valid=False until next check)
-            self.artifact_repo.update_artifact_code(artifact_id, new_code, valid=False)
-            self.logger.info(f"Fixed code attempt {attempt+1}, artifact {artifact_id}")
+            self.artifact_repo.update_artifact_code(
+                artifact_id,
+                new_code,
+                valid=False
+            )
+            self.logger.info(
+                "Fixed code attempt %d, artifact %d",
+                attempt + 1,
+                artifact_id
+            )
 
         # final check
-        final_result = self.token_compiler.validation_service.validate_artifact(
-            artifact_id
+        final_result = (
+            self.token_compiler.validation_service.validate_artifact(
+                artifact_id
+            )
         )
         if final_result.success:
             return True
         else:
             self.logger.warning(
-                f"Artifact {artifact_id} still invalid after {max_attempts} fix attempts."
+                "Artifact %d still invalid after %d attempts.",
+                artifact_id,
+                max_attempts
             )
             return False
 
-    #
-    # ------------------ 4) Retrieve Info About Artifacts, Tokens, Etc. --------------------
-    #
     def get_artifact_info(self, artifact_id: int) -> Dict[str, Any]:
-        """
-        Return detailed info about an artifact:
-         - code
-         - validity
-         - errors if any
-         - associated NI doc content
-         - associated token content
+        """Get detailed information about an artifact.
+
+        Args:
+            artifact_id: ID of artifact to get info for
+
+        Returns:
+            Dictionary containing:
+                - code: The artifact's code
+                - valid: Whether the code is valid
+                - errors: Any validation errors
+                - doc_content: Associated document content
+                - token_content: Associated token content
+
+        Raises:
+            ArtifactNotFoundError: If artifact not found
         """
         artifact = self.artifact_repo.get_artifact_by_id(artifact_id)
         if not artifact:
             raise ArtifactNotFoundError(f"Artifact {artifact_id} not found.")
 
-        # Validate to retrieve error info (the method might re-validate each time,
-        # or you can store errors from the last check)
-        result = self.token_compiler.validation_service.validate_artifact(artifact_id)
+        # Validate to retrieve error info
+        result = self.token_compiler.validation_service.validate_artifact(
+            artifact_id
+        )
         token = self.token_repo.get_token_by_id(artifact.ni_token_id)
         if not token:
-            raise TokenNotFoundError(f"Token for artifact {artifact_id} not found.")
+            raise TokenNotFoundError(
+                f"Token for artifact {artifact_id} not found."
+            )
 
         doc_id = self._find_doc_id_for_token(token)
         ni_doc = self.doc_repo.get_document(doc_id)
@@ -275,10 +333,10 @@ class NIOrchestrator:
         }
 
     def list_tokens_with_artifacts(self, doc_id: int) -> List[Dict[str, Any]]:
-        """
-        Return a list of tokens and their compiled artifacts for a given doc.
-        """
-        tokens_with_artifacts = self.token_repo.get_tokens_with_artifacts(doc_id)
+        """Get tokens and their compiled artifacts for the given document."""
+        tokens_with_artifacts = (
+            self.token_repo.get_tokens_with_artifacts(doc_id)
+        )
         result = []
         for t, a in tokens_with_artifacts:
             entry = {
@@ -304,7 +362,8 @@ class NIOrchestrator:
         return doc_id
 
     def _flatten_llm_output(self, data: dict) -> List[dict]:
-        """
+        """Convert hierarchical LLM output into a flat list of tokens.
+
         Takes the parsed JSON from LLM that looks like:
         {
         "scenes": [
@@ -413,10 +472,7 @@ class NIOrchestrator:
             return OpenAILLMClient(model)
 
     def _summarize_errors(self, errors: List[Any]) -> str:
-        """
-        Turn a list of ValidationErrors into a text summary
-        that can be used as 'error_summary' for fix_code calls.
-        """
+        """Turn a list of ValidationErrors into a text summary."""
         lines = ["Found these errors:"]
         for e in errors:
             lines.append(f"{e.file}({e.line},{e.char}): {e.message}")

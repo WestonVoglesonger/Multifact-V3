@@ -3,7 +3,7 @@
 This script is used in the developer container setup process. Its sole purpose
 is to create a postgres database from database connection environment variables.
 
-Usage: python3 -m script.create_database
+Usage: python3 -m snc.script.create_database
 """
 
 import sqlalchemy

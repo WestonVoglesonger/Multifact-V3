@@ -61,7 +61,7 @@ def test_token_compiler_compile_success(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(llm_client)
+    evaluation_service = CodeEvaluationService()
     compiler = TokenCompiler(
         compilation_service, validation_service, evaluation_service
     )
@@ -115,7 +115,7 @@ def test_token_compiler_compile_fail(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(llm_client)
+    evaluation_service = CodeEvaluationService()
     compiler = TokenCompiler(
         compilation_service, validation_service, evaluation_service
     )
@@ -158,7 +158,7 @@ def test_token_compiler_no_id_raises_error(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(llm_client)
+    evaluation_service = CodeEvaluationService()
     compiler = TokenCompiler(
         compilation_service, validation_service, evaluation_service
     )
@@ -218,7 +218,7 @@ def test_token_compiler_cache_hit(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(llm_client)
+    evaluation_service = CodeEvaluationService()
     compiler = TokenCompiler(
         compilation_service, validation_service, evaluation_service
     )

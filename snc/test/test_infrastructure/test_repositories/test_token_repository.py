@@ -118,6 +118,7 @@ def test_update_changed_tokens(db_session: Session):
     if old_token.id is None:
         raise ValueError("Token ID cannot be None")
     updated = token_repo.get_token_by_id(old_token.id)
+    assert updated is not None, "Token should exist"
     assert updated.content == "Updated content via test_update_changed_tokens()"
 
     # old artifact should be gone if it existed

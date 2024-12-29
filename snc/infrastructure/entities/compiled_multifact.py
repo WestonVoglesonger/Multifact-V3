@@ -1,5 +1,6 @@
+"""Entity model for compiled multifacts."""
+
 from sqlalchemy import (
-    Column,
     Integer,
     Text,
     ForeignKey,
@@ -10,17 +11,28 @@ from sqlalchemy import (
     Float,
 )
 from sqlalchemy.orm import Mapped, mapped_column
-from .entity_base import EntityBase
 from datetime import datetime
+
+from .entity_base import EntityBase
 from snc.domain.models import DomainCompiledMultifact
 
 
 class CompiledMultifact(EntityBase):
+    """Database model for compiled multifacts.
+
+    This model represents the persistent storage of compiled artifacts,
+    including their code, metadata, and validation status.
+    """
+
     __tablename__ = "compiled_multifacts"
 
-    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True
+    )
     ni_token_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("ni_tokens.id", ondelete="CASCADE"), nullable=False
+        Integer,
+        ForeignKey("ni_tokens.id", ondelete="CASCADE"),
+        nullable=False,
     )
     language: Mapped[str] = mapped_column(String, nullable=False)
     framework: Mapped[str] = mapped_column(String, nullable=False)
@@ -28,7 +40,9 @@ class CompiledMultifact(EntityBase):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    valid: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="true")
+    valid: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, server_default="true"
+    )
     cache_hit: Mapped[bool] = mapped_column(
         Boolean, nullable=False, server_default="false"
     )
@@ -39,6 +53,11 @@ class CompiledMultifact(EntityBase):
     feedback: Mapped[str] = mapped_column(Text, nullable=True)
 
     def to_domain_artifact(self) -> DomainCompiledMultifact:
+        """Convert to domain model.
+
+        Returns:
+            Domain model representation of this artifact
+        """
         return DomainCompiledMultifact(
             artifact_id=self.id,
             ni_token_id=self.ni_token_id,
@@ -53,7 +72,17 @@ class CompiledMultifact(EntityBase):
         )
 
     @classmethod
-    def to_entity_artifact(cls, domain: DomainCompiledMultifact) -> "CompiledMultifact":
+    def to_entity_artifact(
+        cls, domain: DomainCompiledMultifact
+    ) -> "CompiledMultifact":
+        """Create entity from domain model.
+
+        Args:
+            domain: Domain model to convert
+
+        Returns:
+            New entity instance
+        """
         return cls(
             ni_token_id=domain.ni_token_id,
             language=domain.language,
@@ -70,7 +99,14 @@ class CompiledMultifact(EntityBase):
     def from_domain_artifact(
         cls, domain: DomainCompiledMultifact
     ) -> "CompiledMultifact":
-        """Convert a domain model to an entity."""
+        """Convert a domain model to an entity.
+
+        Args:
+            domain: Domain model to convert
+
+        Returns:
+            New entity instance with all fields set
+        """
         return cls(
             id=domain.id if domain.id != 0 else None,  # Don't use 0 as ID
             ni_token_id=domain.ni_token_id,

@@ -1,6 +1,4 @@
-"""
-Interactive REPL for SNC.
-"""
+"""Interactive REPL for SNC."""
 
 import code
 import sys

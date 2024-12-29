@@ -118,6 +118,7 @@ def test_validate_artifact_syntax_failure(db_session: Session):
     assert len(result.errors) > 0
     # The artifact in DB is updated with valid=False
     art_in_db = db_session.get(CompiledMultifact, art.id)
+    assert art_in_db is not None, "Artifact should exist in DB"
     assert art_in_db.valid is False
 
 
@@ -172,6 +173,7 @@ def test_validate_artifact_semantic_failure(db_session: Session):
     ), "We expect 2 errors (missing MyMissingComp, missing doStuff)"
     # DB artifact now invalid
     art_in_db = db_session.get(CompiledMultifact, art.id)
+    assert art_in_db is not None, "Artifact should exist in DB"
     assert art_in_db.valid is False
 
 
@@ -219,6 +221,7 @@ def test_validate_artifact_ok(db_session: Session):
     assert result.success is True
     assert len(result.errors) == 0
     updated_art = db_session.get(CompiledMultifact, art.id)
+    assert updated_art is not None, "Artifact should exist in DB"
     assert updated_art.valid is True, "Should be valid after passing TS checks"
 
 

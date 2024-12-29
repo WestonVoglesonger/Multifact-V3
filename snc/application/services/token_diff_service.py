@@ -1,47 +1,57 @@
-# File: backend/application/services/token_diff_service.py
+"""Service for comparing and diffing tokens."""
 
 import hashlib
-from typing import Tuple, Optional, List, Dict
-from dataclasses import dataclass
+from typing import Tuple, Optional, List
 
-from snc.domain.models import DomainToken, DomainCompiledMultifact, TokenDiffResult
+from snc.domain.models import (
+    DomainToken,
+    DomainCompiledMultifact,
+    TokenDiffResult
+)
 from snc.application.services.exceptions import (
-    TokenizationError,
-    CompilationError,
-    ValidationError,
-    CodeFixerError,
-    SelfRepairError,
     TokenDiffError,
     TokenNameCollisionError,
 )
 
 
 class TokenDiffService:
+    """Service for comparing and diffing tokens."""
+
     def diff_tokens(
         self,
         old_tokens: List[Tuple[DomainToken, None | DomainCompiledMultifact]],
         new_tokens_data: List[dict],
     ) -> TokenDiffResult:
-        """
-        Compare old tokens (domain tokens + optional artifacts) to the newly parsed token data,
-        returning which are removed, changed, or added.
+        """Compare old tokens with newly parsed token data.
+
+        Compares domain tokens to new token data,
+        identifying which tokens are removed, changed, or added.
         """
         old_map = {}
         print("DEBUG: ---- diff_tokens START ----")
         for t, art in old_tokens:
             old_k = self._make_key_from_domain_token(t)
             print(
-                f"DEBUG: old token ID={t.id}, type={t.token_type}, name={t.scene_name or t.component_name}, key={old_k}"
+                "DEBUG: old token "
+                f"ID={t.id}, type={t.token_type}, "
+                f"name={t.scene_name or t.component_name}, "
+                f"key={old_k}"
             )
             if old_k in old_map:
-                raise TokenDiffError(f"Duplicate old token key detected: {old_k}")
+                raise TokenDiffError(
+                    f"Duplicate old token key detected: {old_k}"
+                )
             old_map[old_k] = (t, art)
 
         new_map = {}
         for tok_data in new_tokens_data:
             new_k = self._make_key_from_new_token(tok_data)
             print(
-                f"DEBUG: new token type={tok_data['type']}, scene={tok_data.get('scene_name')}, func={tok_data.get('function_name')}, key={new_k}"
+                "DEBUG: new token "
+                f"type={tok_data['type']}, "
+                f"scene={tok_data.get('scene_name')}, "
+                f"func={tok_data.get('function_name')}, "
+                f"key={new_k}"
             )
             if new_k in new_map:
                 raise TokenNameCollisionError(
@@ -71,19 +81,28 @@ class TokenDiffService:
             if old_token.hash != new_hash:
                 changed.append((old_token, old_artifact, new_tok_data))
                 print(
-                    f"DEBUG: changed token ID={old_token.id}, old_hash={old_token.hash}, new_hash={new_hash}"
+                    "DEBUG: changed token "
+                    f"ID={old_token.id}, "
+                    f"old_hash={old_token.hash}, "
+                    f"new_hash={new_hash}"
                 )
 
         print(
-            f"DEBUG: final removed count={len(removed)}, added count={len(added)}, changed count={len(changed)}"
+            "DEBUG: final removed count=", len(removed),
+            "added count=", len(added),
+            "changed count=", len(changed)
         )
         print("DEBUG: ---- diff_tokens END ----")
 
         return TokenDiffResult(removed=removed, changed=changed, added=added)
 
-    def _make_key_from_domain_token(self, t: DomainToken) -> Tuple[str, Optional[str]]:
-        """
-        Produce a (token_type, name) key so we can detect changes or removals.
+    def _make_key_from_domain_token(
+        self,
+        t: DomainToken
+    ) -> Tuple[str, Optional[str]]:
+        """Create a key from a domain token.
+
+        Returns a (token_type, name) tuple for change detection.
         """
         if t.token_type == "scene":
             return ("scene", t.scene_name)
@@ -108,10 +127,13 @@ class TokenDiffService:
         # If the first line looks like "Name: foo", use that; else hash
         if lines and lines[0].startswith("Name: "):
             return lines[0][6:].strip()
-        return "func_" + hashlib.sha256(content.encode("utf-8")).hexdigest()[:8]
+        content_bytes = content.encode("utf-8")
+        hash_val = hashlib.sha256(content_bytes).hexdigest()[:8]
+        return "func_" + hash_val
 
     def _generate_function_name_from_content(self, content: str) -> str:
-        return "func_" + hashlib.sha256(content.encode("utf-8")).hexdigest()[:8]
+        hash_val = hashlib.sha256(content.encode("utf-8")).hexdigest()[:8]
+        return "func_" + hash_val
 
     @staticmethod
     def _compute_hash(content: str) -> str:

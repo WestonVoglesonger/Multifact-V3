@@ -76,7 +76,10 @@ class ConcreteValidationService(IValidationService):
 
     def _parse_expectations(self, content: str) -> Dict[str, List[str]]:
         """Parse document content to extract expected components and methods."""
-        expectations = {"expected_components": [], "expected_methods": []}
+        expectations: Dict[str, List[str]] = {
+            "expected_components": [],
+            "expected_methods": [],
+        }
 
         # Extract component names
         comp_matches = re.finditer(r"component named (\w+)", content)

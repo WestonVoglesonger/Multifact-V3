@@ -1,6 +1,4 @@
-"""
-Domain package for SNC.
-"""
+"""Domain package for SNC."""
 
 from .model_types import CompilationResult
 

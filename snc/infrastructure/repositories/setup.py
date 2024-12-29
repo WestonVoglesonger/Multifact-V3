@@ -1,6 +1,4 @@
-"""
-Helper module for setting up repositories with minimal configuration.
-"""
+"""Helper module for setting up repositories with minimal configuration."""
 
 from dataclasses import dataclass
 from sqlalchemy import create_engine

@@ -1,25 +1,31 @@
 from typing import Optional, Dict, Any
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from snc.domain.models import Model
 
 
 class MockLLMClient(BaseLLMClient):
     """Mock LLM client for testing."""
 
-    def __init__(self):
-        pass
+    def __init__(self, model: Model):
+        super().__init__(model)
 
-    def generate_code(self, prompt: str) -> str:
+    def generate_code(
+        self,
+        token_content: str,
+        additional_requirements: str = "",
+        code_style: str = "",
+    ) -> str:
         """Generate mock code based on the token type."""
-        if "[Scene:" in prompt:
-            return self._generate_scene_code(prompt)
-        elif "[Component:" in prompt:
-            return self._generate_component_code(prompt)
-        elif "[Service:" in prompt:
-            return self._generate_service_code(prompt)
-        elif "[Interface:" in prompt:
-            return self._generate_interface_code(prompt)
-        elif "[Type:" in prompt:
-            return self._generate_type_code(prompt)
+        if "[Scene:" in token_content:
+            return self._generate_scene_code(token_content)
+        elif "[Component:" in token_content:
+            return self._generate_component_code(token_content)
+        elif "[Service:" in token_content:
+            return self._generate_service_code(token_content)
+        elif "[Interface:" in token_content:
+            return self._generate_interface_code(token_content)
+        elif "[Type:" in token_content:
+            return self._generate_type_code(token_content)
         else:
             return "// Mock code for unknown token type"
 
@@ -103,3 +109,19 @@ export type MockType = {
   };
 };
 """
+
+    def parse_document(self, ni_content: str) -> Dict[str, Any]:
+        return {"scenes": []}
+
+    def fix_code(self, original_code: str, error_summary: str) -> str:
+        return original_code
+
+    def _generic_chat_call(
+        self,
+        system_message: Dict[str, Any],
+        user_message: Dict[str, Any],
+        model_name: str,
+        temperature: float = 0.7,
+        max_tokens: int = 1500,
+    ) -> str:
+        return ""

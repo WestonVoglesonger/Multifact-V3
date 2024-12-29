@@ -27,7 +27,7 @@ def main():
         token_diff_service=services.token_diff_service,
         document_updater=services.document_updater,
         token_compiler=services.token_compiler,
-        code_fixer_service=services.llm_service,
+        code_fixer_service=services.code_fixer_service,
     )
 
     # Create a simple narrative document
@@ -42,7 +42,7 @@ def main():
     print(f"Created document with ID: {doc.id}")
 
     # Get all tokens and compile them
-    tokens = orchestrator.get_document_tokens(doc.id)
+    tokens = orchestrator.token_repo.get_all_tokens_for_document(doc.id)
     orchestrator.compile_tokens(tokens, OpenAIModelType.GPT_4O_MINI)
 
     # Display results

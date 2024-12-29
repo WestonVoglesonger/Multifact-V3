@@ -1,5 +1,7 @@
 # File: backend/application/services/dependency_graph_service.py
 
+"""Service for building and analyzing dependency graphs between tokens."""
+
 from typing import Dict, Set, List
 from collections import defaultdict, deque
 
@@ -8,16 +10,32 @@ from snc.application.interfaces.itoken_repository import ITokenRepository
 
 
 class DependencyGraphService:
-    """
-    Builds a dependency graph using domain tokens retrieved from the token repository.
+    """Service for building and analyzing dependency graphs between tokens.
+
+    Uses a token repository to build a graph of token dependencies and provides
+    methods for analyzing the graph structure, including topological sorting
+    to determine the correct order of token processing.
     """
 
     def __init__(self, token_repo: ITokenRepository):
+        """Initialize the service.
+
+        Args:
+            token_repo: Repository for accessing tokens
+        """
         self.token_repo = token_repo
         self.edges: Dict[int, Set[int]] = defaultdict(set)
         self.tokens: Dict[int, DomainToken] = {}
 
-    def from_document(self, doc_id: int):
+    def from_document(self, doc_id: int) -> None:
+        """Build dependency graph from a document's tokens.
+
+        Args:
+            doc_id: ID of document to build graph from
+
+        Raises:
+            ValueError: If any token has None as its ID
+        """
         tokens = self.token_repo.get_all_tokens_for_document(doc_id)
         # tokens is a list of DomainToken, each possibly with dependencies
         for t in tokens:
@@ -32,6 +50,14 @@ class DependencyGraphService:
                 self.edges[t.id].add(dep.id)
 
     def topological_sort(self) -> List[int]:
+        """Sort tokens in topological order based on dependencies.
+
+        Returns:
+            List of token IDs in topological order
+
+        Raises:
+            ValueError: If a cycle is detected in the dependency graph
+        """
         in_degree = {t_id: 0 for t_id in self.tokens.keys()}
         for t, deps in self.edges.items():
             for d in deps:
@@ -48,6 +74,6 @@ class DependencyGraphService:
                     if in_degree[t] == 0:
                         queue.append(t)
 
-        if len(order) != len(self.tokens):
+        if not len(order) == len(self.tokens):
             raise ValueError("Cycle detected in dependency graph.")
         return order

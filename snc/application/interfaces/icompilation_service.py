@@ -1,3 +1,5 @@
+"""Interface for the compilation service."""
+
 from abc import ABC, abstractmethod
 from snc.domain.models import DomainCompiledMultifact
 from snc.domain.model_types import CompilationResult

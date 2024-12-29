@@ -24,8 +24,6 @@ from snc.test.fixtures import ni_orchestrator
 def test_ni_to_code_compilation_e2e(
     db_session: Session,
     ni_orchestrator: NIOrchestrator,
-    # If you need direct repos
-    # doc_repo, token_repo, artifact_repo
 ):
     """
     Comprehensive E2E test verifying we can:

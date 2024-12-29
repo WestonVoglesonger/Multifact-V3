@@ -48,7 +48,8 @@ def test_ni_document_tokens_relationship(db_session: Session):
     db_session.add_all([tok1, tok2])
     db_session.commit()
 
-    fetched_doc = db_session.query(NIDocument).get(doc.id)
+    fetched_doc: NIDocument | None = db_session.query(NIDocument).get(doc.id)
+    assert fetched_doc is not None, "Document should exist"
     assert len(fetched_doc.tokens) == 2
     uuids = {t.token_uuid for t in fetched_doc.tokens}
     assert "token-1" in uuids
@@ -100,3 +101,7 @@ def test_ni_document_from_domain_document(db_session: Session):
 
     fetched = db_session.query(NIDocument).filter_by(version="domV").one()
     assert fetched.content == "Domain doc content"
+    assert fetched.version == "domV"
+    assert fetched.created_at is not None
+    assert fetched.updated_at is not None
+    assert len(fetched.tokens) == 0

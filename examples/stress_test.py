@@ -1,29 +1,33 @@
-"""
-Stress test for System Narrative Compiler (SNC) with complex Angular components.
-"""
+"""Stress test for System Narrative Compiler with complex Angular components."""
 
 import os
 import sys
 import time
-from typing import List, Dict, Any
+from typing import Dict
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
-from snc.infrastructure.repositories.document_repository import DocumentRepository
-from snc.infrastructure.repositories.token_repository import TokenRepository
-from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
+from snc.application.services.code_evaluation_service import (
+    CodeEvaluationService,
+)
 from snc.application.services.token_compiler import TokenCompiler
-from snc.infrastructure.services.compilation_service import ConcreteCompilationService
-from snc.infrastructure.validation.validation_service import ConcreteValidationService
-from snc.application.services.code_evaluation_service import CodeEvaluationService
-from snc.infrastructure.db.session import get_session
-from snc.infrastructure.db.models import EntityBase
-from snc.infrastructure.db.engine import engine
 from snc.domain.models import Model
+from snc.infrastructure.db.engine import engine
+from snc.infrastructure.db.models import EntityBase
+from snc.infrastructure.db.session import get_session
+from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.entities.ni_document import NIDocument
 from snc.infrastructure.entities.ni_token import NIToken
-from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
+from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
+from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
+from snc.infrastructure.repositories.document_repository import DocumentRepository
+from snc.infrastructure.repositories.token_repository import TokenRepository
+from snc.infrastructure.services.compilation_service import (
+    ConcreteCompilationService,
+)
+from snc.infrastructure.validation.validation_service import (
+    ConcreteValidationService,
+)
 
 
 def create_test_document(doc_repo: DocumentRepository) -> int:
@@ -39,7 +43,9 @@ def create_test_tokens(token_repo: TokenRepository, doc_id: int) -> None:
         {
             "type": "scene",
             "token_name": "MainScene",
-            "content": "[Scene:MainScene]\nA beautiful scene with mountains and trees",
+            "content": (
+                "[Scene:MainScene]\n" "A beautiful scene with mountains and trees"
+            ),
         }
     )
 
@@ -49,7 +55,10 @@ def create_test_tokens(token_repo: TokenRepository, doc_id: int) -> None:
             {
                 "type": "component",
                 "token_name": f"Component_{i}",
-                "content": f"[Component:Component_{i}]\nA component that does something interesting {i}",
+                "content": (
+                    f"[Component:Component_{i}]\n"
+                    f"A component that does something interesting {i}"
+                ),
             }
         )
 
@@ -59,7 +68,10 @@ def create_test_tokens(token_repo: TokenRepository, doc_id: int) -> None:
             {
                 "type": "service",
                 "token_name": f"Service_{i}",
-                "content": f"[Service:Service_{i}]\nA service that provides functionality {i}",
+                "content": (
+                    f"[Service:Service_{i}]\n"
+                    f"A service that provides functionality {i}"
+                ),
             }
         )
 
@@ -70,14 +82,15 @@ def get_artifacts(artifact_repo: ArtifactRepository, doc_id: int) -> Dict[str, s
     """Get all artifacts for a document."""
     artifacts = {}
     tokens = artifact_repo.get_tokens_with_artifacts(doc_id)
-    for token in tokens:
-        if token.artifact:
-            artifacts[token.token_name] = token.artifact.code
+    for token, artifact in tokens:
+        if artifact:
+            artifacts[token.token_name] = artifact.code
     return artifacts
 
 
 def compare_artifacts(
-    sequential_artifacts: Dict[str, str], parallel_artifacts: Dict[str, str]
+    sequential_artifacts: Dict[str, str],
+    parallel_artifacts: Dict[str, str],
 ) -> None:
     """Compare artifacts between sequential and parallel compilation."""
     print("\nComparing artifacts between sequential and parallel compilation:")
@@ -105,7 +118,7 @@ def compare_artifacts(
 
 
 def main():
-    """Main function to run the stress test."""
+    """Run the stress test."""
     session = get_session()
 
     # Initialize repositories and services
@@ -131,7 +144,9 @@ def main():
     validation_service = ConcreteValidationService(session)
     code_evaluation_service = CodeEvaluationService()
     token_compiler = TokenCompiler(
-        compilation_service, validation_service, code_evaluation_service
+        compilation_service,
+        validation_service,
+        code_evaluation_service,
     )
 
     # Create test document and tokens
@@ -169,7 +184,7 @@ def main():
     print(f"Parallel compilation completed in {parallel_time:.2f} seconds")
 
     # Compare results
-    print(f"\nSpeed comparison:")
+    print("\nSpeed comparison:")
     print(f"Sequential: {sequential_time:.2f} seconds")
     print(f"Parallel: {parallel_time:.2f} seconds")
     print(f"Speedup: {sequential_time/parallel_time:.2f}x")

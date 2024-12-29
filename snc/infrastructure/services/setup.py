@@ -1,6 +1,4 @@
-"""
-Helper module for setting up services with minimal configuration.
-"""
+"""Helper module for setting up services with minimal configuration."""
 
 from dataclasses import dataclass
 from sqlalchemy.orm import Session
@@ -14,10 +12,13 @@ from snc.infrastructure.services.compilation_service import ConcreteCompilationS
 from snc.infrastructure.validation.validation_service import ConcreteValidationService
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.infrastructure.llm.model_factory import OpenAIModelType
+from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
 
 
 @dataclass
 class Services:
+    """A dataclass that holds all the services."""
+
     llm_service: ConcreteLLMService
     token_diff_service: TokenDiffService
     document_updater: DocumentUpdater
@@ -25,6 +26,7 @@ class Services:
     validation_service: ConcreteValidationService
     compilation_service: ConcreteCompilationService
     code_evaluation_service: CodeEvaluationService
+    code_fixer_service: ConcreteCodeFixerService
 
 
 def setup_services(
@@ -67,4 +69,5 @@ def setup_services(
         validation_service=validation_service,
         compilation_service=compilation_service,
         code_evaluation_service=code_evaluation_service,
+        code_fixer_service=ConcreteCodeFixerService(),
     )

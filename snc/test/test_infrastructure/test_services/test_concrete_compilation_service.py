@@ -11,6 +11,7 @@ from snc.infrastructure.services.compilation_service import (
 )
 from snc.domain.models import DomainToken, DomainCompiledMultifact
 from snc.infrastructure.entities.ni_token import NIToken
+from snc.infrastructure.entities.ni_document import NIDocument
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.repositories.token_repository import TokenRepository
 from snc.test.test_infrastructure.test_llm.mocks import mock_groq_client
@@ -151,12 +152,15 @@ def test_compile_document(db_session: Session, mock_groq_client: MagicMock):
                 component_name=t.component_name,
             )
         )
+    # Get the document directly
+    doc_entity = db_session.query(NIDocument).get(doc_id)
+    assert doc_entity is not None, "Document should exist"
     domain_doc = DomainDocument(
         doc_id=doc_id,
         content="Some doc content",
         version="vX",
-        created_at=tokens_in_db[0].ni_document.created_at,
-        updated_at=tokens_in_db[0].ni_document.updated_at,
+        created_at=doc_entity.created_at,
+        updated_at=doc_entity.updated_at,
         tokens=domain_tokens,
     )
 

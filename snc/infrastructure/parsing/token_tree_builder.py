@@ -1,3 +1,5 @@
+"""Tree builder for parsing narrative instruction tokens."""
+
 import re
 import hashlib
 from typing import List, Optional
@@ -5,14 +7,25 @@ from .advanced_token import AdvancedToken
 
 
 class TokenTreeBuilder:
-    """
-    Builds a tree of AdvancedToken objects from raw narrative instruction text.
+    """Builder for creating a tree of AdvancedToken objects.
+
+    This class parses raw narrative instruction text and constructs a
+    hierarchical tree of tokens representing scenes, components, and functions.
     """
 
     @classmethod
     def build_tree(cls, content: str) -> List[AdvancedToken]:
-        """
-        Build a tree of AdvancedToken objects from raw text.
+        """Build a tree of AdvancedToken objects from raw text.
+
+        Args:
+            content: Raw narrative instruction text to parse
+
+        Returns:
+            List of top-level scene tokens with their children
+
+        Raises:
+            ValueError: If components or functions are found outside their
+                allowed context
         """
         # Split content into lines and process each line
         lines = content.splitlines()
@@ -25,7 +38,9 @@ class TokenTreeBuilder:
         # Regex patterns for bracket lines
         scene_pattern = re.compile(r"^\s*\[Scene\s*:\s*(.*?)\]\s*$")
         component_pattern = re.compile(r"^\s*\[Component\s*:\s*(.*?)\]\s*$")
-        function_pattern = re.compile(r"^\s*\[Function(?:\s*:\s*(.*?))?\]\s*$")
+        function_pattern = re.compile(
+            r"^\s*\[Function(?:\s*:\s*(.*?))?\]\s*$"
+        )
         ref_pattern = re.compile(r"\[REF\s*:\s*(.*?)\]")
 
         for line in lines:
@@ -61,16 +76,17 @@ class TokenTreeBuilder:
                 function_name = function_match.group(1)
                 if not function_name:
                     # Generate a hash-based name for unnamed functions
-                    function_name = (
-                        "func_" + hashlib.sha256(line.encode("utf-8")).hexdigest()[:8]
-                    )
+                    hash_val = hashlib.sha256(line.encode("utf-8"))
+                    function_name = "func_" + hash_val.hexdigest()[:8]
                 function_token = AdvancedToken("function", function_name)
                 if current_component:
                     current_component.add_child(function_token)
                 elif current_scene:
                     current_scene.add_child(function_token)
                 else:
-                    raise ValueError("Function found outside of scene/component")
+                    raise ValueError(
+                        "Function found outside of scene/component"
+                    )
                 current_token = function_token
             else:
                 # Regular line - check for [REF:X] references

@@ -1,6 +1,7 @@
-"""
-Base module for database reset functionality.
-This module provides common functionality used by both reset_testing.py and reset_demo.py.
+"""Base module for database reset functionality.
+
+This module provides common functionality used by both reset_testing.py and
+reset_demo.py.
 """
 
 import sys
@@ -13,28 +14,25 @@ from ..infrastructure import entities
 
 
 def check_development_mode() -> None:
-    """
-    Ensure the script can only be run in development mode.
+    """Ensure the script can only be run in development mode.
 
     Raises:
         SystemExit: If not in development mode
     """
     if getenv("MODE") != "development":
-        print("This script can only be run in development mode.", file=sys.stderr)
-        print(
-            "Add MODE=development to your .env file in workspace's `backend/` directory"
-        )
+        msg = "This script can only be run in development mode."
+        print(msg, file=sys.stderr)
+        print("Add MODE=development to your .env file in backend/")
         sys.exit(1)
 
 
 def reset_database(
-    insert_data_func: Optional[Callable[[Session], None]] = None
+    insert_func: Optional[Callable[[Session], None]] = None
 ) -> None:
-    """
-    Reset the database to a clean state and optionally insert data.
+    """Reset the database to a clean state and optionally insert data.
 
     Args:
-        insert_data_func: Optional function that takes a Session and inserts data
+        insert_func: Optional function that takes a Session and inserts data
     """
     # Run Delete and Create Database Scripts
     subprocess.run(["python3", "-m", "backend.script.delete_database"])
@@ -46,6 +44,6 @@ def reset_database(
 
     # Initialize the SQLAlchemy session
     with Session(engine) as session:
-        if insert_data_func:
-            insert_data_func(session)
+        if insert_func:
+            insert_func(session)
         session.commit()

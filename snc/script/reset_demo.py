@@ -1,8 +1,9 @@
-"""
-Reset the database with demo data.
-This script resets the SQLAlchemy database to contain demo data for development.
+"""Reset the database with demo data.
 
-Usage: python3 -m backend.script.reset_demo
+This script resets the SQLAlchemy database to contain demo data for
+development.
+
+Usage: python3 -m snc.script.reset_demo
 """
 
 from sqlalchemy.orm import Session
@@ -11,8 +12,7 @@ from ..test.test_application.test_services import app_services_data
 
 
 def insert_demo_data(session: Session) -> None:
-    """
-    Insert demo data into the database.
+    """Insert demo data into the database.
 
     Args:
         session: SQLAlchemy session for database operations

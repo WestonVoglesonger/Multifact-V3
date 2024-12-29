@@ -1,3 +1,5 @@
+"""Domain model types and enumerations."""
+
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional, List
@@ -10,7 +12,8 @@ class OpenAIModelType(Enum):
 
     - GPT_4O: The versatile, high-intelligence GPT-4o model with large context.
     - GPT_4O_MINI: A faster, more cost-effective smaller variant of GPT-4o.
-    - O1: A reasoning-focused model that can think before answering and handle tools.
+    - O1: A reasoning-focused model that can think before answering and handle
+    tools.
     - O1_MINI: A smaller, more efficient variant of O1 optimized for reasoning.
     """
 
@@ -24,14 +27,21 @@ class GroqModelType(Enum):
     """
     Enumeration of available Groq model types.
 
-    - GEMMA2_9B_IT: A 9-billion parameter model from Google (Gemma2) with an 8K context.
-    - GEMMA_7B_IT: A 7-billion parameter Gemma model (deprecated) with 8K context.
-    - LLAMA_3_3_70B_VERSATILE: A 70B parameter Llama 3.3 variant with a large context window.
-    - LLAMA_3_1_8B_INSTANT: A smaller, faster Llama 3.1 8B model with a large context.
-    - LLAMA_GUARD_3_8B: A guarded Llama 3-based model focusing on security and reliability.
-    - LLAMA3_70B_8192: Another 70B Llama 3 model variant specialized for an 8K context.
+    - GEMMA2_9B_IT: A 9-billion parameter model from Google (Gemma2) with an
+    8K context.
+    - GEMMA_7B_IT: A 7-billion parameter Gemma model (deprecated) with 8K
+    context.
+    - LLAMA_3_3_70B_VERSATILE: A 70B parameter Llama 3.3 variant with a large
+    context window.
+    - LLAMA_3_1_8B_INSTANT: A smaller, faster Llama 3.1 8B model with a large
+    context.
+    - LLAMA_GUARD_3_8B: A guarded Llama 3-based model focusing on security and
+    reliability.
+    - LLAMA3_70B_8192: Another 70B Llama 3 model variant specialized for an 8K
+    context.
     - LLAMA3_8B_8192: An 8B Llama 3 model variant with 8K context support.
-    - MIXTRAL_8X7B_32768: A Mistral-based model with a large 32K context window.
+    - MIXTRAL_8X7B_32768: A Mistral-based model with a large 32K context
+    window.
     """
 
     GEMMA2_9B_IT = "gemma2-9b-it"
@@ -46,9 +56,7 @@ class GroqModelType(Enum):
 
 @dataclass
 class CompilationResult:
-    """
-    Result of a compilation operation.
-    """
+    """Result of a compilation operation."""
 
     code: str
     valid: bool

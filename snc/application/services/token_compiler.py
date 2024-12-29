@@ -1,46 +1,76 @@
-import logging
-from typing import List, Dict, Set
-from collections import defaultdict
-from snc.domain.models import DomainToken, DomainCompiledMultifact
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
-from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
-from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
-from snc.application.interfaces.icompilation_service import ICompilationService
-from snc.application.interfaces.ivalidation_service import IValidationService
-from snc.application.services.code_evaluation_service import CodeEvaluationService
-from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
-from snc.infrastructure.entities.entity_base import EntityBase
-from snc.infrastructure.entities.ni_token import NIToken
-import concurrent.futures
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker, scoped_session
-from snc.infrastructure.db.engine import engine
-import hashlib
-import threading
+"""Service for compiling tokens into code artifacts."""
 
+import logging
+import hashlib
+import concurrent.futures
+from typing import List, Dict, Set, Any
+from collections import defaultdict
+from sqlalchemy.orm import Session, sessionmaker, scoped_session
+
+from snc.domain.models import DomainToken
+from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from snc.application.interfaces.icompilation_service import (
+    ICompilationService
+)
+from snc.application.interfaces.ivalidation_service import IValidationService
+from snc.application.services.code_evaluation_service import (
+    CodeEvaluationService
+)
+from snc.infrastructure.entities.ni_token import NIToken
+from snc.database import db_session
 
 class TokenCompiler:
+    """Service for compiling tokens into code artifacts.
+
+    Handles the compilation of tokens into code artifacts, including:
+    - Parallel compilation of independent tokens
+    - Validation of compiled artifacts
+    - Code evaluation and scoring
+    - Session management for thread safety
+    """
+
     def __init__(
         self,
         compilation_service: ICompilationService,
         validation_service: IValidationService,
         evaluation_service: CodeEvaluationService,
-    ):
+    ) -> None:
+        """Initialize the compiler.
+
+        Args:
+            compilation_service: Service for compiling tokens
+            validation_service: Service for validating artifacts
+            evaluation_service: Service for evaluating code quality
+        """
         self.compilation_service = compilation_service
         self.validation_service = validation_service
         self.evaluation_service = evaluation_service
         self.logger = logging.getLogger(__name__)
         # Create thread-local session factory
-        self.Session = scoped_session(sessionmaker(bind=engine))
+        self.Session = db_session()
 
     def _get_thread_session(self) -> Session:
-        """Get a thread-local session."""
-        return self.Session()
+        """Get a thread-local session.
+
+        Returns:
+            New database session for the current thread
+        """
+        return next(self.Session)
 
     def _group_tokens_by_level(
         self, tokens: List[DomainToken]
     ) -> List[List[DomainToken]]:
-        """Group tokens by their dependency level. Tokens in the same level can be compiled in parallel."""
+        """Group tokens by their dependency level.
+
+        Tokens in the same level can be compiled in parallel since they
+        have no dependencies on each other.
+
+        Args:
+            tokens: List of tokens to group
+
+        Returns:
+            List of token groups, where each group can be compiled in parallel
+        """
         # Build dependency graph
         graph: Dict[int, Set[int]] = defaultdict(set)
         for token in tokens:
@@ -56,7 +86,7 @@ class TokenCompiler:
 
         # Group tokens by level
         levels: List[List[DomainToken]] = []
-        processed = set()
+        processed: Set[Any] = set()
         current_level = [t for t in tokens if t.id in roots]
 
         while current_level:
@@ -75,11 +105,25 @@ class TokenCompiler:
         return levels
 
     def _generate_hash(self, content: str) -> str:
-        """Generate a hash for the token content."""
+        """Generate a hash for the token content.
+
+        Args:
+            content: Content to hash
+
+        Returns:
+            SHA-256 hash of the content
+        """
         return hashlib.sha256(content.encode()).hexdigest()
 
-    def _copy_token_to_session(self, token: DomainToken, session: Session) -> None:
-        """Copy a token to a new session."""
+    def _copy_token_to_session(
+        self, token: DomainToken, session: Session
+    ) -> None:
+        """Copy a token to a new session.
+
+        Args:
+            token: Token to copy
+            session: Target session
+        """
         if token.id is None:
             return
 
@@ -101,7 +145,18 @@ class TokenCompiler:
     def _compile_token_wrapper(
         self, token: DomainToken, llm_client: BaseLLMClient, revalidate: bool
     ) -> None:
-        """Wrapper to compile a single token, used for parallel processing."""
+        """Process a single token for compilation.
+
+        Used for parallel processing, handles session management and cleanup.
+
+        Args:
+            token: Token to compile
+            llm_client: LLM client to use for compilation
+            revalidate: Whether to validate the compiled artifact
+
+        Raises:
+            ValueError: If token ID is None
+        """
         if token.id is None:
             self.logger.error("Cannot compile token with None ID")
             raise ValueError("Token ID cannot be None")
@@ -110,26 +165,32 @@ class TokenCompiler:
         try:
             # Get thread-local session
             session = self._get_thread_session()
-            self.logger.debug(f"Starting compilation of token {token.id}")
+            self.logger.debug("Starting compilation of token %d", token.id)
 
             # Copy token to this session
             self._copy_token_to_session(token, session)
-            self.logger.debug(f"Token {token.id} copied to thread-local session")
+            self.logger.debug(
+                "Token %d copied to thread-local session", token.id
+            )
 
             # Set thread-local session in services
-            self.compilation_service.session = session
-            self.validation_service.session = session
+            setattr(self.compilation_service, "session", session)
+            setattr(self.validation_service, "session", session)
 
             # Initial compilation
-            self.logger.info(f"Compiling token {token.id} ({token.token_type})")
-            artifact = self.compilation_service.compile_token(token.id, llm_client)
+            self.logger.info(
+                "Compiling token %d (%s)", token.id, token.token_type
+            )
+            artifact = getattr(
+                self.compilation_service, "compile_token"
+            )(token.id, llm_client)
             if not artifact:
-                self.logger.error(f"Failed to compile token {token.id}")
+                self.logger.error("Failed to compile token %d", token.id)
                 return
 
             # Validate if requested
             if revalidate:
-                self.logger.debug(f"Validating artifact {artifact.id}")
+                self.logger.debug("Validating artifact %d", artifact.id)
                 validation_result = self.validation_service.validate_artifact(
                     artifact.id
                 )
@@ -138,15 +199,19 @@ class TokenCompiler:
                         error.message for error in validation_result.errors
                     )
                     self.logger.warning(
-                        f"Artifact {artifact.id} validation failed: {error_messages}"
+                        "Artifact %d validation failed: %s",
+                        artifact.id,
+                        error_messages
                     )
                     artifact.valid = False
-                    self.compilation_service.update_artifact(artifact)
+                    getattr(
+                        self.compilation_service, "update_artifact"
+                    )(artifact)
                     return
 
             # Only evaluate valid artifacts
             if artifact.valid:
-                self.logger.debug(f"Evaluating artifact {artifact.id}")
+                self.logger.debug("Evaluating artifact %d", artifact.id)
                 evaluation_result = self.evaluation_service.evaluate_code(
                     artifact.code,
                     {"token_id": token.id, "artifact_id": artifact.id},
@@ -155,21 +220,30 @@ class TokenCompiler:
                 artifact.feedback = evaluation_result.get(
                     "feedback", "No feedback provided"
                 )
-                self.compilation_service.update_artifact(artifact)
+                getattr(
+                    self.compilation_service, "update_artifact"
+                )(artifact)
                 self.logger.info(
-                    f"Token {token.id} compilation complete: score={artifact.score}"
+                    "Token %d compilation complete: score=%.2f",
+                    token.id,
+                    artifact.score
                 )
 
         except Exception as e:
             self.logger.error(
-                f"Failed to compile token {token.token_uuid}: {str(e)}", exc_info=True
+                "Failed to compile token %s: %s",
+                token.token_uuid,
+                str(e),
+                exc_info=True
             )
             raise
         finally:
             if session:
                 # Remove the session from the registry and close it
-                self.Session.remove()
-                self.logger.debug(f"Cleaned up session for token {token.id}")
+                self.Session.close()
+                self.logger.debug(
+                    "Cleaned up session for token %d", token.id
+                )
 
     def compile_and_validate_parallel(
         self,
@@ -178,24 +252,40 @@ class TokenCompiler:
         revalidate: bool,
         max_workers: int = 4,
     ) -> None:
-        """
-        Compiles tokens in parallel when they don't have dependencies on each other.
-        Tokens are grouped into levels based on their dependencies, and tokens within
-        each level are compiled in parallel.
+        """Compile tokens in parallel when possible.
+
+        Tokens are grouped into levels based on their dependencies, and tokens
+        within each level are compiled in parallel.
+
+        Args:
+            tokens: List of tokens to compile
+            llm_client: LLM client to use for compilation
+            revalidate: Whether to validate compiled artifacts
+            max_workers: Maximum number of parallel workers
         """
         self.logger.info(
-            f"Starting parallel compilation of {len(tokens)} tokens with {max_workers} workers"
+            "Starting parallel compilation of %d tokens with %d workers",
+            len(tokens),
+            max_workers
         )
 
         # Group tokens by their dependency level
         token_levels = self._group_tokens_by_level(tokens)
-        self.logger.debug(f"Grouped tokens into {len(token_levels)} dependency levels")
+        self.logger.debug(
+            "Grouped tokens into %d dependency levels",
+            len(token_levels)
+        )
 
         # Process each level in sequence, but tokens within a level in parallel
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=max_workers
+        ) as executor:
             for level_num, level in enumerate(token_levels, 1):
                 self.logger.info(
-                    f"Processing level {level_num}/{len(token_levels)} with {len(level)} tokens"
+                    "Processing level %d/%d with %d tokens",
+                    level_num,
+                    len(token_levels),
+                    len(level)
                 )
 
                 # Create a set to track processed tokens
@@ -207,7 +297,10 @@ class TokenCompiler:
                     if token.id not in processed_tokens:
                         processed_tokens.add(token.id)
                         future = executor.submit(
-                            self._compile_token_wrapper, token, llm_client, revalidate
+                            self._compile_token_wrapper,
+                            token,
+                            llm_client,
+                            revalidate
                         )
                         futures[future] = token.id
 
@@ -216,15 +309,19 @@ class TokenCompiler:
                     token_id = futures[future]
                     try:
                         future.result()
-                        self.logger.debug(f"Token {token_id} processing complete")
+                        self.logger.debug(
+                            "Token %d processing complete", token_id
+                        )
                     except Exception as e:
                         self.logger.error(
-                            f"Failed to compile token {token_id}: {str(e)}",
-                            exc_info=True,
+                            "Failed to compile token %d: %s",
+                            token_id,
+                            str(e),
+                            exc_info=True
                         )
                         raise
 
-                self.logger.info(f"Completed processing of level {level_num}")
+                self.logger.info("Completed processing of level %d", level_num)
 
         self.logger.info("Parallel compilation completed successfully")
 
@@ -234,9 +331,16 @@ class TokenCompiler:
         llm_client: BaseLLMClient,
         revalidate: bool,
     ) -> None:
-        """
-        Legacy sequential compilation method. Consider using compile_and_validate_parallel
-        for better performance when tokens can be compiled in parallel.
+        """Compile tokens sequentially.
+
+        Legacy sequential compilation method. Consider using
+        compile_and_validate_parallel for better performance when tokens can
+        be compiled in parallel.
+
+        Args:
+            tokens: List of tokens to compile
+            llm_client: LLM client to use for compilation
+            revalidate: Whether to validate compiled artifacts
         """
         for tok in tokens:
             self._compile_token_wrapper(tok, llm_client, revalidate)

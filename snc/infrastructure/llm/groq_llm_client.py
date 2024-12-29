@@ -3,17 +3,20 @@
 import json
 import logging
 from decimal import Decimal
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, cast
 from os import getenv
+
 from dotenv import load_dotenv
 from groq import Groq
 from groq.types.chat import (
     ChatCompletionSystemMessageParam,
     ChatCompletionUserMessageParam,
+    ChatCompletionMessageParam,
 )
+from openai.types.completion_usage import CompletionUsage
+
 from snc.domain.models import Model
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
-from openai.types.completion_usage import CompletionUsage
 
 load_dotenv()
 
@@ -27,10 +30,10 @@ class GroqLLMClient(BaseLLMClient):
     def __init__(self, model: Model):
         super().__init__(model)
         self.client = Groq(api_key=getenv("GROQ_API_KEY"))
+        self.last_usage: Optional[CompletionUsage] = None
 
     def parse_document(self, ni_content: str) -> Dict[str, Any]:
         system_message = {
-            "role": "system",
             "content": (
                 "You are a bracket-based parser. Whenever you see `[Function:XYZ]`, you must create an object in "
                 "`functions` array with `name=XYZ` and `narrative` = lines until the next bracket.\n"
@@ -67,7 +70,7 @@ class GroqLLMClient(BaseLLMClient):
                 "You must never create a `component` named `Function:XYZ` unless the bracket actually said `[Component:Function:XYZ]`.\n"
                 "Instead, `[Function:Name]` belongs in a `functions` array on either the current component or the current scene.\n"
                 "No extra disclaimers or keys, only valid JSON.\n"
-            ),
+            )
         }
 
         user_prompt = f"""
@@ -75,8 +78,8 @@ class GroqLLMClient(BaseLLMClient):
             Document:
             {ni_content}
             Now return the JSON with the structure described above.
-            """
-        user_message = {"role": "user", "content": user_prompt}
+        """
+        user_message = {"content": user_prompt}
 
         response = self._generic_chat_call(
             system_message,
@@ -94,13 +97,13 @@ class GroqLLMClient(BaseLLMClient):
         # Debug: Print the raw parsed JSON
         logging.debug(f"Parsed JSON from LLM: {json.dumps(data, indent=2)}")
 
-        # Post-process to extract functions from narrative
+        # Post-process to extract inline [Function:XYZ] calls from the scene's narrative
         for scene in data.get("scenes", []):
             lines = scene["narrative"].splitlines()
             new_functions = scene.get("functions", []) or []
             cleaned_lines = []
             collecting_func = False
-            func_lines = []
+            func_lines: list[str] = []
             func_name = ""
 
             for line in lines:
@@ -174,7 +177,6 @@ class GroqLLMClient(BaseLLMClient):
         code_style: str = "",
     ) -> str:
         system_message = {
-            "role": "system",
             "content": "You are a world-class coding assistant.\nReturn only code.",
         }
 
@@ -185,23 +187,21 @@ class GroqLLMClient(BaseLLMClient):
             "Only code."
         )
 
-        user_message = {"role": "user", "content": user_message_content}
+        user_message = {"content": user_message_content}
         return self._generic_chat_call(
             system_message, user_message, model_name=self.model.name
         )
 
     def fix_code(self, original_code: str, error_summary: str) -> str:
         system_message = {
-            "role": "system",
             "content": (
                 "You are a coding assistant. You have been given TypeScript code for an Angular component that contains errors. "
                 "You must fix the code so that it passes strict type checking with `tsc`. "
                 "Only return the fixed code, no explanations or extra output. Keep as much of the original structure as possible."
-            ),
+            )
         }
 
         user_message = {
-            "role": "user",
             "content": (
                 f"Here is the current code:\n```\n{original_code}\n```\n\n"
                 f"{error_summary}\n\n"
@@ -228,58 +228,74 @@ class GroqLLMClient(BaseLLMClient):
 
     def _generic_chat_call(
         self,
-        system_message: dict,
-        user_message: dict,
+        system_message: Dict[str, str],   # or more specific TypedDict if you like
+        user_message: Dict[str, str],
         model_name: str,
         temperature: float = 0.7,
         max_tokens: int = 1500,
     ) -> str:
+        """
+        A generic helper that sends system & user messages to the Groq LLM and returns the response.
+        """
         for attempt in range(3):
             try:
-                messages = [
-                    ChatCompletionSystemMessageParam(**system_message),
-                    ChatCompletionUserMessageParam(**user_message),
-                ]
+                # Build typed message params
+                sys_msg = ChatCompletionSystemMessageParam(
+                    role="system",
+                    content=system_message["content"]
+                )
+                usr_msg = ChatCompletionUserMessageParam(
+                    role="user",
+                    content=user_message["content"]
+                )
+
+                # Now Mypy / Pyright sees a list of properly typed message objects
+                messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [sys_msg, usr_msg]
+
                 response = self.client.chat.completions.create(
                     model=model_name,
                     messages=messages,
                     temperature=temperature,
                     max_tokens=max_tokens,
-                    stream=False,
                 )
 
-                # Properly handle response structure
                 if not hasattr(response, "choices") or not response.choices:
                     raise RuntimeError("Invalid response structure from Groq API")
 
-                self.last_usage = getattr(response, "usage", None)
-                if self.last_usage is not None:
-                    self.last_cost = self.compute_cost_from_model(self.last_usage)
+                usage_dict = getattr(response, "usage", None)
+                if usage_dict:
+                    self.last_usage = CompletionUsage(
+                        prompt_tokens=usage_dict.prompt_tokens,
+                        completion_tokens=usage_dict.completion_tokens,
+                        total_tokens=usage_dict.total_tokens
+                    )
                 else:
-                    self.last_usage = {
-                        "prompt_tokens": 0,
-                        "completion_tokens": 0,
-                        "total_tokens": 0,
-                    }
-                    self.last_cost = 0.0
+                    self.last_usage = CompletionUsage(
+                        prompt_tokens=0,
+                        completion_tokens=0,
+                        total_tokens=0
+                    )
 
-                # Safely access response content
                 if hasattr(response.choices[0], "message") and hasattr(
                     response.choices[0].message, "content"
                 ):
-                    return response.choices[0].message.content.strip()
+                    content = response.choices[0].message.content
+                    return content.strip() if content else ""
                 else:
-                    raise RuntimeError(
-                        "Invalid response structure: missing message content"
-                    )
+                    raise RuntimeError("Invalid response structure: missing content")
 
             except Exception as e:
                 logging.error(f"Attempt {attempt + 1} failed: {e}")
                 if attempt == 2:
                     raise RuntimeError("LLM call failed after 3 attempts.") from e
+
         raise RuntimeError("LLM call failed after 3 attempts.")
 
+
     def compute_cost_from_model(self, usage: CompletionUsage) -> float:
+        """
+        Compute the cost of a given usage dictionary based on the model's pricing.
+        """
         prompt_tokens = usage.prompt_tokens
         completion_tokens = usage.completion_tokens
 
@@ -294,3 +310,13 @@ class GroqLLMClient(BaseLLMClient):
             * Decimal(self.model.completion_cost_per_1k)
         )
         return float(round(prompt_cost + completion_cost, 6))
+
+    def _attempt_json_parse(self, text: str) -> Optional[Dict[str, Any]]:
+        """
+        Attempt to parse `text` as JSON. If parsing fails, return None.
+        """
+        try:
+            return json.loads(text)
+        except (json.JSONDecodeError, TypeError):
+            logging.error("Failed to decode JSON from LLM output.")
+            return None

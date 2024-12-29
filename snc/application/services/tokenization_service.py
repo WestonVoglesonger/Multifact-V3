@@ -1,20 +1,32 @@
-# backend/infrastructure/parsing/tokenization_service.py
+"""A service that converts narrative instruction text to list of DomainTokens.
+
+Uses AdvancedToken and TokenTreeBuilder as parsing utilities (infrastructure
+layer).
+"""
 
 import uuid
 from typing import List
-import hashlib
 from snc.domain.models import DomainToken
 from snc.infrastructure.parsing.token_tree_builder import TokenTreeBuilder
 from snc.infrastructure.parsing.advanced_token import AdvancedToken
 
 
 class TokenizationService:
-    """
-    A service that converts raw narrative instruction text into a list of DomainTokens.
-    Uses AdvancedToken and TokenTreeBuilder as parsing utilities (infrastructure layer).
+    """A service that converts narrative instruction text to list.
+
+    Uses AdvancedToken and TokenTreeBuilder as parsing utilities
+    (infrastructure layer).
     """
 
     def tokenize_content(self, content: str) -> List[DomainToken]:
+        """Tokenize narrative instruction text.
+
+        Args:
+            content: Narrative instruction text to tokenize
+
+        Returns:
+            List of DomainTokens
+        """
         # Build a tree of AdvancedToken objects
         scenes = TokenTreeBuilder.build_tree(content)
 
@@ -36,7 +48,9 @@ class TokenizationService:
                     name_to_token[token.token_name] = token
 
         # Second pass: resolve dependencies using the name map
-        def resolve_dependencies(adv_token: AdvancedToken, domain_token: DomainToken):
+        def resolve_dependencies(
+            adv_token: AdvancedToken, domain_token: DomainToken
+        ):
             for dep_name in adv_token.dependencies:
                 if dep_name in name_to_token:
                     domain_token.add_dependency(name_to_token[dep_name])
@@ -46,7 +60,10 @@ class TokenizationService:
                         t
                         for t in domain_tokens
                         if (
-                            (t.token_type == "scene" and t.scene_name == child.name)
+                            (
+                                t.token_type == "scene"
+                                and t.scene_name == child.name
+                            )
                             or (
                                 t.token_type == "component"
                                 and t.component_name == child.name
@@ -95,7 +112,8 @@ class TokenizationService:
         # Compute hash from adv_token content
         token_hash = adv_token.compute_hash()
 
-        # For domain tokens, we may need a stable UUID. Let's just use a random UUID for now.
+        # For domain tokens, we may need a stable UUID. Let's just use a random
+        # UUID for now.
         token_uuid = str(uuid.uuid4())
 
         return DomainToken(
@@ -105,10 +123,12 @@ class TokenizationService:
             token_type=adv_token.token_type,
             content=adv_token.get_full_text(),
             hash=token_hash,
-            scene_name=adv_token.name if adv_token.token_type == "scene" else None,
+            scene_name=(
+                adv_token.name if adv_token.token_type == "scene" else None
+            ),
             component_name=(
                 adv_token.name if adv_token.token_type == "component" else None
             ),
             order=0,  # order can be set later if needed
-            dependencies=[],  # dependencies will be resolved in the second pass
+            dependencies=[],  # dependencies will be resolved the second pass
         )

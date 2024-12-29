@@ -10,6 +10,7 @@ from snc.infrastructure.llm.llm_service_impl import ConcreteLLMService
 from snc.application.services.token_diff_service import TokenDiffService
 from snc.application.services.document_updater import DocumentUpdater
 from snc.application.services.token_compiler import TokenCompiler
+from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
 from snc.infrastructure.services.compilation_service import ConcreteCompilationService
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.infrastructure.validation.validation_service import ConcreteValidationService
@@ -22,7 +23,7 @@ from snc.infrastructure.entities.entity_base import EntityBase
 from snc.infrastructure.entities.ni_document import NIDocument
 from snc.infrastructure.entities.ni_token import NIToken
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
-
+from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
 
 def main():
     # Initialize settings
@@ -58,12 +59,13 @@ def main():
         validation_service,
         code_evaluation_service,
     )
+    code_fixer_service = ConcreteCodeFixerService()
 
     # Initialize self-repair service
     self_repair_service = SelfRepairService(
         artifact_repo=artifact_repo,
         validation_service=validation_service,
-        code_fixer_service=llm_service,
+        code_fixer_service=code_fixer_service,
         session=db_session,
     )
 
@@ -76,7 +78,7 @@ def main():
         token_diff_service=token_diff_service,
         document_updater=document_updater,
         token_compiler=token_compiler,
-        code_fixer_service=llm_service,  # Use LLM service as code fixer
+        code_fixer_service=code_fixer_service,
     )
 
     # Create a simple narrative document

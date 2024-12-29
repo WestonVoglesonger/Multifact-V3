@@ -29,6 +29,7 @@ from snc.application.services.exceptions import (
 )
 from snc.test.test_application.test_services.fixtures import mock_llm_parse_help
 from snc.infrastructure.llm.client_factory import ClientFactory
+from snc.domain.models import DomainDocument
 
 
 def test_create_ni_document(db_session: Session):
@@ -63,12 +64,29 @@ def test_create_ni_document(db_session: Session):
     # Create a new document
     doc = ni_orchestrator.create_ni_document(test_create_ni_document_content)
     doc_entity = doc_repo.get_document(doc.id)
+    assert doc_entity is not None, "Document should exist"
     assert doc_entity.content == test_create_ni_document_content
     assert doc_entity.id is not None
     assert doc_entity.version is not None
     assert doc_entity.created_at is not None
     assert doc_entity.updated_at is not None
     assert len(doc_entity.tokens) > 0
+    # Check specific tokens
+    assert any(
+        t.token_type == "scene" and t.scene_name == "Intro" for t in doc_entity.tokens
+    )
+    assert any(
+        t.token_type == "component" and t.component_name == "Greeting"
+        for t in doc_entity.tokens
+    )
+    assert any(
+        t.token_type == "function" and t.function_name == "displayGreeting"
+        for t in doc_entity.tokens
+    )
+    assert any(
+        t.token_type == "function" and t.function_name == "logEntry"
+        for t in doc_entity.tokens
+    )
 
 
 def test_user_intervention_service_update_and_recompile_success(
@@ -125,14 +143,19 @@ def test_user_intervention_service_update_and_recompile_success(
 
     # Verify the updated content
     updated_doc = doc_repo.get_document(doc_id)
-    assert updated_doc.content == new_content, "Document content should be updated."
+    assert updated_doc is not None, "Document should exist"
+    assert isinstance(
+        updated_doc, DomainDocument
+    ), "Document should be a DomainDocument"
+    doc: DomainDocument = updated_doc  # Type cast after assertion
+    assert doc.content == new_content, "Document content should be updated."
 
     # Verify tokens
     updated_tokens = token_repo.get_all_tokens_for_document(doc_id)
     updated_component = next(
         (t for t in updated_tokens if t.component_name == "Help"), None
     )
-    assert updated_component, "Should have a new 'Help' component"
+    assert updated_component is not None, "Should have a new 'Help' component"
     assert updated_component.content == "Display a help message."
 
     # Verify evaluation results

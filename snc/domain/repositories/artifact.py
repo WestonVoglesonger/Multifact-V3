@@ -1,17 +1,17 @@
-"""
-Artifact repository interface.
-"""
+"""Artifact repository interface."""
 
 from abc import ABC, abstractmethod
 from typing import Optional
-from snc.domain.models.artifact import Artifact
+from snc.domain.models import DomainCompiledMultifact
 
 
 class ArtifactRepository(ABC):
     """Interface for artifact repositories."""
 
     @abstractmethod
-    def get_artifact_by_id(self, artifact_id: str) -> Optional[Artifact]:
+    def get_artifact_by_id(
+        self, artifact_id: str
+    ) -> Optional[DomainCompiledMultifact]:
         """Get artifact by ID."""
         pass
 

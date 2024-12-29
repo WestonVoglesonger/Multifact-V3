@@ -92,6 +92,7 @@ def test_update_artifact_code(db_session: Session):
     repo.update_artifact_code(new_art.id, "console.log('updated');", valid=False)
 
     updated_art = db_session.query(CompiledMultifact).get(new_art.id)
+    assert updated_art is not None, "Updated artifact should exist"
     assert updated_art.code == "console.log('updated');"
     assert updated_art.valid is False, "We changed valid to false."
 

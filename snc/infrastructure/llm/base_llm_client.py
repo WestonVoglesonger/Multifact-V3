@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, Optional
 import json
 from snc.domain.models import Model
+from openai.types.completion_usage import CompletionUsage
 
 
 class BaseLLMClient(ABC):
@@ -10,7 +11,7 @@ class BaseLLMClient(ABC):
     """
 
     def __init__(self, model: Model):
-        self.last_usage: Optional[Dict[str, int]] = None
+        self.last_usage: Optional[CompletionUsage] = None
         self.last_cost: Optional[float] = None
         self.model: Model = model
 
