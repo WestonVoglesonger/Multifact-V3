@@ -20,8 +20,10 @@ wheels/
 .installed.cfg
 *.egg
 
-# Testing
+# Cache directories
+.mypy_cache/
 .pytest_cache/
+.benchmarks/
 .coverage
 htmlcov/
 .tox/
@@ -33,40 +35,44 @@ coverage.xml
 *.cover
 *.py,cover
 .hypothesis/
-.pytest_cache/
-cover/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.DS_Store
-.env.local
-.env.*.local
+*~
 
-# Project specific
-.benchmarks/
-node_modules/
+# Environment
 .env
-*.log
-logs/
-tmp/
-temp/
-
-# Database
-*.sqlite3
-*.db
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
 
 # Documentation
 docs/_build/
 docs/build/
+docs/source/_build/
 
-# Virtual Environment
-venv/
-ENV/
-env/
-.env/
-.venv/
-env.bak/
-venv.bak/
+# Benchmark data
+benchmark/archive/
+benchmark/all_models/
+*.json.gz
+*.csv
+
+# Database
+*.db
+*.sqlite3
+*.sqlite
+
+# Logs
+*.log
+logs/
+log/
+
+# OS specific
+.DS_Store
+Thumbs.db
