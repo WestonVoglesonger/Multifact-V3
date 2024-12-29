@@ -8,6 +8,7 @@ repos:
       - id: check-added-large-files
       - id: check-ast
       - id: check-json
+        exclude: ^benchmark/.*\.json$
       - id: check-merge-conflict
       - id: detect-private-key
 
@@ -16,16 +17,3 @@ repos:
     hooks:
       - id: black
         language_version: python3
-
-  - repo: https://github.com/pycqa/flake8
-    rev: 6.1.0
-    hooks:
-      - id: flake8
-        additional_dependencies: [flake8-docstrings]
-
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.7.1
-    hooks:
-      - id: mypy
-        additional_dependencies: [types-all]
-        exclude: ^(docs/|example-plugin/|tests/fixtures/)

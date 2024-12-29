@@ -4,8 +4,9 @@ from typing import Dict, Any, List, cast
 from sqlalchemy.orm import Session
 import re
 import threading
+import logging
 
-from snc.domain.models import DomainDocument, DomainCompiledMultifact
+from snc.domain.models import DomainDocument, DomainCompiledMultifact, DomainMultifact
 from snc.domain.model_types import CompilationResult
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.entities.ni_token import NIToken
@@ -30,6 +31,7 @@ class ConcreteCompilationService(ICompilationService):
         self._main_session = session
         self._thread_local = threading.local()
         self._thread_local.session = session
+        self.logger = logging.getLogger(__name__)
 
     @property
     def session(self) -> Session:
@@ -55,37 +57,47 @@ class ConcreteCompilationService(ICompilationService):
             Compilation result with status and errors if any
         """
         try:
-            return CompilationResult(
-                code=code, valid=True, errors=None, cache_hit=False
-            )
+            return CompilationResult(code=code, valid=True, errors=None, cache_hit=False)
         except Exception as e:
-            return CompilationResult(
-                code="", valid=False, errors=[str(e)], cache_hit=False
+            return CompilationResult(code="", valid=False, errors=[str(e)], cache_hit=False)
+
+    def compile_multifact(self, multifact: DomainMultifact) -> DomainCompiledMultifact:
+        """Compile a multifact into a compiled multifact."""
+        if multifact.is_compiled is True:
+            return DomainCompiledMultifact(
+                id=multifact.id,
+                name=multifact.name,
+                description=multifact.description,
+                code=multifact.code,
+                metadata=multifact.metadata,
+                is_compiled=True,
+                created_at=multifact.created_at,
+                updated_at=multifact.updated_at,
+                compiled_at=multifact.compiled_at,
+                version=multifact.version,
+                parent_id=multifact.parent_id,
+                parent_version=multifact.parent_version,
+                parent_type=multifact.parent_type,
+                parent_name=multifact.parent_name,
+                parent_description=multifact.parent_description,
+                parent_metadata=multifact.parent_metadata,
+                parent_created_at=multifact.parent_created_at,
+                parent_updated_at=multifact.parent_updated_at,
+                parent_compiled_at=multifact.parent_compiled_at,
+                parent_is_compiled=multifact.parent_is_compiled,
+                parent_code=multifact.parent_code,
+                parent_version_id=multifact.parent_version_id,
+                parent_version_name=multifact.parent_version_name,
+                parent_version_description=multifact.parent_version_description,
+                parent_version_metadata=multifact.parent_version_metadata,
+                parent_version_created_at=multifact.parent_version_created_at,
+                parent_version_updated_at=multifact.parent_version_updated_at,
+                parent_version_compiled_at=multifact.parent_version_compiled_at,
+                parent_version_is_compiled=multifact.parent_version_is_compiled,
+                parent_version_code=multifact.parent_version_code,
             )
 
-    def compile_multifact(
-        self, multifact: DomainCompiledMultifact
-    ) -> CompilationResult:
-        """Compile multifact and return the result.
-
-        Args:
-            multifact: Multifact to compile
-
-        Returns:
-            Compilation result with status and errors if any
-        """
-        return CompilationResult(
-            code=multifact.code,
-            valid=multifact.valid,
-            errors=None if multifact.valid else ["Compilation failed"],
-            cache_hit=multifact.cache_hit,
-            score=multifact.score,
-            feedback=multifact.feedback,
-        )
-
-    def compile_token(
-        self, token_id: int, llm_client: BaseLLMClient
-    ) -> DomainCompiledMultifact:
+    def compile_token(self, token_id: int, llm_client: BaseLLMClient) -> DomainCompiledMultifact:
         """Compile a token into a multifact.
 
         Args:
@@ -99,12 +111,6 @@ class ConcreteCompilationService(ICompilationService):
             ValueError: If token not found or invalid
         """
         try:
-            # Delete any existing non-cached artifacts for this token
-            # self._thread_local.session.query(CompiledMultifact).filter(
-            #     CompiledMultifact.ni_token_id == token_id,
-            #     CompiledMultifact.cache_hit == False,
-            # ).delete()
-
             # Check for cached artifacts
             cached_artifact = (
                 self._thread_local.session.query(CompiledMultifact)
@@ -142,35 +148,28 @@ class ConcreteCompilationService(ICompilationService):
 
             # If content doesn't start with the token type header, add it
             if not token.content.strip().startswith(f"[{token.token_type.title()}:"):
-                token.content = (
-                    f"[{token.token_type.title()}:{token.token_name}]\n{token.content}"
-                )
-                self._thread_local.session.commit()
+                token.content = f"[{token.token_type.title()}:{token.token_name}]\n{token.content}"
 
-            match = re.search(pattern, token.content)
-            if not match:
-                raise ValueError("Could not extract target name from token content.")
-
-            # Generate code using target name
+            # Generate code using LLM
             code = llm_client.generate_code(token.content)
+            if not code:
+                raise ValueError("Failed to generate code")
 
             # Create new artifact
             artifact = CompiledMultifact(
                 ni_token_id=token_id,
-                language="typescript",
-                framework="angular",
+                language="typescript",  # Default to TypeScript since we're generating Angular code
+                framework="angular",  # Default to Angular framework
                 code=code,
                 valid=True,
                 cache_hit=False,
             )
             self._thread_local.session.add(artifact)
-            self._thread_local.session.commit()
-
             return artifact.to_domain_artifact()
 
         except Exception as e:
-            self._thread_local.session.rollback()
-            raise e
+            self.logger.error(f"Failed to compile token {token_id}: {e}")
+            raise
 
     def compile_document(
         self, document: DomainDocument, llm_client: BaseLLMClient
@@ -219,9 +218,7 @@ class ConcreteCompilationService(ICompilationService):
 
         # Recurse over dependencies:
         for dep_ent in result.dependencies:
-            compiled_artifacts_dep = self.compile_token_with_dependencies(
-                dep_ent.id, llm_client
-            )
+            compiled_artifacts_dep = self.compile_token_with_dependencies(dep_ent.id, llm_client)
             compiled_artifacts.extend(compiled_artifacts_dep)
 
         # Now compile this token:

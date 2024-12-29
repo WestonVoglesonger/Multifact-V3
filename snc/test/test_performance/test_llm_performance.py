@@ -1,121 +1,70 @@
-# File: snc/test/test_performance/test_llm_performance.py
+"""Performance tests for LLM-based operations."""
 
-import os
-import pytest
 import logging
-from typing import Callable, Any, Optional, TypeVar, ParamSpec, cast
+from typing import Any, Callable, Dict, List, Optional
+
+import pytest
 from sqlalchemy.orm import Session
 
-# External references in your codebase:
-from snc.test.test_performance.test_performance_data import TEST_INPUTS
-
-# Services needed:
-from snc.application.services.ni_orchestrator import NIOrchestrator
-from snc.application.services.token_diff_service import TokenDiffService
-from snc.application.services.document_updater import DocumentUpdater
-from snc.application.services.token_compiler import TokenCompiler
-from snc.infrastructure.services.compilation_service import ConcreteCompilationService
-from snc.infrastructure.validation.validation_service import ConcreteValidationService
+from snc.application.interfaces.illm_client import ILLMClient
 from snc.application.services.code_evaluation_service import CodeEvaluationService
-
-# Repositories:
+from snc.infrastructure.services.compilation_service import ConcreteCompilationService
+from snc.application.services.document_updater import DocumentUpdater
+from snc.infrastructure.llm.llm_service_impl import ConcreteLLMService
+from snc.application.services.ni_orchestrator import NIOrchestrator
+from snc.application.services.token_compiler import TokenCompiler
+from snc.application.services.token_diff_service import TokenDiffService
+from snc.infrastructure.validation.validation_service import ConcreteValidationService
+from snc.database import Session
+from snc.infrastructure.entities.ni_document import NIDocument
+from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from snc.domain.model_types import OpenAIModelType
+from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
 from snc.infrastructure.repositories.document_repository import DocumentRepository
 from snc.infrastructure.repositories.token_repository import TokenRepository
-from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
 
-# LLM-related:
-from snc.infrastructure.llm.llm_service_impl import ConcreteLLMService
-from snc.infrastructure.llm.client_factory import ClientFactory
-from snc.infrastructure.llm.model_factory import ClientType
-from snc.domain.model_types import GroqModelType, OpenAIModelType
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
-from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
-from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
+from .test_performance_data import TEST_INPUTS
 
-# Entities:
-from snc.infrastructure.entities.ni_document import NIDocument
-
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Type variables for the decorator
-P = ParamSpec("P")
-T = TypeVar("T")
-
-# Provide each test input a descriptive ID for test reports
+# Create IDs for test inputs to make test output more readable
 input_ids = [f"input_{i+1}" for i in range(len(TEST_INPUTS))]
 
 
 def _build_llm_client_from_env() -> Optional[BaseLLMClient]:
+    """Build LLM client from environment variables.
+
+    Returns:
+        LLM client if environment variables are set, None otherwise
     """
-    Reads LLM_CLIENT_TYPE & LLM_MODEL_TYPE from environment
-    and constructs a suitable LLM client (BaseLLMClient).
-    Returns None if required environment variables are missing.
-    """
-    client_type_str = os.getenv("LLM_CLIENT_TYPE")
-    model_type_str = os.getenv("LLM_MODEL_TYPE")
+    import os
 
-    if not client_type_str or not model_type_str:
-        logger.warning("Missing required environment variables: LLM_CLIENT_TYPE and/or LLM_MODEL_TYPE")
+    client_type = os.getenv("LLM_CLIENT_TYPE")
+    model_type = os.getenv("LLM_MODEL_TYPE")
+
+    if not client_type or not model_type:
+        logger.warning("LLM_CLIENT_TYPE and/or LLM_MODEL_TYPE not set, skipping test")
         return None
 
-    client_type_str = client_type_str.lower()
-    model_type_str = model_type_str.lower()
+    if client_type == "openai":
+        from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
+        from snc.domain.model_types import OpenAIModelType
 
-    try:
-        if client_type_str == "openai":
-            return _build_openai_client(model_type_str)
-        elif client_type_str == "groq":
-            return _build_groq_client(model_type_str)
-        else:
-            logger.error(f"Unknown LLM client type: '{client_type_str}'")
-            return None
-    except ValueError as e:
-        logger.error(f"Error building LLM client: {e}")
+        model_enum = getattr(OpenAIModelType, model_type.upper().replace("-", "_"))
+        return OpenAILLMClient(model=model_enum)
+    elif client_type == "groq":
+        from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
+        from snc.domain.model_types import GroqModelType
+
+        model_enum = getattr(GroqModelType, model_type.upper().replace("-", "_"))
+        return GroqLLMClient(model=model_enum)
+    else:
+        logger.warning(f"Unknown LLM client type: {client_type}")
         return None
-    except Exception as e:
-        logger.error(f"Unexpected error building LLM client: {e}")
-        return None
-
-
-def _build_openai_client(model_type_str: str) -> OpenAILLMClient:
-    """Build an OpenAI client with the specified model type."""
-    model_map = {
-        "gpt-4o": OpenAIModelType.GPT_4O,
-        "gpt-4o-mini": OpenAIModelType.GPT_4O_MINI
-    }
-    
-    if model_type_str not in model_map:
-        raise ValueError(f"Unknown or unsupported OpenAI model: '{model_type_str}'. Supported models: {list(model_map.keys())}")
-    
-    return cast(OpenAILLMClient, ClientFactory.get_llm_client(model_map[model_type_str]))
-
-
-def _build_groq_client(model_type_str: str) -> GroqLLMClient:
-    """Build a Groq client with the specified model type."""
-    model_map = {
-        "llama-guard-3-8b": GroqModelType.LLAMA_GUARD_3_8B,
-        "llama-3.1-8b-instant": GroqModelType.LLAMA_3_1_8B_INSTANT
-    }
-    
-    if model_type_str not in model_map:
-        raise ValueError(f"Unknown or unsupported Groq model: '{model_type_str}'. Supported models: {list(model_map.keys())}")
-    
-    return cast(GroqLLMClient, ClientFactory.get_llm_client(model_map[model_type_str]))
-
-
-def requires_llm(func: Callable[P, T]) -> Callable[P, T]:
-    """Decorator to skip tests if LLM client cannot be built."""
-    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        if _build_llm_client_from_env() is None:
-            pytest.skip("Required LLM environment variables not set")
-        return func(*args, **kwargs)
-    return wrapper
 
 
 @pytest.mark.benchmark(group="doc_creation_varied")
 @pytest.mark.parametrize("ni_content", TEST_INPUTS, ids=input_ids)
-@requires_llm
 def test_ni_creation_and_compilation(
     benchmark: Callable[[Callable[[], Any]], Any],
     db_session: Session,
@@ -129,33 +78,40 @@ def test_ni_creation_and_compilation(
     """
     # Build the LLM client from environment variables
     llm_client = _build_llm_client_from_env()
-    assert llm_client is not None, "LLM client should be available due to @requires_llm decorator"
+    if llm_client is None:
+        pytest.skip("Required LLM environment variables not set")
 
     def create_and_compile():
         try:
+            # Create a fresh session for each test run
+            test_session = db_session
+
             # 1) Insert a doc in DB with a placeholder
             doc_ent = NIDocument(
                 content="[Scene:Placeholder]\nThis content will be replaced by NI content.",
                 version="v1",
             )
-            db_session.add(doc_ent)
-            db_session.commit()
+            test_session.add(doc_ent)
+            test_session.commit()
 
             doc_id = doc_ent.id
 
             # 2) Setup the pipeline
-            doc_repo = DocumentRepository(db_session)
-            token_repo = TokenRepository(db_session)
-            artifact_repo = ArtifactRepository(db_session)
+            doc_repo = DocumentRepository(test_session)
+            token_repo = TokenRepository(test_session)
+            artifact_repo = ArtifactRepository(test_session)
 
             parser_llm = ConcreteLLMService(model_type=OpenAIModelType.GPT_4O_MINI)
             token_diff_service = TokenDiffService()
             document_updater = DocumentUpdater(doc_repo, token_repo)
-            compilation_service = ConcreteCompilationService(db_session)
-            validation_service = ConcreteValidationService(db_session)
+            compilation_service = ConcreteCompilationService(test_session)
+            validation_service = ConcreteValidationService(test_session)
             evaluation_service = CodeEvaluationService()
             token_compiler = TokenCompiler(
-                compilation_service, validation_service, evaluation_service
+                compilation_service,
+                validation_service,
+                evaluation_service,
+                session_factory=lambda: test_session,
             )
 
             orchestrator = NIOrchestrator(
@@ -188,6 +144,7 @@ def test_ni_creation_and_compilation(
 
             # Attach usage info to the benchmark
             benchmark.extra_info = usage_info
+
             return usage_info
 
         except Exception as e:

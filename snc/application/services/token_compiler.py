@@ -3,7 +3,7 @@
 import logging
 import hashlib
 import concurrent.futures
-from typing import List, Dict, Set, Any, Optional
+from typing import List, Dict, Set, Any, Optional, Callable
 from collections import defaultdict
 from sqlalchemy.orm import Session, sessionmaker, scoped_session
 
@@ -11,6 +11,7 @@ from snc.domain.models import DomainToken
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 from snc.application.interfaces.icompilation_service import ICompilationService
 from snc.application.interfaces.ivalidation_service import IValidationService
+from snc.application.interfaces.icode_evaluation_service import ICodeEvaluationService
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.infrastructure.entities.ni_token import NIToken
 from snc.database import engine
@@ -30,39 +31,24 @@ class TokenCompiler:
         self,
         compilation_service: ICompilationService,
         validation_service: IValidationService,
-        evaluation_service: CodeEvaluationService,
-        session: Optional[Session] = None,
-    ) -> None:
+        evaluation_service: ICodeEvaluationService,
+        session_factory: Optional[Callable[[], Session]] = None,
+    ):
         """Initialize the compiler.
 
         Args:
             compilation_service: Service for compiling tokens
             validation_service: Service for validating artifacts
-            evaluation_service: Service for evaluating code quality
-            session: Optional session to use (for testing)
+            evaluation_service: Service for evaluating code
+            session_factory: Optional factory function to create new sessions
         """
         self.compilation_service = compilation_service
         self.validation_service = validation_service
         self.evaluation_service = evaluation_service
+        self.session_factory = session_factory
         self.logger = logging.getLogger(__name__)
 
-        # If a session is provided, use it. Otherwise, create a new one for concurrency.
-        if session is not None:
-            self.Session = lambda: session
-        else:
-            self.Session = scoped_session(sessionmaker(bind=engine))
-
-    def _get_thread_session(self) -> Session:
-        """Get a thread-local session.
-
-        Returns:
-            New database session for the current thread
-        """
-        return self.Session()
-
-    def _group_tokens_by_level(
-        self, tokens: List[DomainToken]
-    ) -> List[List[DomainToken]]:
+    def _group_tokens_by_level(self, tokens: List[DomainToken]) -> List[List[DomainToken]]:
         """Group tokens by their dependency level.
 
         Tokens in the same level can be compiled in parallel since they
@@ -125,63 +111,44 @@ class TokenCompiler:
             token: Token to copy
             session: Thread-local session
         """
-        # Get the original token to access relationships
-        original_token = (
-            session.query(NIToken).filter(NIToken.id == token.id).one_or_none()
-        )
-
-        if original_token:
-            # If we found the original token, use its document ID
-            new_token = NIToken(
-                id=token.id,
-                ni_document_id=original_token.ni_document_id,
-                token_uuid=token.token_uuid,
-                token_name=token.token_name,
-                token_type=token.token_type,
-                scene_name=token.scene_name,
-                component_name=token.component_name,
-                content=token.content,
-                hash=self._generate_hash(token.content),
-            )
-            session.merge(new_token)
-            try:
-                session.flush()  # Use flush instead of commit to keep transaction open
-            except:
-                session.rollback()
-                raise ValueError(f"Failed to merge token {token.id}")
-        else:
-            # If token not found, try to refresh the session and try again
-            session.expire_all()
-            session.commit()  # Commit any pending changes
-            session.begin()  # Start a new transaction
-
-            # Try to get the token again
+        try:
+            # Get the original token to access relationships
             original_token = (
-                session.query(NIToken).filter(NIToken.id == token.id).one_or_none()
+                session.query(NIToken).filter(NIToken.token_uuid == token.token_uuid).one_or_none()
             )
+
             if original_token:
+                # If we found the original token, use its document ID
                 new_token = NIToken(
-                    id=token.id,
+                    id=original_token.id,  # Use original token's ID
                     ni_document_id=original_token.ni_document_id,
                     token_uuid=token.token_uuid,
                     token_name=token.token_name,
                     token_type=token.token_type,
                     scene_name=token.scene_name,
                     component_name=token.component_name,
+                    function_name=token.function_name,
                     content=token.content,
                     hash=self._generate_hash(token.content),
                 )
-                session.merge(new_token)
-                try:
-                    session.flush()  # Use flush instead of commit to keep transaction open
-                except:
-                    session.rollback()
-                    raise ValueError(f"Failed to merge token {token.id}")
+                # Instead of merge, expire the original and update its values
+                session.expire(original_token)
+                for attr, value in new_token.__dict__.items():
+                    if not attr.startswith("_"):
+                        setattr(original_token, attr, value)
             else:
-                raise ValueError(f"Token {token.id} not found in database")
+                raise ValueError(f"Token {token.token_uuid} not found in database")
+
+        except Exception as e:
+            self.logger.error("Failed to copy token %s: %s", token.token_uuid, str(e))
+            raise
 
     def _compile_token_wrapper(
-        self, token: DomainToken, llm_client: BaseLLMClient, revalidate: bool
+        self,
+        token: DomainToken,
+        llm_client: BaseLLMClient,
+        revalidate: bool,
+        session: Optional[Session] = None,
     ) -> None:
         """Process a single token for compilation.
 
@@ -191,6 +158,7 @@ class TokenCompiler:
             token: Token to compile
             llm_client: LLM client to use for compilation
             revalidate: Whether to validate the compiled artifact
+            session: Optional database session to use
 
         Raises:
             ValueError: If token ID is None
@@ -199,11 +167,11 @@ class TokenCompiler:
             self.logger.error("Cannot compile token with None ID")
             raise ValueError("Token ID cannot be None")
 
-        session = None
         try:
-            # Get thread-local session
-            session = self._get_thread_session()
             self.logger.debug("Starting compilation of token %d", token.id)
+
+            if not session:
+                raise ValueError("Session is required for token compilation")
 
             # Copy token to this session
             self._copy_token_to_session(token, session)
@@ -215,23 +183,20 @@ class TokenCompiler:
 
             # Initial compilation
             self.logger.info("Compiling token %d (%s)", token.id, token.token_type)
-            artifact = getattr(self.compilation_service, "compile_token")(
-                token.id, llm_client
-            )
+            artifact = getattr(self.compilation_service, "compile_token")(token.id, llm_client)
             if not artifact:
                 self.logger.error("Failed to compile token %d", token.id)
                 return
 
+            # Commit to ensure artifact exists in DB
+            session.commit()
+
             # Validate if requested
-            if revalidate:
+            if revalidate and artifact.id is not None:
                 self.logger.debug("Validating artifact %d", artifact.id)
-                validation_result = self.validation_service.validate_artifact(
-                    artifact.id
-                )
+                validation_result = self.validation_service.validate_artifact(artifact.id)
                 if not validation_result.success:
-                    error_messages = "; ".join(
-                        error.message for error in validation_result.errors
-                    )
+                    error_messages = "; ".join(error.message for error in validation_result.errors)
                     self.logger.warning(
                         "Artifact %d validation failed: %s", artifact.id, error_messages
                     )
@@ -239,123 +204,80 @@ class TokenCompiler:
                     getattr(self.compilation_service, "update_artifact")(artifact)
 
             # Evaluate all artifacts, regardless of validation status
-            self.logger.debug("Evaluating artifact %d", artifact.id)
-            evaluation_result = self.evaluation_service.evaluate_code(
-                artifact.code,
-                {"token_id": token.id, "artifact_id": artifact.id},
-            )
-            artifact.score = evaluation_result.get("score", 0)
-            artifact.feedback = evaluation_result.get(
-                "feedback", "No feedback provided"
-            )
-            getattr(self.compilation_service, "update_artifact")(artifact)
-            self.logger.info(
-                "Token %d compilation complete: score=%.2f",
-                token.id,
-                artifact.score,
-            )
+            if artifact.id is not None:
+                self.logger.debug("Evaluating artifact %d", artifact.id)
+                evaluation_result = self.evaluation_service.evaluate_code(
+                    artifact.code,
+                    {"token_id": token.id, "artifact_id": artifact.id},
+                )
+                artifact.score = evaluation_result.get("score", 0)
+                artifact.feedback = evaluation_result.get("feedback", "")
+                getattr(self.compilation_service, "update_artifact")(artifact)
+
+            # Final commit
+            session.commit()
 
         except Exception as e:
-            self.logger.error(
-                "Failed to compile token %s: %s",
-                token.token_uuid,
-                str(e),
-                exc_info=True,
-            )
+            self.logger.error("Failed to compile token %s: %s", token.token_uuid, str(e))
+            if session:
+                session.rollback()
             raise
         finally:
             if session:
-                # Remove the session from the registry and close it
-                if not isinstance(self.Session, type(lambda: None)):  # Not a lambda
-                    self.Session.remove()
-                self.logger.debug("Cleaned up session for token %d", token.id)
-
-    def compile_and_validate_parallel(
-        self,
-        tokens: List[DomainToken],
-        llm_client: BaseLLMClient,
-        revalidate: bool,
-        max_workers: int = 4,
-    ) -> None:
-        """Compile tokens in parallel when possible.
-
-        Tokens are grouped into levels based on their dependencies, and tokens
-        within each level are compiled in parallel.
-
-        Args:
-            tokens: List of tokens to compile
-            llm_client: LLM client to use for compilation
-            revalidate: Whether to validate compiled artifacts
-            max_workers: Maximum number of parallel workers
-        """
-        self.logger.info(
-            "Starting parallel compilation of %d tokens with %d workers",
-            len(tokens),
-            max_workers,
-        )
-
-        # Group tokens by their dependency level
-        token_levels = self._group_tokens_by_level(tokens)
-        self.logger.debug("Grouped tokens into %d dependency levels", len(token_levels))
-
-        # Process each level in sequence, but tokens within a level in parallel
-        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
-            for level_num, level in enumerate(token_levels, 1):
-                self.logger.info(
-                    "Processing level %d/%d with %d tokens",
-                    level_num,
-                    len(token_levels),
-                    len(level),
-                )
-
-                # Create a set to track processed tokens
-                processed_tokens = set()
-                futures = {}
-
-                # Submit all tokens in this level for parallel processing
-                for token in level:
-                    if token.id not in processed_tokens:
-                        processed_tokens.add(token.id)
-                        future = executor.submit(
-                            self._compile_token_wrapper, token, llm_client, revalidate
-                        )
-                        futures[future] = token.id
-
-                # Wait for all tokens in this level to complete
-                for future in concurrent.futures.as_completed(futures.keys()):
-                    token_id = futures[future]
-                    try:
-                        future.result()
-                        self.logger.debug("Token %d processing complete", token_id)
-                    except Exception as e:
-                        self.logger.error(
-                            "Failed to compile token %d: %s",
-                            token_id,
-                            str(e),
-                            exc_info=True,
-                        )
-                        raise
-
-                self.logger.info("Completed processing of level %d", level_num)
-
-        self.logger.info("Parallel compilation completed successfully")
+                session.close()
 
     def compile_and_validate(
         self,
         tokens: List[DomainToken],
         llm_client: BaseLLMClient,
-        revalidate: bool,
+        revalidate: bool = True,
     ) -> None:
-        """Compile tokens sequentially.
+        """Compile and validate a list of tokens.
 
-        Legacy sequential compilation method. Consider using
-        compile_and_validate_parallel for better performance when tokens can
-        be compiled in parallel.
+        Tokens are grouped by dependency level and compiled in parallel
+        within each level.
 
         Args:
             tokens: List of tokens to compile
             llm_client: LLM client to use for compilation
             revalidate: Whether to validate compiled artifacts
         """
-        for tok in tokens:
-            self._compile_token_wrapper(tok, llm_client, revalidate)
+        if not tokens:
+            self.logger.info("No tokens to compile")
+            return
+
+        # Group tokens by dependency level
+        token_levels = self._group_tokens_by_level(tokens)
+        self.logger.info("Grouped %d tokens into %d levels", len(tokens), len(token_levels))
+
+        # Process each level in sequence
+        for level_idx, level_tokens in enumerate(token_levels):
+            self.logger.info("Processing level %d with %d tokens", level_idx, len(level_tokens))
+
+            # Process tokens in this level in parallel
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                futures = []
+                for token in level_tokens:
+                    # Create a new session for each token
+                    if self.session_factory:
+                        session = self.session_factory()
+                        futures.append(
+                            executor.submit(
+                                self._compile_token_wrapper,
+                                token,
+                                llm_client,
+                                revalidate,
+                                session,
+                            )
+                        )
+                    else:
+                        self.logger.error("No session factory available")
+                        raise ValueError("Session factory is required for parallel compilation")
+
+                # Wait for all futures to complete
+                for future in futures:
+                    try:
+                        future.result()  # This will raise any exceptions that occurred
+                    except Exception as e:
+                        self.logger.error("Token compilation failed: %s", e)
+                        raise

@@ -4,13 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "snc"
-version = "0.1.0"
+dynamic = ["version"]
 authors = [
     {name = "Weston Vogelsong", email = "westonvogelsong@gmail.com"}
 ]
 description = "A system narrative compiler for allowing developers to write code in natural, narrative language."
 readme = "README.md"
 requires-python = ">=3.8"
+license = {text = "MIT"}
+keywords = ["compiler", "natural-language", "code-generation", "llm"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -20,6 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
+    "Typing :: Typed",
 ]
 dependencies = [
     "fastapi[all]>=0.100.0,<0.101.0",
@@ -62,6 +65,10 @@ docs = [
 
 [project.urls]
 "Homepage" = "https://github.com/westonvogelsong/snc-v3"
+"Bug Tracker" = "https://github.com/westonvogelsong/snc-v3/issues"
+"Documentation" = "https://github.com/westonvogelsong/snc-v3/docs"
+"Source Code" = "https://github.com/westonvogelsong/snc-v3"
+"Changelog" = "https://github.com/westonvogelsong/snc-v3/blob/main/CHANGELOG.md"
 
 [project.scripts]
 snc-db = "snc.script.create_database:main"
@@ -69,24 +76,79 @@ snc-db = "snc.script.create_database:main"
 [tool.setuptools]
 packages = ["snc"]
 
+[tool.setuptools.dynamic]
+version = {attr = "snc.__version__"}
+
 [tool.mypy]
-ignore_missing_imports = true
-disallow_untyped_defs = false
-check_untyped_defs = false
-disallow_incomplete_defs = false
-disallow_untyped_decorators = false
-no_implicit_optional = false
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
 warn_redundant_casts = false
-warn_unused_ignores = false
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_optional = true
+ignore_missing_imports = true
+exclude = [
+    "tests/",
+    "test/",
+    "tools/benchmark/",
+    "docs/",
+    "build/",
+    "dist/",
+    ".git/",
+    "__pycache__/",
+]
+
+[[tool.mypy.overrides]]
+module = ["tests.*", "test.*", "tools.benchmark.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_decorators = false
 warn_return_any = false
+warn_unused_ignores = false
+warn_no_return = false
 warn_unreachable = false
-allow_untyped_globals = true
-allow_redefinition = true
-local_partial_types = true
+strict_optional = false
+
+[tool.pytest.ini_options]
+testpaths = ["snc/test"]
+python_files = ["test_*.py"]
+addopts = "--cov=snc --cov-report=term-missing"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.coverage.run]
+source = ["snc"]
+omit = ["snc/test/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "pass",
+    "raise ImportError",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 100
 
 [tool.flake8]
 max-line-length = 100
-ignore = ["E203", "W503", "W504", "E231", "E266", "E302", "E402", "C901", "E722", "E731"]
-exclude = [".git", "__pycache__", "build", "dist"]
-max-complexity = 18
-select = ["B", "C", "E", "F", "W", "B9"] 
+extend-ignore = ["D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "E501"]
+exclude = ["docs/*", "tests/*", "benchmark/*"]

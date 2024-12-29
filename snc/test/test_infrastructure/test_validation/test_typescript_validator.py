@@ -2,11 +2,15 @@ import pytest
 from pathlib import Path
 from typing import List
 
-from snc.infrastructure.validation.validators.typescript_validator import TypeScriptValidator
-from snc.application.interfaces.ivalidation_service import ValidationError, ValidationResult
+from snc.infrastructure.validation.validators.typescript_validator import (
+    TypeScriptValidator,
+)
+from snc.application.interfaces.ivalidation_service import (
+    ValidationError,
+    ValidationResult,
+)
 
 
-@pytest.fixture
 def typescript_validator() -> TypeScriptValidator:
     """Create a TypeScript validator instance."""
     return TypeScriptValidator()
@@ -18,21 +22,21 @@ def test_validate_valid_typescript(typescript_validator: TypeScriptValidator, tm
     function greet(name: string): string {
         return `Hello, ${name}!`;
     }
-    
+
     interface User {
         id: number;
         name: string;
     }
-    
+
     class UserGreeter {
         constructor(private user: User) {}
-        
+
         greet(): string {
             return greet(this.user.name);
         }
     }
     """
-    
+
     result = _validate_code(typescript_validator, valid_code, tmp_path)
     assert result.success is True
     assert len(result.errors) == 0
@@ -44,7 +48,7 @@ def test_validate_syntax_error(typescript_validator: TypeScriptValidator, tmp_pa
     function brokenFunction(
         console.log("Missing closing parenthesis";
     """
-    
+
     result = _validate_code(typescript_validator, invalid_code, tmp_path)
     assert result.success is False
     assert len(result.errors) > 0
@@ -58,12 +62,14 @@ def test_validate_type_error(typescript_validator: TypeScriptValidator, tmp_path
         return a + "b";  // Type error: can't add number and string
     }
     """
-    
+
     result = _validate_code(typescript_validator, code_with_type_error, tmp_path)
     assert result.success is False
     assert len(result.errors) > 0
-    assert any("string" in error.message.lower() and "number" in error.message.lower() 
-              for error in result.errors)
+    assert any(
+        "string" in error.message.lower() and "number" in error.message.lower()
+        for error in result.errors
+    )
 
 
 def test_validate_missing_imports(typescript_validator: TypeScriptValidator, tmp_path: Path):
@@ -71,19 +77,18 @@ def test_validate_missing_imports(typescript_validator: TypeScriptValidator, tmp
     code_with_missing_import = """
     const router = new Router();  // Router is not imported
     """
-    
+
     result = _validate_code(typescript_validator, code_with_missing_import, tmp_path)
     assert result.success is False
     assert len(result.errors) > 0
-    assert any("cannot find name 'router'" in error.message.lower() 
-              for error in result.errors)
+    assert any("cannot find name 'router'" in error.message.lower() for error in result.errors)
 
 
 def test_validate_angular_component(typescript_validator: TypeScriptValidator, tmp_path: Path):
     """Test validation of an Angular component."""
     angular_component = """
     import { Component } from '@angular/core';
-    
+
     @Component({
         selector: 'app-test',
         template: '<div>{{ message }}</div>'
@@ -92,7 +97,7 @@ def test_validate_angular_component(typescript_validator: TypeScriptValidator, t
         message: string = "Hello World";
     }
     """
-    
+
     result = _validate_code(typescript_validator, angular_component, tmp_path)
     assert result.success is True
     assert len(result.errors) == 0
@@ -105,7 +110,7 @@ def test_validate_multiple_errors(typescript_validator: TypeScriptValidator, tmp
         const result = a + b;  // Type error
         return result  // Missing semicolon and type mismatch
     """  # Missing closing brace
-    
+
     result = _validate_code(typescript_validator, code_with_multiple_errors, tmp_path)
     assert result.success is False
     assert len(result.errors) > 1  # Should have multiple errors

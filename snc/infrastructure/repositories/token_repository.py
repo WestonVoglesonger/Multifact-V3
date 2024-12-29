@@ -5,6 +5,7 @@ from typing import List, Tuple, Optional, Dict, Any
 from sqlalchemy.orm import Session
 import uuid
 import hashlib
+from sqlalchemy.sql import text
 
 from snc.domain.models import DomainToken, DomainCompiledMultifact
 from snc.infrastructure.entities.ni_token import NIToken
@@ -58,8 +59,7 @@ class TokenRepository(ITokenRepository):
                 .all()
             )
             self.logger.debug(
-                f"Token ID={t.id}, token_uuid={t.token_uuid}, "
-                f"found {len(arts)} artifacts"
+                f"Token ID={t.id}, token_uuid={t.token_uuid}, " f"found {len(arts)} artifacts"
             )
             domain_token = t  # t is already a DomainToken
             if arts:
@@ -83,9 +83,7 @@ class TokenRepository(ITokenRepository):
 
         Uses token_uuid for matching tokens and artifact.id for artifacts.
         """
-        self.logger.debug(
-            f"Removing {len(tokens)} tokens and {len(artifacts)} artifacts"
-        )
+        self.logger.debug(f"Removing {len(tokens)} tokens and {len(artifacts)} artifacts")
 
         token_uuids = [t.token_uuid for t in tokens]
         if token_uuids:
@@ -100,9 +98,9 @@ class TokenRepository(ITokenRepository):
 
         # Remove the tokens by token_uuid
         if token_uuids:
-            self.session.query(NIToken).filter(
-                NIToken.token_uuid.in_(token_uuids)
-            ).delete(synchronize_session="fetch")
+            self.session.query(NIToken).filter(NIToken.token_uuid.in_(token_uuids)).delete(
+                synchronize_session="fetch"
+            )
 
         self.session.commit()
 
@@ -125,9 +123,7 @@ class TokenRepository(ITokenRepository):
                 f"old_artifact_id={old_artifact.id if old_artifact else None}"
             )
             t_ent = (
-                self.session.query(NIToken)
-                .filter(NIToken.token_uuid == old_token.token_uuid)
-                .one()
+                self.session.query(NIToken).filter(NIToken.token_uuid == old_token.token_uuid).one()
             )
             t_ent.content = new_data["content"]
             t_ent.hash = hashlib.sha256(new_data["content"].encode("utf-8")).hexdigest()
@@ -143,9 +139,7 @@ class TokenRepository(ITokenRepository):
                 ).delete()
                 self.session.commit()
 
-    def add_new_tokens(
-        self, doc_id: int, tokens: List[Dict[str, Any]]
-    ) -> List[NIToken]:
+    def add_new_tokens(self, doc_id: int, tokens: List[Dict[str, Any]]) -> List[NIToken]:
         """Add multiple new tokens to a document.
 
         Args:
@@ -166,9 +160,7 @@ class TokenRepository(ITokenRepository):
             content = token_data["content"]
 
             if not token_name:
-                msg = (
-                    f"Could not determine token_name for token of type " f"{token_type}"
-                )
+                msg = f"Could not determine token_name for token of type " f"{token_type}"
                 raise ValueError(msg)
 
             token = NIToken(
@@ -178,7 +170,9 @@ class TokenRepository(ITokenRepository):
                 token_name=token_name,
                 scene_name=token_name if token_type == "scene" else None,
                 component_name=(token_name if token_type == "component" else None),
-                function_name=(token_name if token_type == "function" else None),
+                function_name=token_data.get(
+                    "function_name", token_name if token_type == "function" else None
+                ),
                 content=content,
                 hash=self._generate_hash(content),
             )
@@ -236,15 +230,9 @@ class TokenRepository(ITokenRepository):
             Document ID if found, None otherwise
         """
         self.logger.debug(f"Getting document ID for token_uuid={token_uuid}")
-        t_ent = (
-            self.session.query(NIToken)
-            .filter(NIToken.token_uuid == token_uuid)
-            .one_or_none()
-        )
+        t_ent = self.session.query(NIToken).filter(NIToken.token_uuid == token_uuid).one_or_none()
         if t_ent:
-            self.logger.debug(
-                f"Token {t_ent.id} belongs to document {t_ent.ni_document_id}"
-            )
+            self.logger.debug(f"Token {t_ent.id} belongs to document {t_ent.ni_document_id}")
             return t_ent.ni_document_id
         self.logger.debug("Token not found")
         return None
@@ -397,3 +385,12 @@ class TokenRepository(ITokenRepository):
     def _generate_hash(self, content: str) -> str:
         """Generate a hash for the token content."""
         return hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+    def get_next_token_id(self) -> Optional[int]:
+        """Get the next token ID."""
+        try:
+            result = self.session.execute(text("SELECT nextval('token_id_seq')"))
+            return result.scalar()
+        except Exception as e:
+            self.logger.error(f"Error getting next token ID: {e}")
+            return None

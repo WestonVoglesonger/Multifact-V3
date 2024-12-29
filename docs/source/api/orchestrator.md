@@ -1,97 +1,185 @@
-# NIOrchestrator
+# Orchestrator API
 
-The NIOrchestrator is the main entry point for working with Multifact. It coordinates the parsing,
-compilation, and management of narrative instructions.
+The `NIOrchestrator` (Narrative Interface Orchestrator) is the main entry point for the System Narrative Compiler. It handles the coordination between different components of the system.
 
-```{eval-rst}
-.. module:: backend.application.services.ni_orchestrator
-
-.. autoclass:: NIOrchestrator
-   :members:
-   :undoc-members:
-   :show-inheritance:
-```
-
-## Example Usage
-
-Here's a basic example of using the NIOrchestrator:
+## Basic Usage
 
 ```python
-from multifact import NIOrchestrator
+from snc import NIOrchestrator
+from snc.config import Settings
 
 # Initialize the orchestrator
-orchestrator = NIOrchestrator()
+settings = Settings()  # Load settings from environment
+orchestrator = NIOrchestrator(settings)
 
-# Create a document with narrative instructions
-doc = orchestrator.create_ni_document(
-    initial_content="""
-    [Scene:WelcomeScene]
-    This scene welcomes users to the application.
+# Compile a narrative to code
+narrative = """
+Create a function that calculates the factorial of a number recursively.
+The function should be named 'factorial' and take one parameter 'n'.
+"""
 
-    [Function:greet]
-    This function displays a welcome message.
-    """,
-    version="v1"
-)
-
-# Get all tokens for the document
-tokens = orchestrator.token_repo.get_all_tokens_for_document(doc.id)
-
-# Compile tokens into artifacts
-for token in tokens:
-    artifact = orchestrator.compile_token(token.id)
-    if artifact.valid:
-        print(f"Successfully compiled {token.token_type}:{token.token_name}")
+result = await orchestrator.compile_narrative(narrative)
+print(result.code)
 ```
 
-## Advanced Features
+## API Reference
 
-### Token Dependencies
-
-The NIOrchestrator automatically handles token dependencies through reference tracking:
+### NIOrchestrator
 
 ```python
-# Create a document with dependencies
-doc = orchestrator.create_ni_document(
-    initial_content="""
-    [Function:validateInput]
-    This function validates user input.
+class NIOrchestrator:
+    """Main orchestrator for the System Narrative Compiler."""
 
-    [Function:processForm]
-    This function [REF:validateInput] processes the form after validation.
-    """,
-    version="v1"
-)
+    def __init__(self, settings: Settings):
+        """Initialize the orchestrator.
 
-# The orchestrator will ensure validateInput is compiled before processForm
+        Args:
+            settings: Configuration settings for the orchestrator
+        """
+
+    async def compile_narrative(
+        self,
+        narrative: str,
+        context: Optional[Dict[str, Any]] = None,
+        language: str = "python",
+    ) -> CompilationResult:
+        """Compile a natural language narrative into code.
+
+        Args:
+            narrative: The natural language description of the code to generate
+            context: Optional context information for the compilation
+            language: Target programming language (default: "python")
+
+        Returns:
+            CompilationResult containing the generated code and metadata
+
+        Raises:
+            CompilationError: If the narrative cannot be compiled
+            ValidationError: If the generated code fails validation
+        """
+
+    async def validate_code(
+        self,
+        code: str,
+        language: str = "python",
+    ) -> ValidationResult:
+        """Validate generated code against language-specific rules.
+
+        Args:
+            code: The code to validate
+            language: Programming language of the code
+
+        Returns:
+            ValidationResult containing validation status and any errors
+        """
 ```
 
-### Self-Repair
+## Examples
 
-If compilation fails, the orchestrator can attempt to repair invalid artifacts:
+### Basic Code Generation
 
 ```python
-# Enable self-repair
-orchestrator.enable_self_repair = True
+# Generate a simple function
+narrative = """
+Create a function that reverses a string.
+The function should be named 'reverse_string' and take one parameter 'text'.
+"""
 
-# The orchestrator will automatically attempt to fix invalid artifacts
-artifact = orchestrator.compile_token(token_id)
-if not artifact.valid:
-    fixed_artifact = orchestrator.repair_artifact(artifact.id)
+result = await orchestrator.compile_narrative(narrative)
+print(result.code)
 ```
 
-## Configuration
+Output:
+```python
+def reverse_string(text: str) -> str:
+    """Reverse the input string.
 
-The orchestrator can be configured through environment variables or directly:
+    Args:
+        text: The string to reverse
+
+    Returns:
+        The reversed string
+    """
+    return text[::-1]
+```
+
+### Using Context
 
 ```python
-from multifact.config import Settings
+# Generate code with additional context
+context = {
+    "existing_functions": ["calculate_tax", "apply_discount"],
+    "required_imports": ["decimal"],
+    "style": "functional",
+}
 
-settings = Settings(
-    MAX_COMPILATION_ATTEMPTS=5,
-    ENABLE_ARTIFACT_CACHE=True
-)
-orchestrator = NIOrchestrator(settings=settings)
+narrative = """
+Create a function that calculates the final price after tax and discount.
+Use the existing calculate_tax and apply_discount functions.
+"""
+
+result = await orchestrator.compile_narrative(narrative, context=context)
+print(result.code)
 ```
 
-Note: We use the `eval-rst` directive in a fenced code block to maintain compatibility with Sphinx's autodoc features while using Markdown. This allows us to keep the automatic API documentation generation while using Markdown for the rest of the content.
+### Validation
+
+```python
+# Validate generated code
+code = """
+def calculate_sum(numbers):
+    return sum(numbers)
+"""
+
+validation_result = await orchestrator.validate_code(code)
+if validation_result.is_valid:
+    print("Code passed validation!")
+else:
+    print("Validation errors:", validation_result.errors)
+```
+
+## Error Handling
+
+The orchestrator provides detailed error information when things go wrong:
+
+```python
+from snc.exceptions import CompilationError, ValidationError
+
+try:
+    result = await orchestrator.compile_narrative("invalid narrative")
+except CompilationError as e:
+    print(f"Compilation failed: {e}")
+    print(f"Error details: {e.details}")
+except ValidationError as e:
+    print(f"Validation failed: {e}")
+    print(f"Error location: {e.location}")
+```
+
+## Best Practices
+
+1. **Context Usage**: Always provide relevant context when available:
+   - Existing functions and classes
+   - Required imports
+   - Coding style preferences
+   - Project-specific requirements
+
+2. **Error Handling**: Always handle potential exceptions:
+   - CompilationError
+   - ValidationError
+   - ConnectionError (for LLM service issues)
+
+3. **Validation**: Always validate generated code before using it:
+   ```python
+   result = await orchestrator.compile_narrative(narrative)
+   validation = await orchestrator.validate_code(result.code)
+   if not validation.is_valid:
+       raise ValidationError(validation.errors)
+   ```
+
+4. **Resource Management**: The orchestrator manages its own resources, but it's good practice to close it when done:
+   ```python
+   try:
+       result = await orchestrator.compile_narrative(narrative)
+   finally:
+       await orchestrator.close()
+   ```

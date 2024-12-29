@@ -1,23 +1,24 @@
 #!/usr/bin/env python3
-"""
-Script: benchmark_all_models.py
+"""Benchmark all models.
 
 This script runs benchmarks for all supported models from both OpenAI and Groq,
 compares them, and produces a comprehensive CSV report. It executes a suite of
 performance tests for each (client, model) combination, aggregates the results,
 and identifies the fastest model per benchmark and overall.
 
-It saves results in a directory named with the current date and time under `benchmark/all_models/`.
+It saves results in a directory named with the current date and time under
+`benchmark/all_models/`.
 
 Usage:
     python3 benchmark_all_models.py
 
-No arguments are required. The script will use the current date and time as the directory name.
+No arguments are required. The script will use the current date and time as
+the directory name.
 
 Output:
     - JSON benchmark files for each model in benchmark/all_models/{date-time}/
-    - A CSV report (benchmark_all_models_comparison_report.csv) summarizing all models' 
-      performance on each benchmark (mean, median, stddev, min, max, tokens, cost).
+    - A CSV report summarizing all models' performance on each benchmark
+      (mean, median, stddev, min, max, tokens, cost).
     - Logs ranking each model by how many benchmarks it "won" (fastest mean time).
 
 This script provides a broad overview of performance across all available models,
@@ -38,7 +39,7 @@ from statistics import mean
 logging.basicConfig(level=logging.INFO)
 
 # Define test path
-TEST_PATH = Path("backend/test/test_performance/test_llm_performance.py")
+TEST_PATH = Path("snc/test/test_performance/test_llm_performance.py")
 
 # Define the sets of models for OpenAI and Groq
 # Not including o1 and o1-mini because I do not have access to them
@@ -50,7 +51,7 @@ GROQ_MODELS = [
     "llama-guard-3-8b",
     "llama3-70b-8192",
     "llama3-8b-8192",
-    "mixtral-8x7b-32768"
+    "mixtral-8x7b-32768",
 ]
 
 # Compute current date-time string
@@ -59,6 +60,7 @@ current_timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 # Define benchmark directory and versioned subdirectory
 BENCHMARK_DIR = Path("benchmark") / "all_models" / current_timestamp
 BENCHMARK_DIR.mkdir(parents=True, exist_ok=True)
+
 
 def run_pytest_benchmark(client: str, model: str, test_path: Path, json_path: Path):
     """
@@ -94,6 +96,7 @@ def load_benchmark_data(json_path: Path) -> List[Dict]:
         data = json.load(f)
     return data.get("benchmarks", [])
 
+
 def determine_status(percentage_change: float) -> str:
     if percentage_change > 5:
         return "⬆️ Slower"
@@ -101,6 +104,7 @@ def determine_status(percentage_change: float) -> str:
         return "⬇️ Faster"
     else:
         return "➡️ No Significant Change"
+
 
 def main():
     # Run all benchmarks for all models
@@ -117,7 +121,7 @@ def main():
 
     # Load all benchmark data
     all_data = {}
-    for k,v in results_map.items():
+    for k, v in results_map.items():
         all_data[k] = load_benchmark_data(v)
 
     # Build an index by benchmark name
@@ -127,29 +131,31 @@ def main():
             name = b["name"]
             if name not in benchmark_index:
                 benchmark_index[name] = {}
-            benchmark_index[name][(client,model)] = b
+            benchmark_index[name][(client, model)] = b
 
     # Prepare CSV headers
     all_models = list(results_map.keys())
     headers = ["Benchmark"]
-    for (c,m) in all_models:
+    for c, m in all_models:
         prefix = f"{c}/{m}"
-        headers.extend([
-            f"{prefix} Mean (s)",
-            f"{prefix} Median (s)",
-            f"{prefix} Std Dev (s)",
-            f"{prefix} Min (s)",
-            f"{prefix} Max (s)",
-            f"{prefix} Prompt Tokens",
-            f"{prefix} Completion Tokens",
-            f"{prefix} Total Tokens",
-            f"{prefix} Cost"
-        ])
+        headers.extend(
+            [
+                f"{prefix} Mean (s)",
+                f"{prefix} Median (s)",
+                f"{prefix} Std Dev (s)",
+                f"{prefix} Min (s)",
+                f"{prefix} Max (s)",
+                f"{prefix} Prompt Tokens",
+                f"{prefix} Completion Tokens",
+                f"{prefix} Total Tokens",
+                f"{prefix} Cost",
+            ]
+        )
 
     CSV_REPORT_PATH = BENCHMARK_DIR / "benchmark_all_models_comparison_report.csv"
 
     # Count wins per model
-    wins_count = {mm:0 for mm in all_models}
+    wins_count = {mm: 0 for mm in all_models}
 
     with open(CSV_REPORT_PATH, mode="w", newline="") as csv_file:
         writer = csv.DictWriter(csv_file, fieldnames=headers)
@@ -157,7 +163,7 @@ def main():
 
         for bench_name, model_data in benchmark_index.items():
             row = {"Benchmark": bench_name}
-            min_mean = float('inf')
+            min_mean = float("inf")
             min_model = None
             for mm in all_models:
                 bdata = model_data.get(mm)
@@ -192,10 +198,10 @@ def main():
                     row[f"{prefix} Std Dev (s)"] = stats.get("stddev", 0)
                     row[f"{prefix} Min (s)"] = stats.get("min", 0)
                     row[f"{prefix} Max (s)"] = stats.get("max", 0)
-                    row[f"{prefix} Prompt Tokens"] = extra_info.get("prompt_tokens",0)
-                    row[f"{prefix} Completion Tokens"] = extra_info.get("completion_tokens",0)
-                    row[f"{prefix} Total Tokens"] = extra_info.get("total_tokens",0)
-                    row[f"{prefix} Cost"] = extra_info.get("cost",0)
+                    row[f"{prefix} Prompt Tokens"] = extra_info.get("prompt_tokens", 0)
+                    row[f"{prefix} Completion Tokens"] = extra_info.get("completion_tokens", 0)
+                    row[f"{prefix} Total Tokens"] = extra_info.get("total_tokens", 0)
+                    row[f"{prefix} Cost"] = extra_info.get("cost", 0)
 
             writer.writerow(row)
 
@@ -209,6 +215,7 @@ def main():
     logging.info(f"Overall best model: {best_model[0]}/{best_model[1]}")
     logging.info(f"Comparison report saved to {CSV_REPORT_PATH}.")
     logging.info("Done.")
+
 
 if __name__ == "__main__":
     main()
