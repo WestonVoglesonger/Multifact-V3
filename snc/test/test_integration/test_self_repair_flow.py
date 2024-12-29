@@ -21,13 +21,10 @@ from snc.test.fixtures import mock_self_repair_service, real_self_repair_service
 def test_self_repair_service_flow(
     db_session: Session,
     mock_self_repair_service: SelfRepairService,
-    # If needed: doc_repo, token_repo, artifact_repo, etc.
 ):
     """
-    This test mocks the "compiling LLM" to produce invalid code,
-    so that we can see if the SelfRepairService can fix it.
+    Test the self-repair service with mocked dependencies to verify the repair flow.
     """
-
     # 1) Create a doc + token in the DB
     doc_ent = NIDocument(content="", version="TestRepairDoc")
     db_session.add(doc_ent)
@@ -47,8 +44,7 @@ def test_self_repair_service_flow(
     db_session.add(token_ent)
     db_session.commit()
 
-    # 2) Mock the compilation step. Instead of actually calling the LLM,
-    #    we directly insert an artifact with "invalid code."
+    # 2) Create an artifact with invalid code
     artifact = CompiledMultifact(
         ni_token_id=token_ent.id,
         language="typescript",
@@ -61,13 +57,7 @@ def test_self_repair_service_flow(
     db_session.commit()
     artifact_id = artifact.id
 
-    # 3) We'll patch the "validate_artifact" call to simulate failing first,
-    #    then re-check if it's been "fixed."
-
-    # The first time it's called => it fails
-    # The second time => let's pretend it's successful.
-
-    # We'll store references to each call result in a list
+    # 3) Set up validation results sequence
     val_results = [
         ValidationResult(
             success=False,
@@ -84,7 +74,7 @@ def test_self_repair_service_flow(
     def mock_validate_artifact(art_id: int):
         return next(val_result_iter)
 
-    # 4) We'll also patch the "fix_code" method on your code-fixer to produce "fixed" code
+    # 4) Set up mock fix_code that returns valid TypeScript
     def mock_fix_code(original_code: str, error_summary: str) -> str:
         return "function fixedCode() { console.log('Now it works!'); }"
 
@@ -92,38 +82,37 @@ def test_self_repair_service_flow(
         mock_self_repair_service.validation_service,
         "validate_artifact",
         side_effect=mock_validate_artifact,
+    ), patch.object(
+        mock_self_repair_service.code_fixer_service,
+        "fix_code",
+        side_effect=mock_fix_code,
     ):
-        with patch.object(
-            mock_self_repair_service.code_fixer_service,
-            "fix_code",
-            side_effect=mock_fix_code,
-        ):
-            # 5) Actually call repair_artifact
-            success = mock_self_repair_service.repair_artifact(
-                artifact_id, max_attempts=2
-            )
-            assert success is True, "Expected the artifact to be successfully repaired."
+        # 5) Run repair process
+        success = mock_self_repair_service.repair_artifact(
+            artifact_id, max_attempts=2
+        )
+        assert success is True, "Expected the artifact to be successfully repaired"
 
-    # 6) Check that the artifact in DB is now updated with the fixed code
+    # 6) Verify the repair results
     repaired_art = db_session.query(CompiledMultifact).get(artifact_id)
     assert repaired_art is not None, f"Artifact {artifact_id} not found"
-    assert (
-        "function brokenCode(" in repaired_art.code
-    ), "Function declaration should be fixed"
-    assert ")" in repaired_art.code, "Function should have closing parenthesis"
-    assert "{" in repaired_art.code, "Function should have opening brace"
-    assert "}" in repaired_art.code, "Function should have closing brace"
-    assert repaired_art.valid is True
-    print("SelfRepairService test passed: artifact was fixed & validated!")
+    
+    # Check for valid TypeScript function structure
+    code = repaired_art.code
+    assert "function" in code, "Should contain a function declaration"
+    assert "(" in code and ")" in code, "Function should have parentheses"
+    assert "{" in code and "}" in code, "Function should have braces"
+    assert "console.log" in code, "Should contain the expected functionality"
+    assert repaired_art.valid is True, "Artifact should be marked as valid"
 
 
 def test_self_repair_service_flow_with_real_llm(
     db_session: Session, real_self_repair_service: SelfRepairService
 ):
     """
-    This test uses the real LLM to compile the artifact.
+    Test the self-repair service with real LLM integration.
     """
-    # 1) Create a doc + token in the DB
+    # 1) Create test document and token
     doc_ent = NIDocument(content="", version="TestRepairDoc")
     db_session.add(doc_ent)
     db_session.commit()
@@ -136,12 +125,13 @@ def test_self_repair_service_flow_with_real_llm(
         token_name="BrokenFunction",
         scene_name=None,
         component_name=None,
-        content="Narrative instructions for a broken function",
+        content="Create a TypeScript function that logs a message",
         hash="dummy-hash",
     )
     db_session.add(token_ent)
     db_session.commit()
 
+    # 2) Create an artifact with invalid code
     artifact = CompiledMultifact(
         ni_token_id=token_ent.id,
         language="typescript",
@@ -154,13 +144,7 @@ def test_self_repair_service_flow_with_real_llm(
     db_session.commit()
     artifact_id = artifact.id
 
-    # 3) We'll patch the "validate_artifact" call to simulate failing first,
-    #    then re-check if it's been "fixed."
-
-    # The first time it's called => it fails
-    # The second time => let's pretend it's successful.
-
-    # We'll store references to each call result in a list
+    # 3) Set up validation sequence
     val_results = [
         ValidationResult(
             success=False,
@@ -182,19 +166,17 @@ def test_self_repair_service_flow_with_real_llm(
         "validate_artifact",
         side_effect=mock_validate_artifact,
     ):
-        # 5) Actually call repair_artifact
+        # 4) Run repair process
         success = real_self_repair_service.repair_artifact(artifact_id, max_attempts=2)
-        assert success is True, "Expected the artifact to be successfully repaired."
+        assert success is True, "Expected the artifact to be successfully repaired"
 
-    # 6) Check that the artifact in DB is now updated with the fixed code
+    # 5) Verify the repair results
     repaired_art = db_session.query(CompiledMultifact).get(artifact_id)
     assert repaired_art is not None, f"Artifact {artifact_id} not found"
-    assert "function" in repaired_art.code, "Should contain a function declaration"
-    assert (
-        "(" in repaired_art.code and ")" in repaired_art.code
-    ), "Function should have parentheses"
-    assert (
-        "{" in repaired_art.code and "}" in repaired_art.code
-    ), "Function should have braces"
-    assert repaired_art.valid is True
-    print("SelfRepairService test passed: artifact was fixed & validated!")
+    
+    # Check for valid TypeScript function structure
+    code = repaired_art.code
+    assert "function" in code, "Should contain a function declaration"
+    assert "(" in code and ")" in code, "Function should have parentheses"
+    assert "{" in code and "}" in code, "Function should have braces"
+    assert repaired_art.valid is True, "Artifact should be marked as valid"
