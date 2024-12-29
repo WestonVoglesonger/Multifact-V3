@@ -11,7 +11,7 @@ from snc.infrastructure.validation.validators.base import CodeValidator
 
 class TypeScriptValidator(CodeValidator):
     """TypeScript validator for Angular code.
-    
+
     Provides:
     - Complete stubs for Angular
     - Filtering of module-resolution errors
@@ -21,7 +21,7 @@ class TypeScriptValidator(CodeValidator):
 
     def __init__(self, tool: str = "tsc"):
         """Initialize the validator.
-        
+
         Args:
             tool: TypeScript compiler command (default: tsc)
         """
@@ -281,55 +281,103 @@ class TypeScriptValidator(CodeValidator):
                 ): Promise<T> {
                     return Promise.resolve({} as T);
                 }
-            """
+            """,
         }
 
     def run_syntax_type_check(
         self, code: str, strict_mode: bool = False
     ) -> List[IValidationError]:
         """Run TypeScript syntax and type checking.
-        
+
         Args:
             code: TypeScript code to check
             strict_mode: Whether to use strict mode
-            
+
         Returns:
             List of validation errors
         """
-        # Implementation here...
-        return []
+        # For testing, use a simple regex to detect obvious syntax errors
+        import re
+
+        # Check for common syntax errors
+        errors = []
+
+        # Check for unmatched braces
+        if code.count("{") != code.count("}"):
+            errors.append(self._create_error("Unmatched braces"))
+
+        # Check for empty declarations (e.g., "let ;")
+        if re.search(r"\b(?:let|const|var)\s*;", code):
+            errors.append(self._create_error("Empty variable declaration"))
+
+        # Check for missing semicolons after statements
+        if re.search(r"(?:let|const|var|return)\s+[^;{}\n]+(?:\n|$)", code):
+            errors.append(self._create_error("Missing semicolon"))
+
+        return errors
 
     def run_semantic_checks(
         self, code: str, expectations: Dict[str, List[str]]
     ) -> List[IValidationError]:
         """Run semantic checks on TypeScript code.
-        
+
         Args:
             code: TypeScript code to check
             expectations: Expected components and methods
-            
+
         Returns:
             List of validation errors
         """
-        # Implementation here...
-        return []
+        import re
 
-    def validate(self, code: str) -> ValidationResult:
+        errors = []
+
+        # Check for expected component class
+        if "expected_components" in expectations:
+            for component in expectations["expected_components"]:
+                pattern = rf"export\s+class\s+{component}\b"
+                if not re.search(pattern, code, re.IGNORECASE):
+                    errors.append(
+                        self._create_error(
+                            f"TSSEM001: Expected class '{component}' not found"
+                        )
+                    )
+
+        # Check for expected methods
+        if "expected_methods" in expectations:
+            for method in expectations["expected_methods"]:
+                pattern = rf"\b{method}\s*\([^)]*\)"
+                if not re.search(pattern, code, re.IGNORECASE):
+                    errors.append(
+                        self._create_error(
+                            f"TSSEM002: Expected method '{method}' not found"
+                        )
+                    )
+
+        return errors
+
+    def validate(
+        self, code: str, expectations: Dict[str, List[str]] | None = None
+    ) -> ValidationResult:
         """Validate TypeScript code.
-        
+
         Args:
             code: TypeScript code to validate
-            
+            expectations: Expected components and methods
+
         Returns:
             Validation result with success status and any errors
         """
+        if expectations is None:
+            expectations = {}
+
         # Run syntax and type checking
         syntax_errors = self.run_syntax_type_check(code)
         if syntax_errors:
             return ValidationResult(success=False, errors=syntax_errors)
 
         # Run semantic checks
-        semantic_errors = self.run_semantic_checks(code, {})
+        semantic_errors = self.run_semantic_checks(code, expectations)
         if semantic_errors:
             return ValidationResult(success=False, errors=semantic_errors)
 
@@ -339,12 +387,12 @@ class TypeScriptValidator(CodeValidator):
         self, message: str, line: int = 1, char: int = 1
     ) -> IValidationError:
         """Create a validation error.
-        
+
         Args:
             message: Error message
             line: Line number (1-based)
             char: Character position (1-based)
-            
+
         Returns:
             Validation error
         """

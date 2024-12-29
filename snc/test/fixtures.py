@@ -53,8 +53,13 @@ def ni_orchestrator(db_session: Session) -> NIOrchestrator:
     validation_svc = ConcreteValidationService(db_session)
     model_type = ModelFactory.get_model(ClientType.GROQ, GroqModelType.LLAMA_GUARD_3_8B)
     llm_evaluator = GroqLLMClient(model_type)
-    evaluation_svc = CodeEvaluationService()
-    token_compiler = TokenCompiler(compilation_svc, validation_svc, evaluation_svc)
+    evaluation_svc = CodeEvaluationService(llm_client=llm_evaluator)
+    token_compiler = TokenCompiler(
+        compilation_svc,
+        validation_svc,
+        evaluation_svc,
+        session=db_session,
+    )
 
     return NIOrchestrator(
         doc_repo=doc_repo,

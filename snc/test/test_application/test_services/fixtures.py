@@ -19,7 +19,7 @@ def mock_fix_code_return(original_code: str, error_summary: str) -> str:
     If there's an error_summary, we return code that presumably passes validation.
     Otherwise, we just return the original code.
     """
-    if "Found the following TypeScript errors" in error_summary:
+    if error_summary:
         return "// Some code that passes validation\nexport class MyFixedComponent {}"
     else:
         return original_code

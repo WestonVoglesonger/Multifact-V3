@@ -24,9 +24,7 @@ class ArtifactRepository(IArtifactRepository):
         self.logger = logging.getLogger(__name__)
         self.token_repo = TokenRepository(session)
 
-    def get_artifact_by_id(
-        self, artifact_id: int
-    ) -> Optional[DomainCompiledMultifact]:
+    def get_artifact_by_id(self, artifact_id: int) -> Optional[DomainCompiledMultifact]:
         """Get an artifact by its ID.
 
         Args:
@@ -71,17 +69,17 @@ class ArtifactRepository(IArtifactRepository):
             List of (token, artifact) pairs
         """
         self.logger.debug(f"Getting artifacts for token_id={token_id}")
-        art = (
+        artifacts = (
             self.session.query(CompiledMultifact)
             .filter(CompiledMultifact.ni_token_id == token_id)
-            .first()
+            .all()
         )
 
-        # For now, we just return a single artifact if found
-        if art:
+        # Return all artifacts found for the token
+        if artifacts:
             token = self.token_repo.get_token_by_id(token_id)
             if token:
-                return [(token, art.to_domain_artifact())]
+                return [(token, art.to_domain_artifact()) for art in artifacts]
         return []
 
     def add_artifact(
@@ -111,9 +109,7 @@ class ArtifactRepository(IArtifactRepository):
         self.session.add(artifact)
         self.session.commit()
 
-    def get_artifact(
-        self, artifact_id: int
-    ) -> Optional[DomainCompiledMultifact]:
+    def get_artifact(self, artifact_id: int) -> Optional[DomainCompiledMultifact]:
         """Retrieve a single DomainCompiledMultifact by DB artifact_id.
 
         Args:
@@ -129,9 +125,7 @@ class ArtifactRepository(IArtifactRepository):
             .first()
         )
         if art:
-            self.logger.debug(
-                f"Found artifact {art.id} for token {art.ni_token_id}"
-            )
+            self.logger.debug(f"Found artifact {art.id} for token {art.ni_token_id}")
             return art.to_domain_artifact()
         self.logger.debug("Artifact not found")
         return None

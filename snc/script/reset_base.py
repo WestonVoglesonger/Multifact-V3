@@ -26,17 +26,15 @@ def check_development_mode() -> None:
         sys.exit(1)
 
 
-def reset_database(
-    insert_func: Optional[Callable[[Session], None]] = None
-) -> None:
+def reset_database(insert_func: Optional[Callable[[Session], None]] = None) -> None:
     """Reset the database to a clean state and optionally insert data.
 
     Args:
         insert_func: Optional function that takes a Session and inserts data
     """
     # Run Delete and Create Database Scripts
-    subprocess.run(["python3", "-m", "backend.script.delete_database"])
-    subprocess.run(["python3", "-m", "backend.script.create_database"])
+    subprocess.run(["python3", "-m", "snc.script.delete_database"])
+    subprocess.run(["python3", "-m", "snc.script.create_database"])
 
     # Reset Tables
     entities.EntityBase.metadata.drop_all(engine)

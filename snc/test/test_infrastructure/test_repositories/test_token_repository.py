@@ -145,6 +145,7 @@ def test_add_new_tokens(db_session: Session):
     new_tokens_data = [
         {
             "type": "function",
+            "token_name": "TestFunc1",
             "function_name": "TestFunc1",
             "scene_name": None,
             "component_name": None,
@@ -152,6 +153,7 @@ def test_add_new_tokens(db_session: Session):
         },
         {
             "type": "component",
+            "token_name": "NewComp",
             "function_name": None,
             "scene_name": None,
             "component_name": "NewComp",

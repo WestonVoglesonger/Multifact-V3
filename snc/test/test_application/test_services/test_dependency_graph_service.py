@@ -49,6 +49,10 @@ def test_dependency_graph_service_normal(db_session: Session):
     )
     s_token = dep_doc  # Already retrieved
 
+    assert f_token is not None, "Function token not found"
+    assert c_token is not None, "Component token not found"
+    assert s_token is not None, "Scene token not found"
+
     expected_order = [f_token.id, c_token.id, s_token.id]
     assert (
         sorted_ids == expected_order
@@ -103,6 +107,6 @@ def test_dependency_graph_service_cycle(db_session: Session):
     token_repo = TokenRepository(db_session)
     dgs = DependencyGraphService(token_repo=token_repo)
 
+    # The from_document call should detect the cycle and raise ValueError
     with pytest.raises(ValueError, match="Cycle detected in dependency graph."):
         dgs.from_document(cycle_doc.id)
-        dgs.topological_sort()

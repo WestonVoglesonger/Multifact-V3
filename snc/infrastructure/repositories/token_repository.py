@@ -47,24 +47,26 @@ class TokenRepository(ITokenRepository):
         tokens = self.get_all_tokens_for_document(doc_id)
         self.logger.debug(f"Found {len(tokens)} tokens for document {doc_id}")
 
-        result: List[
-            Tuple[DomainToken, Optional[DomainCompiledMultifact]]
-        ] = []
+        result: List[Tuple[DomainToken, Optional[DomainCompiledMultifact]]] = []
         for t in tokens:
-            # If multiple artifacts exist, we pick the newest by descending ID.
-            art = (
+            # Get all artifacts for this token
+            self.session.expire_all()
+            arts = (
                 self.session.query(CompiledMultifact)
                 .filter(CompiledMultifact.ni_token_id == t.id)
-                .order_by(CompiledMultifact.id.desc())
-                .first()
+                .order_by(CompiledMultifact.created_at.desc())
+                .all()
             )
             self.logger.debug(
                 f"Token ID={t.id}, token_uuid={t.token_uuid}, "
-                f"artifact_id={art.id if art else None}"
+                f"found {len(arts)} artifacts"
             )
             domain_token = t  # t is already a DomainToken
-            domain_artifact = art.to_domain_artifact() if art else None
-            result.append((domain_token, domain_artifact))
+            if arts:
+                for art in arts:
+                    result.append((domain_token, art.to_domain_artifact()))
+            else:
+                result.append((domain_token, None))
 
         return result
 
@@ -106,9 +108,7 @@ class TokenRepository(ITokenRepository):
 
     def update_changed_tokens(
         self,
-        changed_data: List[
-            Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]
-        ],
+        changed_data: List[Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]],
     ) -> None:
         """Update changed tokens and remove their old artifacts.
 
@@ -130,9 +130,7 @@ class TokenRepository(ITokenRepository):
                 .one()
             )
             t_ent.content = new_data["content"]
-            t_ent.hash = hashlib.sha256(
-                new_data["content"].encode("utf-8")
-            ).hexdigest()
+            t_ent.hash = hashlib.sha256(new_data["content"].encode("utf-8")).hexdigest()
             t_ent.token_type = new_data["type"]
             t_ent.scene_name = new_data["scene_name"]
             t_ent.component_name = new_data["component_name"]
@@ -169,8 +167,7 @@ class TokenRepository(ITokenRepository):
 
             if not token_name:
                 msg = (
-                    f"Could not determine token_name for token of type "
-                    f"{token_type}"
+                    f"Could not determine token_name for token of type " f"{token_type}"
                 )
                 raise ValueError(msg)
 
@@ -180,9 +177,8 @@ class TokenRepository(ITokenRepository):
                 token_type=token_type,
                 token_name=token_name,
                 scene_name=token_name if token_type == "scene" else None,
-                component_name=(
-                    token_name if token_type == "component" else None
-                ),
+                component_name=(token_name if token_type == "component" else None),
+                function_name=(token_name if token_type == "function" else None),
                 content=content,
                 hash=self._generate_hash(content),
             )
@@ -192,9 +188,7 @@ class TokenRepository(ITokenRepository):
         self.session.commit()
         return created_tokens
 
-    def get_artifact(
-        self, artifact_id: int
-    ) -> Optional[DomainCompiledMultifact]:
+    def get_artifact(self, artifact_id: int) -> Optional[DomainCompiledMultifact]:
         """Get a single compiled artifact by ID.
 
         Args:
@@ -210,9 +204,7 @@ class TokenRepository(ITokenRepository):
             .one_or_none()
         )
         if art:
-            self.logger.debug(
-                f"Found artifact {art.id} for token {art.ni_token_id}"
-            )
+            self.logger.debug(f"Found artifact {art.id} for token {art.ni_token_id}")
         else:
             self.logger.debug("Artifact not found")
         return self._to_domain_artifact(art) if art else None
@@ -227,11 +219,7 @@ class TokenRepository(ITokenRepository):
             Domain token if found, None otherwise
         """
         self.logger.debug(f"Getting token with id={token_id}")
-        token = (
-            self.session.query(NIToken)
-            .filter(NIToken.id == token_id)
-            .first()
-        )
+        token = self.session.query(NIToken).filter(NIToken.id == token_id).first()
         if not token:
             self.logger.debug("Token not found")
             return None
@@ -268,7 +256,7 @@ class TokenRepository(ITokenRepository):
             doc_id: Document ID to get tokens for
 
         Returns:
-            List of domain tokens
+            List of domain tokens with their dependencies
         """
         self.logger.debug(f"Getting all tokens for document {doc_id}")
         tokens = (
@@ -279,8 +267,8 @@ class TokenRepository(ITokenRepository):
         )
         self.logger.debug(f"Found {len(tokens)} tokens for document {doc_id}")
 
-        # Convert to domain tokens
-        domain_tokens = []
+        # First create all domain tokens
+        token_map = {}  # Map of id to domain token
         for token in tokens:
             self.logger.debug(f"Converting token {token.id}")
             domain_token = DomainToken(
@@ -295,9 +283,16 @@ class TokenRepository(ITokenRepository):
                 order=token.order,
                 dependencies=[],
             )
-            domain_tokens.append(domain_token)
+            token_map[token.id] = domain_token
 
-        return domain_tokens
+        # Then set up dependencies
+        for token in tokens:
+            domain_token = token_map[token.id]
+            for dep in token.dependencies:
+                if dep.id in token_map:
+                    domain_token.dependencies.append(token_map[dep.id])
+
+        return list(token_map.values())
 
     def _to_domain_token(
         self, t: NIToken, cache: Optional[Dict[int, DomainToken]] = None
@@ -340,9 +335,7 @@ class TokenRepository(ITokenRepository):
         domain_token.dependencies = child_tokens
         return domain_token
 
-    def _to_domain_artifact(
-        self, art: CompiledMultifact
-    ) -> DomainCompiledMultifact:
+    def _to_domain_artifact(self, art: CompiledMultifact) -> DomainCompiledMultifact:
         """Convert a CompiledMultifact ORM entity into DomainCompiledMultifact.
 
         Args:
@@ -389,16 +382,14 @@ class TokenRepository(ITokenRepository):
             token_uuid=token_uuid,
             token_type=token_type,
             token_name=token_name,
-            content=content,
-            hash=content_hash,
             scene_name=scene_name,
             component_name=component_name,
             function_name=function_name,
+            content=content,
+            hash=content_hash,
         )
 
-        self.logger.debug(
-            f"Creating new token uuid={token_uuid}, type={token_type}"
-        )
+        self.logger.debug(f"Creating new token uuid={token_uuid}, type={token_type}")
         self.session.add(token)
         self.session.commit()
         return token

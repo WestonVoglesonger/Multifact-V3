@@ -50,7 +50,7 @@ class DomainToken:
         self.component_name = component_name
         self.function_name = function_name
         self.order = order
-        self.dependencies = dependencies if dependencies else []
+        self.dependencies = dependencies or []
 
     def add_dependency(self, token: "DomainToken"):
         """Add a dependency token to this token."""

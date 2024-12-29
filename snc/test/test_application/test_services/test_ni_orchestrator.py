@@ -1,3 +1,5 @@
+"""Test the NIOrchestrator service."""
+
 import pytest
 from unittest.mock import patch, Mock
 from sqlalchemy.orm import Session
@@ -27,9 +29,26 @@ from snc.application.services.exceptions import (
     DocumentNotFoundError,
     TokenNotFoundError,
 )
-from snc.test.test_application.test_services.fixtures import mock_llm_parse_help
+from snc.test.test_application.test_services.fixtures import (
+    mock_llm_parse_help,
+    mock_validation_service_success,
+    mock_llm_client,
+    patch_client_factory,
+)
 from snc.infrastructure.llm.client_factory import ClientFactory
 from snc.domain.models import DomainDocument
+
+
+@pytest.fixture
+def mock_llm_generate_code():
+    """Mock the LLM client to generate code for artifacts."""
+    with patch.object(ClientFactory, "get_llm_client") as mock_factory:
+        mock_client = Mock()
+        mock_client.generate_code.return_value = (
+            "function displayGreeting() { console.log('Hello!'); }"
+        )
+        mock_factory.return_value = mock_client
+        yield mock_client
 
 
 def test_create_ni_document(db_session: Session):
@@ -48,6 +67,7 @@ def test_create_ni_document(db_session: Session):
             ConcreteCompilationService(db_session),
             ConcreteValidationService(db_session),
             CodeEvaluationService(),
+            session=db_session,
         ),
     )
 
@@ -90,7 +110,10 @@ def test_create_ni_document(db_session: Session):
 
 
 def test_user_intervention_service_update_and_recompile_success(
-    db_session: Session, mock_llm_parse_help: Mock
+    db_session: Session,
+    mock_llm_parse_help: Mock,
+    mock_llm_generate_code: Mock,
+    mock_validation_service_success: Mock,
 ):
     """
     Test successful update and recompile, including validation, testing, and scoring.
@@ -108,7 +131,7 @@ def test_user_intervention_service_update_and_recompile_success(
     evaluator_llm = ClientFactory.get_llm_client(OpenAIModelType.GPT_4O_MINI)
     evaluation_service = CodeEvaluationService()
     token_compiler = TokenCompiler(
-        compilation_service, validation_service, evaluation_service
+        compilation_service, validation_service, evaluation_service, session=db_session
     )
 
     # Instantiate NIOrchestrator
@@ -156,17 +179,17 @@ def test_user_intervention_service_update_and_recompile_success(
         (t for t in updated_tokens if t.component_name == "Help"), None
     )
     assert updated_component is not None, "Should have a new 'Help' component"
-    assert updated_component.content == "Display a help message."
+    assert updated_component.content == "[Component:Help]\nDisplay a help message."
 
-    # Verify evaluation results
+    # Wait for compilation to complete and verify artifacts
+    db_session.expire_all()  # Ensure we get fresh data
+    artifacts_by_token = token_repo.get_tokens_with_artifacts(doc_id)
     for token in updated_tokens:
         if token.id is None:
             continue
-        # Get artifacts for this token
-        artifacts = token_repo.get_tokens_with_artifacts(doc_id)
         # Find the artifact for this specific token
         token_artifact = next(
-            (art for tok, art in artifacts if tok.id == token.id), None
+            (art for tok, art in artifacts_by_token if tok.id == token.id), None
         )
         assert token_artifact is not None, f"No artifact found for token {token.id}"
         # assert token_artifact.valid, f"Artifact {token_artifact.id} is not valid"

@@ -31,11 +31,12 @@ def main():
     )
 
     # Create a simple narrative document
-    content = """
-    [Component:HelloWorld]
-    This component displays a simple greeting message.
-    It should show "Hello, World!" in a centered div with a blue background.
-    """
+    content = """[Scene:MainScene]
+This is the main scene of the application.
+
+[Component:HelloWorld]
+This component displays a simple greeting message.
+It should show "Hello, World!" in a centered div with a blue background."""
 
     # Create and compile the document
     doc = orchestrator.create_ni_document(initial_content=content, version="v1.0")

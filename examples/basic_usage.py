@@ -2,7 +2,7 @@
 Basic example demonstrating how to use System Narrative Compiler (SNC) for narrative instruction processing.
 """
 
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session
 from snc.infrastructure.repositories.document_repository import DocumentRepository
 from snc.infrastructure.repositories.token_repository import TokenRepository
 from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
@@ -18,41 +18,35 @@ from snc.infrastructure.llm.model_factory import OpenAIModelType
 from snc.application.services.ni_orchestrator import NIOrchestrator
 from snc.application.services.dependency_graph_service import DependencyGraphService
 from snc.application.services.self_repair_service import SelfRepairService
-from snc.config import get_settings
 from snc.infrastructure.entities.entity_base import EntityBase
 from snc.infrastructure.entities.ni_document import NIDocument
 from snc.infrastructure.entities.ni_token import NIToken
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
 
+
 def main():
-    # Initialize settings
-    settings = get_settings()
+    # Create a database session using our PostgreSQL setup
+    from snc.database import db_session, engine
 
-    # Create a database session (this is just for example purposes)
-    # In a real application, you would use proper database configuration
-    from sqlalchemy import create_engine
-
-    engine = create_engine("sqlite:///:memory:")
-
-    # Create all tables
+    # Drop and recreate all tables
+    EntityBase.metadata.drop_all(engine)
     EntityBase.metadata.create_all(engine)
 
-    # Create session factory
-    SessionFactory = sessionmaker(bind=engine)
-    db_session = SessionFactory()
+    # Get a session
+    session = next(db_session())
 
     # Initialize repositories
-    doc_repo = DocumentRepository(db_session)
-    token_repo = TokenRepository(db_session)
-    artifact_repo = ArtifactRepository(db_session)
+    doc_repo = DocumentRepository(session)
+    token_repo = TokenRepository(session)
+    artifact_repo = ArtifactRepository(session)
 
     # Initialize services
     llm_service = ConcreteLLMService(OpenAIModelType.GPT_4O_MINI)
     token_diff_service = TokenDiffService()
     document_updater = DocumentUpdater(doc_repo, token_repo)
-    validation_service = ConcreteValidationService(db_session)
-    compilation_service = ConcreteCompilationService(db_session)
+    validation_service = ConcreteValidationService(session)
+    compilation_service = ConcreteCompilationService(session)
     code_evaluation_service = CodeEvaluationService()
     token_compiler = TokenCompiler(
         compilation_service,
@@ -66,7 +60,7 @@ def main():
         artifact_repo=artifact_repo,
         validation_service=validation_service,
         code_fixer_service=code_fixer_service,
-        session=db_session,
+        session=session,
     )
 
     # Initialize orchestrator
@@ -138,8 +132,10 @@ def main():
     print("\nFinal artifacts:")
     artifacts = orchestrator.list_tokens_with_artifacts(doc.id)
     for artifact_info in artifacts:
-        token_type = artifact_info.get("token_type", "unknown")
-        token_name = artifact_info.get("token_name", "unnamed")
+        token_id = artifact_info.get("token_id")
+        token = token_repo.get_token_by_id(token_id) if token_id is not None else None
+        token_type = token.token_type if token else "unknown"
+        token_name = token.token_name if token else "unnamed"
         print(f"\n{token_type}:{token_name}")
         print("-" * 40)
         if artifact_info.get("artifact_id"):

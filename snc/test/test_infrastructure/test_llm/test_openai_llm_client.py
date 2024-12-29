@@ -63,7 +63,9 @@ def test_generate_code(
     mock_openai_client.chat.completions.create.return_value.choices[
         0
     ].message.content = "   Some TS code   "
-    code = openai_llm_client.generate_code("component content")
+    code = openai_llm_client.generate_code(
+        "[Component:TestComponent]\ncomponent content"
+    )
     assert code == "Some TS code"
     # Verify the LLM was called
     mock_openai_client.chat.completions.create.assert_called_once()

@@ -34,7 +34,7 @@ class DependencyGraphService:
             doc_id: ID of document to build graph from
 
         Raises:
-            ValueError: If any token has None as its ID
+            ValueError: If any token has None as its ID or if a cycle is detected
         """
         tokens = self.token_repo.get_all_tokens_for_document(doc_id)
         # tokens is a list of DomainToken, each possibly with dependencies
@@ -49,31 +49,65 @@ class DependencyGraphService:
                     raise ValueError("Token ID cannot be None")
                 self.edges[t.id].add(dep.id)
 
+        # Check for cycles using DFS
+        visited = set()
+        path = set()
+
+        def has_cycle(node: int) -> bool:
+            if node in path:
+                return True
+            if node in visited:
+                return False
+
+            visited.add(node)
+            path.add(node)
+
+            for dep in self.edges[node]:
+                if has_cycle(dep):
+                    return True
+
+            path.remove(node)
+            return False
+
+        # Check each node for cycles
+        for node in self.tokens:
+            if node not in visited:
+                if has_cycle(node):
+                    raise ValueError("Cycle detected in dependency graph.")
+
     def topological_sort(self) -> List[int]:
         """Sort tokens in topological order based on dependencies.
 
         Returns:
-            List of token IDs in topological order
+            List of token IDs in topological order. If A depends on B, B will come before A.
 
         Raises:
             ValueError: If a cycle is detected in the dependency graph
         """
+        # Initialize in-degree for all nodes
         in_degree = {t_id: 0 for t_id in self.tokens.keys()}
-        for t, deps in self.edges.items():
-            for d in deps:
-                in_degree[t] += 1
 
+        # Count incoming edges - if A depends on B, increment A's in-degree
+        for t_id in self.tokens:
+            for dep_id in self.edges[t_id]:
+                in_degree[t_id] += 1
+
+        # Start with nodes that have no incoming edges (no dependencies)
         queue = deque([t for t in in_degree if in_degree[t] == 0])
         order = []
+
         while queue:
             node = queue.popleft()
             order.append(node)
-            for t, deps in self.edges.items():
-                if node in deps:
-                    in_degree[t] -= 1
-                    if in_degree[t] == 0:
-                        queue.append(t)
 
-        if not len(order) == len(self.tokens):
+            # For each node that depends on the current node
+            for t_id in self.tokens:
+                if node in self.edges[t_id]:
+                    in_degree[t_id] -= 1
+                    if in_degree[t_id] == 0:
+                        queue.append(t_id)
+
+        if len(order) != len(self.tokens):
             raise ValueError("Cycle detected in dependency graph.")
+
         return order

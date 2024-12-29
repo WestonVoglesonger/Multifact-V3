@@ -15,7 +15,7 @@ from snc.application.services.exceptions import (
     DocumentNotFoundError,
     LLMParsingError,
     ArtifactNotFoundError,
-    TokenNotFoundError
+    TokenNotFoundError,
 )
 from snc.infrastructure.llm.llm_service_impl import ConcreteLLMService
 from snc.infrastructure.llm.model_factory import (
@@ -24,9 +24,7 @@ from snc.infrastructure.llm.model_factory import (
     ClientType,
     ModelFactory,
 )
-from snc.infrastructure.repositories.artifact_repository import (
-    ArtifactRepository
-)
+from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
 from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
@@ -114,9 +112,7 @@ class NIOrchestrator:
         if not saved_doc:
             raise DocumentNotFoundError("Failed to create new document")
         self.logger.info(
-            "Created new NI document id=%d, version=%s",
-            saved_doc.id,
-            version
+            "Created new NI document id=%d, version=%s", saved_doc.id, version
         )
         return saved_doc
 
@@ -173,9 +169,7 @@ class NIOrchestrator:
 
         # Grab old tokens + diff
         old_tokens = self.token_repo.get_tokens_with_artifacts(ni_id)
-        diff_result = self.token_diff_service.diff_tokens(
-            old_tokens, new_tokens_data
-        )
+        diff_result = self.token_diff_service.diff_tokens(old_tokens, new_tokens_data)
 
         # Update DB: doc content + tokens changes
         newly_added_tokens = self.document_updater.apply_diff(
@@ -186,21 +180,17 @@ class NIOrchestrator:
         changed_tokens = [c[0] for c in diff_result.changed]
         tokens_to_compile = changed_tokens + newly_added_tokens
         self.token_compiler.compile_and_validate(
-            tokens_to_compile,
-            self._get_llm_client(model_type),
-            revalidate
+            tokens_to_compile, self._get_llm_client(model_type), revalidate
         )
 
         self.logger.info(
-            "NI doc %d updated. Compiled %d tokens.",
-            ni_id,
-            len(tokens_to_compile)
+            "NI doc %d updated. Compiled %d tokens.", ni_id, len(tokens_to_compile)
         )
 
     def compile_tokens(
         self,
         tokens: List[DomainToken],
-        model_type: Union[GroqModelType, OpenAIModelType]
+        model_type: Union[GroqModelType, OpenAIModelType],
     ) -> None:
         """Compile and validate a list of tokens.
 
@@ -213,14 +203,10 @@ class NIOrchestrator:
             ValidationError: If validation fails
         """
         self.token_compiler.compile_and_validate(
-            tokens,
-            self._get_llm_client(model_type),
-            revalidate=True
+            tokens, self._get_llm_client(model_type), revalidate=True
         )
 
-    def fix_artifact_code(
-        self, artifact_id: int, max_attempts: int = 2
-    ) -> bool:
+    def fix_artifact_code(self, artifact_id: int, max_attempts: int = 2) -> bool:
         """Try to fix invalid artifact code.
 
         Args:
@@ -251,28 +237,17 @@ class NIOrchestrator:
                 return True
             # If not success, fix code with code_fixer
             error_summary = self._summarize_errors(result.errors)
-            new_code = self.code_fixer_service.fix_code(
-                artifact.code,
-                error_summary
-            )
+            new_code = self.code_fixer_service.fix_code(artifact.code, error_summary)
 
             # Update artifact code in DB (mark valid=False until next check)
-            self.artifact_repo.update_artifact_code(
-                artifact_id,
-                new_code,
-                valid=False
-            )
+            self.artifact_repo.update_artifact_code(artifact_id, new_code, valid=False)
             self.logger.info(
-                "Fixed code attempt %d, artifact %d",
-                attempt + 1,
-                artifact_id
+                "Fixed code attempt %d, artifact %d", attempt + 1, artifact_id
             )
 
         # final check
-        final_result = (
-            self.token_compiler.validation_service.validate_artifact(
-                artifact_id
-            )
+        final_result = self.token_compiler.validation_service.validate_artifact(
+            artifact_id
         )
         if final_result.success:
             return True
@@ -280,7 +255,7 @@ class NIOrchestrator:
             self.logger.warning(
                 "Artifact %d still invalid after %d attempts.",
                 artifact_id,
-                max_attempts
+                max_attempts,
             )
             return False
 
@@ -306,14 +281,10 @@ class NIOrchestrator:
             raise ArtifactNotFoundError(f"Artifact {artifact_id} not found.")
 
         # Validate to retrieve error info
-        result = self.token_compiler.validation_service.validate_artifact(
-            artifact_id
-        )
+        result = self.token_compiler.validation_service.validate_artifact(artifact_id)
         token = self.token_repo.get_token_by_id(artifact.ni_token_id)
         if not token:
-            raise TokenNotFoundError(
-                f"Token for artifact {artifact_id} not found."
-            )
+            raise TokenNotFoundError(f"Token for artifact {artifact_id} not found.")
 
         doc_id = self._find_doc_id_for_token(token)
         ni_doc = self.doc_repo.get_document(doc_id)
@@ -332,22 +303,27 @@ class NIOrchestrator:
             "doc_id": doc_id,
         }
 
-    def list_tokens_with_artifacts(self, doc_id: int) -> List[Dict[str, Any]]:
-        """Get tokens and their compiled artifacts for the given document."""
-        tokens_with_artifacts = (
-            self.token_repo.get_tokens_with_artifacts(doc_id)
-        )
+    def list_tokens_with_artifacts(self, ni_id: int) -> List[Dict[str, Any]]:
+        """Get all tokens and artifacts for a document.
+
+        Args:
+            ni_id: Document ID to get tokens for
+
+        Returns:
+            List of dictionaries containing token and artifact info
+        """
+        tokens_with_arts = self.token_repo.get_tokens_with_artifacts(ni_id)
         result = []
-        for t, a in tokens_with_artifacts:
-            entry = {
-                "token_id": t.id,
-                "token_type": t.token_type,
-                "content": t.content,
-                "artifact_id": a.id if a else None,
-                "valid": a.valid if a else None,
-                "code": a.code if a else None,
+        for token, artifact in tokens_with_arts:
+            info = {
+                "token_id": token.id,
+                "token_type": token.token_type,
+                "token_name": token.token_name,
+                "artifact_id": artifact.id if artifact else None,
+                "valid": artifact.valid if artifact else None,
+                "code": artifact.code if artifact else None,
             }
-            result.append(entry)
+            result.append(info)
         return result
 
     #
@@ -398,6 +374,7 @@ class NIOrchestrator:
                     "token_name": scene_name,
                     "scene_name": scene_name,
                     "component_name": None,
+                    "function_name": None,
                     "content": scene_narrative,
                 }
             )
@@ -430,6 +407,7 @@ class NIOrchestrator:
                         "token_name": comp_name,
                         "scene_name": None,
                         "component_name": comp_name,
+                        "function_name": None,
                         "content": comp_narrative,
                     }
                 )

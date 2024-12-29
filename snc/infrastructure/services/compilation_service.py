@@ -10,12 +10,8 @@ from snc.domain.model_types import CompilationResult
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.entities.ni_token import NIToken
 from snc.infrastructure.llm.base_llm_client import BaseLLMClient
-from snc.application.interfaces.icompilation_service import (
-    ICompilationService
-)
-from snc.application.services.code_evaluation_service import (
-    CodeEvaluationService
-)
+from snc.application.interfaces.icompilation_service import ICompilationService
+from snc.application.services.code_evaluation_service import CodeEvaluationService
 
 
 class ConcreteCompilationService(ICompilationService):
@@ -104,17 +100,17 @@ class ConcreteCompilationService(ICompilationService):
         """
         try:
             # Delete any existing non-cached artifacts for this token
-            self._thread_local.session.query(CompiledMultifact).filter(
-                CompiledMultifact.ni_token_id == token_id,
-                not CompiledMultifact.cache_hit,
-            ).delete()
+            # self._thread_local.session.query(CompiledMultifact).filter(
+            #     CompiledMultifact.ni_token_id == token_id,
+            #     CompiledMultifact.cache_hit == False,
+            # ).delete()
 
             # Check for cached artifacts
             cached_artifact = (
                 self._thread_local.session.query(CompiledMultifact)
                 .filter(
                     CompiledMultifact.ni_token_id == token_id,
-                    CompiledMultifact.cache_hit is True,
+                    CompiledMultifact.cache_hit == True,
                 )
                 .first()
             )
@@ -137,17 +133,23 @@ class ConcreteCompilationService(ICompilationService):
                 "service": r"\[Service:(\w+)\]",
                 "interface": r"\[Interface:(\w+)\]",
                 "type": r"\[Type:(\w+)\]",
+                "function": r"\[Function:(\w+)\]",
             }
 
             pattern = patterns.get(token.token_type)
             if not pattern:
                 raise ValueError(f"Unknown token type: {token.token_type}")
 
+            # If content doesn't start with the token type header, add it
+            if not token.content.strip().startswith(f"[{token.token_type.title()}:"):
+                token.content = (
+                    f"[{token.token_type.title()}:{token.token_name}]\n{token.content}"
+                )
+                self._thread_local.session.commit()
+
             match = re.search(pattern, token.content)
             if not match:
-                raise ValueError(
-                    "Could not extract target name from token content."
-                )
+                raise ValueError("Could not extract target name from token content.")
 
             # Generate code using target name
             code = llm_client.generate_code(token.content)
@@ -160,13 +162,7 @@ class ConcreteCompilationService(ICompilationService):
                 code=code,
                 valid=True,
                 cache_hit=False,
-                token_hash=None,
             )
-
-            # Expire the session to clear identity map
-            self._thread_local.session.expire_all()
-
-            # Add and commit the new artifact
             self._thread_local.session.add(artifact)
             self._thread_local.session.commit()
 
@@ -196,13 +192,9 @@ class ConcreteCompilationService(ICompilationService):
             if tok.id is None:
                 raise ValueError(f"Token with id {tok.id} not found")
             artifact_domain = self.compile_token(tok.id, llm_client)
-            artifact_ent = self.session.query(CompiledMultifact).get(
-                artifact_domain.id
-            )
+            artifact_ent = self.session.query(CompiledMultifact).get(artifact_domain.id)
             if artifact_ent:
-                compiled_artifacts.append(
-                    cast(CompiledMultifact, artifact_ent)
-                )
+                compiled_artifacts.append(cast(CompiledMultifact, artifact_ent))
         return compiled_artifacts
 
     def compile_token_with_dependencies(
@@ -234,13 +226,9 @@ class ConcreteCompilationService(ICompilationService):
 
         # Now compile this token:
         domain_artifact = self.compile_token(result.id, llm_client)
-        artifact_ent = self.session.query(CompiledMultifact).get(
-            domain_artifact.id
-        )
+        artifact_ent = self.session.query(CompiledMultifact).get(domain_artifact.id)
         if artifact_ent:
-            compiled_artifacts.append(
-                cast(CompiledMultifact, artifact_ent)
-            )
+            compiled_artifacts.append(cast(CompiledMultifact, artifact_ent))
         return compiled_artifacts
 
     def mark_artifact_invalid(self, artifact_id: int) -> None:

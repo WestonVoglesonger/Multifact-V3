@@ -4,6 +4,7 @@ from typing import Dict, Any, Optional
 
 from snc.application.interfaces.illm_client import ILLMClient
 from snc.domain.models import DomainCompiledMultifact
+from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 
 
 class CodeEvaluationService:
@@ -13,7 +14,7 @@ class CodeEvaluationService:
     compiled artifacts and raw code.
     """
 
-    def __init__(self, llm_client: Optional[ILLMClient] = None):
+    def __init__(self, llm_client: Optional[BaseLLMClient] = None):
         """Initialize the service with an optional LLM client.
 
         Args:
@@ -21,7 +22,7 @@ class CodeEvaluationService:
         """
         self.llm_client = llm_client
 
-    def set_llm_client(self, llm_client: ILLMClient) -> None:
+    def set_llm_client(self, llm_client: BaseLLMClient) -> None:
         """Set the LLM client to use for evaluation.
 
         Args:
@@ -29,9 +30,7 @@ class CodeEvaluationService:
         """
         self.llm_client = llm_client
 
-    def evaluate_compiled_artifact(
-        self, artifact: DomainCompiledMultifact
-    ) -> float:
+    def evaluate_compiled_artifact(self, artifact: DomainCompiledMultifact) -> float:
         """Evaluate a compiled artifact's code quality.
 
         Args:
@@ -49,9 +48,7 @@ class CodeEvaluationService:
         # For now, just return a default score
         return 0.8  # TODO: Implement actual evaluation logic
 
-    def evaluate_code(
-        self, code: str, context: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def evaluate_code(self, code: str, context: Dict[str, Any]) -> Dict[str, Any]:
         """Evaluate code and return evaluation results.
 
         Args:
@@ -60,11 +57,48 @@ class CodeEvaluationService:
 
         Returns:
             Dictionary containing evaluation results with keys:
-                - score: Float between 0 and 1
+                - score: Float between 0 and 10
                 - feedback: String with evaluation feedback
         """
-        # TODO: Implement actual evaluation logic
+        # Basic code quality checks
+        score = 10.0  # Start with perfect score
+        feedback = []
+
+        # Check code length
+        if len(code) < 10:
+            score -= 2
+            feedback.append("Code is too short")
+        elif len(code) > 1000:
+            score -= 1
+            feedback.append("Code is quite long, consider breaking it down")
+
+        # Check for basic TypeScript patterns
+        if "import" not in code:
+            score -= 1
+            feedback.append("Missing imports")
+
+        if "class" not in code and "interface" not in code and "type" not in code:
+            score -= 1
+            feedback.append("No TypeScript type definitions found")
+
+        if "export" not in code:
+            score -= 1
+            feedback.append("No exports found")
+
+        # Check for error handling
+        if "try" not in code or "catch" not in code:
+            score -= 1
+            feedback.append("No error handling found")
+
+        # Check for comments/documentation
+        if "/**" not in code and "/*" not in code and "//" not in code:
+            score -= 1
+            feedback.append("Missing documentation/comments")
+
+        # Ensure score is between 0 and 10
+        score = max(0, min(10, score))
+
         return {
-            "score": 1.0,  # Default score
-            "feedback": "Code evaluation not yet implemented",
+            "score": score,
+            "feedback": "; ".join(feedback) if feedback else "Code looks good!",
         }

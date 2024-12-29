@@ -7,14 +7,12 @@ from typing import Dict
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from snc.database import db_session
 from snc.application.services.code_evaluation_service import (
     CodeEvaluationService,
 )
 from snc.application.services.token_compiler import TokenCompiler
 from snc.domain.models import Model
-from snc.infrastructure.db.engine import engine
-from snc.infrastructure.db.models import EntityBase
-from snc.infrastructure.db.session import get_session
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.entities.ni_document import NIDocument
 from snc.infrastructure.entities.ni_token import NIToken
@@ -81,10 +79,20 @@ def create_test_tokens(token_repo: TokenRepository, doc_id: int) -> None:
 def get_artifacts(artifact_repo: ArtifactRepository, doc_id: int) -> Dict[str, str]:
     """Get all artifacts for a document."""
     artifacts = {}
-    tokens = artifact_repo.get_tokens_with_artifacts(doc_id)
+    tokens = artifact_repo.token_repo.get_tokens_with_artifacts(doc_id)
+    print(f"\nRetrieving artifacts for document {doc_id}")
+    print(f"Found {len(tokens)} token-artifact pairs")
+
     for token, artifact in tokens:
+        print(f"Processing token {token.token_name} ({token.id})")
         if artifact:
+            if not artifact.code:
+                print(f"Warning: Empty code for token {token.token_name}")
+                continue
             artifacts[token.token_name] = artifact.code
+            print(f"Added artifact for {token.token_name}")
+        else:
+            print(f"Warning: No artifact found for token {token.token_name}")
     return artifacts
 
 
@@ -99,9 +107,24 @@ def compare_artifacts(
     all_tokens = set(sequential_artifacts.keys()) | set(parallel_artifacts.keys())
     differences_found = False
 
+    print(f"\nTotal tokens in sequential: {len(sequential_artifacts)}")
+    print(f"Total tokens in parallel: {len(parallel_artifacts)}")
+
     for token_name in sorted(all_tokens):
-        seq_code = sequential_artifacts.get(token_name, "")
-        par_code = parallel_artifacts.get(token_name, "")
+        seq_code = sequential_artifacts.get(token_name)
+        par_code = parallel_artifacts.get(token_name)
+
+        if seq_code is None:
+            differences_found = True
+            print(f"\nToken {token_name} missing in sequential compilation")
+            print("-" * 40)
+            continue
+
+        if par_code is None:
+            differences_found = True
+            print(f"\nToken {token_name} missing in parallel compilation")
+            print("-" * 40)
+            continue
 
         if seq_code != par_code:
             differences_found = True
@@ -114,12 +137,14 @@ def compare_artifacts(
             print("-" * 40)
 
     if not differences_found:
-        print("No differences found between sequential and parallel compilation!")
+        print("\nNo differences found between sequential and parallel compilation!")
+    else:
+        print("\nDifferences were found in the compilation results.")
 
 
 def main():
     """Run the stress test."""
-    session = get_session()
+    session = next(db_session())
 
     # Initialize repositories and services
     doc_repo = DocumentRepository(session)
@@ -150,35 +175,52 @@ def main():
     )
 
     # Create test document and tokens
+    print("\nCreating test document and tokens for sequential run...")
     doc_id = create_test_document(doc_repo)
     create_test_tokens(token_repo, doc_id)
-
-    # Get all tokens for compilation
     tokens = token_repo.get_all_tokens_for_document(doc_id)
+    print(f"Created document {doc_id} with {len(tokens)} tokens")
 
     # Sequential compilation
     print("\nRunning sequential compilation...")
     start_time = time.time()
     token_compiler.compile_and_validate(tokens, llm_client, revalidate=True)
+    session.commit()
     sequential_time = time.time() - start_time
     sequential_artifacts = get_artifacts(artifact_repo, doc_id)
     print(f"Sequential compilation completed in {sequential_time:.2f} seconds")
 
     # Clear artifacts for parallel compilation
+    print("\nClearing database for parallel run...")
     session.query(CompiledMultifact).delete()
     session.query(NIToken).delete()
     session.query(NIDocument).delete()
     session.commit()
 
+    # Create new session for parallel run
+    session = next(db_session())
+    doc_repo = DocumentRepository(session)
+    token_repo = TokenRepository(session)
+    artifact_repo = ArtifactRepository(session)
+    compilation_service = ConcreteCompilationService(session)
+    token_compiler = TokenCompiler(
+        compilation_service,
+        validation_service,
+        code_evaluation_service,
+    )
+
     # Recreate test document and tokens
+    print("\nCreating test document and tokens for parallel run...")
     doc_id = create_test_document(doc_repo)
     create_test_tokens(token_repo, doc_id)
     tokens = token_repo.get_all_tokens_for_document(doc_id)
+    print(f"Created document {doc_id} with {len(tokens)} tokens")
 
     # Parallel compilation
     print("\nRunning parallel compilation...")
     start_time = time.time()
     token_compiler.compile_and_validate_parallel(tokens, llm_client, revalidate=True)
+    session.commit()
     parallel_time = time.time() - start_time
     parallel_artifacts = get_artifacts(artifact_repo, doc_id)
     print(f"Parallel compilation completed in {parallel_time:.2f} seconds")

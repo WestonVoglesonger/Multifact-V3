@@ -45,6 +45,7 @@ class NIToken(EntityBase):
     token_type: Mapped[str] = mapped_column(String, nullable=True)
     scene_name: Mapped[str] = mapped_column(String, nullable=True)
     component_name: Mapped[str] = mapped_column(String, nullable=True)
+    function_name: Mapped[str] = mapped_column(String, nullable=True)
     order: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     content: Mapped[str] = mapped_column(Text, nullable=False)
     hash: Mapped[str] = mapped_column(String, nullable=False)
@@ -79,6 +80,7 @@ class NIToken(EntityBase):
             hash=self.hash,
             scene_name=self.scene_name,
             component_name=self.component_name,
+            function_name=self.function_name,
             order=self.order,
             dependencies=[],
         )
@@ -104,5 +106,6 @@ class NIToken(EntityBase):
             hash=domain_token.hash,
             scene_name=domain_token.scene_name,
             component_name=domain_token.component_name,
+            function_name=domain_token.function_name,
             order=domain_token.order,
         )

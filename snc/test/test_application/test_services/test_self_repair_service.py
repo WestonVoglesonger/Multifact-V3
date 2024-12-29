@@ -8,9 +8,14 @@ from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
 from snc.infrastructure.validation.validation_service import ConcreteValidationService
 from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
+from snc.infrastructure.llm.client_factory import ClientFactory
 from snc.application.services.self_repair_service import (
     SelfRepairService,
     ArtifactNotFoundError,
+)
+from snc.application.interfaces.ivalidation_service import (
+    ValidationResult,
+    ValidationError,
 )
 from snc.test.test_application.test_services.fixtures import mock_code_fixer_service
 
@@ -36,6 +41,9 @@ def test_self_repair_service_already_valid(
     artifact_repo = ArtifactRepository(db_session)
     validation_service = ConcreteValidationService(db_session)
     code_fixer = ConcreteCodeFixerService()
+    mock_code_fixer_service.side_effect = (
+        lambda code, error_summary: "// Some code that passes validation\nexport class MyFixedComponent {}"
+    )
 
     # 3) Create the SelfRepairService
     srs = SelfRepairService(artifact_repo, validation_service, code_fixer, db_session)
@@ -75,31 +83,47 @@ def test_self_repair_service_fix_invalid(
     validation_service = ConcreteValidationService(db_session)
     code_fixer = ConcreteCodeFixerService()
 
-    # 3) Create SelfRepairService
-    srs = SelfRepairService(artifact_repo, validation_service, code_fixer, db_session)
+    # Mock validation service to return failure
+    with patch.object(code_fixer, "fix_code") as mock_fix_code, patch.object(
+        validation_service, "validate_artifact"
+    ) as mock_validate:
+        mock_fix_code.return_value = (
+            "// Some code that passes validation\nexport class MyFixedComponent {}"
+        )
+        mock_validate.return_value = ValidationResult(
+            success=False,
+            errors=[
+                ValidationError(file="test.ts", line=1, char=1, message="Test error")
+            ],
+        )
 
-    # 4) Repair with max_attempts=1
-    success = srs.repair_artifact(artifact_id, max_attempts=1)
+        # 3) Create SelfRepairService
+        srs = SelfRepairService(
+            artifact_repo, validation_service, code_fixer, db_session
+        )
 
-    # 5) Re-fetch
-    updated_artifact = db_session.query(CompiledMultifact).get(artifact_id)
-    assert updated_artifact, "Artifact should still exist after the attempt."
+        # 4) Repair with max_attempts=1
+        success = srs.repair_artifact(artifact_id, max_attempts=1)
 
-    if success:
-        # If our validation logic thinks it's fixed by the new code
+        # 5) Re-fetch
+        updated_artifact = db_session.query(CompiledMultifact).get(artifact_id)
+        assert updated_artifact, "Artifact should still exist after the attempt."
+
+        if success:
+            # If our validation logic thinks it's fixed by the new code
+            assert (
+                updated_artifact.valid is True
+            ), "Artifact should now be valid after repair."
+        else:
+            # If validation still fails
+            assert (
+                updated_artifact.valid is False
+            ), "Artifact should remain invalid after a failed repair."
+
+        # 6) Confirm fix_code was indeed called once (since the artifact was invalid)
         assert (
-            updated_artifact.valid is True
-        ), "Artifact should now be valid after repair."
-    else:
-        # If validation still fails
-        assert (
-            updated_artifact.valid is False
-        ), "Artifact should remain invalid after a failed repair."
-
-    # 6) Confirm fix_code was indeed called once (since the artifact was invalid)
-    assert (
-        mock_code_fixer_service.call_count == 1
-    ), "We expected exactly one fix_code call for a single attempt."
+            mock_fix_code.call_count == 1
+        ), "We expected exactly one fix_code call for a single attempt."
 
 
 def test_self_repair_service_artifact_not_found(

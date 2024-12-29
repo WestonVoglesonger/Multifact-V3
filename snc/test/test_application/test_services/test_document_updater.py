@@ -44,7 +44,11 @@ def test_document_updater_remove_and_add(db_session: Session):
     # Correctly unpack the old_tokens
     removed_token, removed_artifact = old_tokens[0]
     changed_token, changed_artifact = old_tokens[1]
-    new_token_data = {"type": "function", "content": "New function content."}
+    new_token_data = {
+        "type": "function",
+        "content": "New function content.",
+        "token_name": "UpdaterFunc",
+    }
 
     # Build a TokenDiffResult
     diff_result = TokenDiffResult(
@@ -69,6 +73,7 @@ def test_document_updater_remove_and_add(db_session: Session):
 
     # Verify that the document content is updated
     updated_doc = doc_repo.get_document(doc_id)
+    assert updated_doc is not None, "Updated document should exist"
     assert (
         updated_doc.content == "Document updated content"
     ), "Document content should be updated."
@@ -83,6 +88,7 @@ def test_document_updater_remove_and_add(db_session: Session):
     if changed_token.id is None:
         raise ValueError("Token ID cannot be None")
     updated_component = token_repo.get_token_by_id(changed_token.id)
+    assert updated_component is not None, "Updated component should exist"
     assert (
         updated_component.content == "Updated UpdaterComp content."
     ), "Component token should be updated."
