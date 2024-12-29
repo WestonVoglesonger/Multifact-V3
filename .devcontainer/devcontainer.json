@@ -4,7 +4,6 @@
     "service": "dev",
     "workspaceFolder": "/workspace",
     "remoteUser": "vscode",
-
     "customizations": {
         "vscode": {
             "extensions": [
@@ -21,20 +20,26 @@
                 "python.testing.unittestEnabled": false,
                 "python.formatting.provider": "black",
                 "editor.formatOnSave": true,
-                "editor.rulers": [88],
+                "editor.rulers": [
+                    88
+                ],
                 "python.analysis.typeCheckingMode": "basic",
                 "python.analysis.diagnosticSeverityOverrides": {
                     "reportMissingParameterType": "error",
                     "reportGeneralTypeIssues": "error",
                     "reportDeprecated": "error",
                     "reportImportCycles": "error"
+                },
+                "terminal.integrated.defaultProfile.linux": "zsh",
+                "terminal.integrated.profiles.linux": {
+                    "zsh": {
+                        "path": "/usr/bin/zsh"
+                    }
                 }
             }
         }
     },
-
     "postCreateCommand": "pip install -e '.[dev,test]' && pre-commit install",
-    
     "remoteEnv": {
         "PYTHONPATH": "${containerWorkspaceFolder}"
     }

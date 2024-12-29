@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make \
     curl \
     postgresql-client \
+    zsh \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and switch to a non-root user
@@ -18,13 +19,17 @@ ARG USERNAME=vscode
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME -s /usr/bin/zsh \
     && mkdir -p /workspace \
     && chown $USERNAME:$USERNAME /workspace
 
 # Set up the workspace
 WORKDIR /workspace
 USER $USERNAME
+
+# Install Oh My Zsh and configure it
+RUN curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | bash - \
+    && sed -i 's/robbyrussell/kennethreitz/g' ~/.zshrc
 
 # Install Python tools
 ENV PATH="/home/$USERNAME/.local/bin:$PATH"
