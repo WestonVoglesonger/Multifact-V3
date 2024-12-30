@@ -16,18 +16,13 @@ def mock_llm_client():
 
 
 @pytest.fixture
-def mock_groq_client() -> GroqLLMClient:
+def mock_groq_client() -> MagicMock:
     """Create a mock Groq client for testing."""
-    model = Model(
-        client_type=ClientType.GROQ,
-        name="gemma2-9b-it",
-        context_window=8192,
-        max_output_tokens=4096,
-        prompt_cost_per_1k=0.025,
-        completion_cost_per_1k=0.05,
-        supports_images=False,
-    )
-    return GroqLLMClient(model)
+    mock_client = MagicMock()
+    mock_completion = MagicMock()
+    mock_completion.choices = [MagicMock(message=MagicMock(content=""))]
+    mock_client.chat.completions.create.return_value = mock_completion
+    return mock_client
 
 
 @pytest.fixture
@@ -56,16 +51,11 @@ def groq_llm_client(
 @pytest.fixture
 def mock_openai_client() -> MagicMock:
     """Create a mock OpenAI client for testing."""
-    model = Model(
-        client_type=ClientType.OPENAI,
-        name="gpt-4o-mini",
-        context_window=128000,
-        max_output_tokens=16384,
-        prompt_cost_per_1k=0.0025,
-        completion_cost_per_1k=0.01,
-        supports_images=True,
-    )
-    return MagicMock()
+    mock_client = MagicMock()
+    mock_completion = MagicMock()
+    mock_completion.choices = [MagicMock(message=MagicMock(content=""))]
+    mock_client.chat.completions.create.return_value = mock_completion
+    return mock_client
 
 
 @pytest.fixture

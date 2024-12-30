@@ -394,3 +394,42 @@ class TokenRepository(ITokenRepository):
         except Exception as e:
             self.logger.error(f"Error getting next token ID: {e}")
             return None
+
+    def create_token(
+        self,
+        doc_id: int,
+        token_type: str,
+        token_name: str,
+        scene_name: Optional[str],
+        component_name: Optional[str],
+        function_name: Optional[str],
+        content: str,
+    ) -> DomainToken:
+        """Create a new token.
+
+        Args:
+            doc_id: Document ID
+            token_type: Token type
+            token_name: Token name
+            scene_name: Scene name
+            component_name: Component name
+            function_name: Function name
+            content: Token content
+
+        Returns:
+            Created domain token
+        """
+        token = NIToken(
+            ni_document_id=doc_id,
+            token_uuid=str(uuid.uuid4()),
+            token_type=token_type,
+            token_name=token_name,
+            scene_name=scene_name,
+            component_name=component_name,
+            function_name=function_name,
+            content=content,
+            hash=hashlib.sha256(content.encode()).hexdigest(),
+        )
+        self.session.add(token)
+        self.session.flush()  # Get the ID
+        return token.to_domain_token()

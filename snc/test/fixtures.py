@@ -2,6 +2,7 @@
 
 import pytest
 from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
 
 # Repos
 from snc.infrastructure.repositories.document_repository import DocumentRepository
@@ -38,12 +39,15 @@ def ni_orchestrator(db_session: Session) -> NIOrchestrator:
     real or default LLM parser (which you might mock if desired).
     """
 
+    # Create session factory
+    session_factory = sessionmaker(bind=db_session.get_bind())
+
     # Repositories
     doc_repo = DocumentRepository(db_session)
     token_repo = TokenRepository(db_session)
     artifact_repo = ArtifactRepository(db_session)
 
-    # LLM parser (ex: default to GPT_4O, or “dummy” if you mock)
+    # LLM parser (ex: default to GPT_4O, or "dummy" if you mock)
     llm_parser = ConcreteLLMService(OpenAIModelType.GPT_4O_MINI)
 
     # Additional services
@@ -53,12 +57,15 @@ def ni_orchestrator(db_session: Session) -> NIOrchestrator:
     validation_svc = ConcreteValidationService(db_session)
     model_type = ModelFactory.get_model(ClientType.GROQ, GroqModelType.LLAMA_GUARD_3_8B)
     llm_evaluator = GroqLLMClient(model_type)
-    evaluation_svc = CodeEvaluationService(llm_client=llm_evaluator)
+    evaluation_svc = CodeEvaluationService(
+        llm_client=llm_evaluator,
+        validation_service=validation_svc,
+    )
     token_compiler = TokenCompiler(
-        compilation_svc,
-        validation_svc,
-        evaluation_svc,
-        session=db_session,
+        compilation_service=compilation_svc,
+        validation_service=validation_svc,
+        session_factory=session_factory,
+        token_repository=token_repo,
     )
 
     return NIOrchestrator(

@@ -11,9 +11,7 @@ class DocumentRepository(IDocumentRepository):
         self.session = session
 
     def get_document(self, ni_id: int) -> Optional[DomainDocument]:
-        doc = (
-            self.session.query(NIDocument).filter(NIDocument.id == ni_id).one_or_none()
-        )
+        doc = self.session.query(NIDocument).filter(NIDocument.id == ni_id).one_or_none()
         if doc is None:
             return None
 
@@ -21,9 +19,7 @@ class DocumentRepository(IDocumentRepository):
         return doc.to_domain_document()
 
     def update_document_content(self, ni_id: int, new_content: str) -> None:
-        doc = (
-            self.session.query(NIDocument).filter(NIDocument.id == ni_id).one_or_none()
-        )
+        doc = self.session.query(NIDocument).filter(NIDocument.id == ni_id).one_or_none()
         if doc:
             doc.content = new_content
             self.session.commit()
@@ -39,18 +35,26 @@ class DocumentRepository(IDocumentRepository):
         # Now return the domain doc re-built from entity
         return document_entity.to_domain_document()
 
-    def create_document(self, content: str = "") -> int:
-        """Create a new document and return its ID."""
+    def create_document(self, content: str = "", version: str = "v1.0") -> DomainDocument:
+        """Create a new document and return it.
+
+        Args:
+            content: Initial document content
+            version: Document version string
+
+        Returns:
+            DomainDocument: The created document
+        """
         from snc.infrastructure.entities.ni_document import NIDocument
         from datetime import datetime
 
         now = datetime.now()
         document = NIDocument(
             content=content,
-            version="v1.0",
+            version=version,
             created_at=now,
             updated_at=now,
         )
         self.session.add(document)
         self.session.commit()
-        return document.id
+        return document.to_domain_document()

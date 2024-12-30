@@ -33,6 +33,7 @@ from snc.test.test_application.test_services.fixtures import (
     mock_validation_service_failure,
     mock_validation_service_success,
 )
+from sqlalchemy.orm import sessionmaker
 
 
 def get_test_session():
@@ -56,22 +57,28 @@ def test_create_ni_document(db_session: Session):
     """
     Test creating a new NI document.
     """
+    # Create session factory
+    session_factory = sessionmaker(bind=db_session.get_bind())
+
+    # Setup repositories
     doc_repo = DocumentRepository(db_session)
+    token_repo = TokenRepository(db_session)
     model = ModelFactory.get_model(ClientType.OPENAI, OpenAIModelType.GPT_4O_MINI)
     llm_client = OpenAILLMClient(model=model)
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     ni_orchestrator = NIOrchestrator(
         doc_repo,
-        TokenRepository(db_session),
+        token_repo,
         ArtifactRepository(db_session),
         ConcreteLLMService(OpenAIModelType.GPT_4O_MINI),
         TokenDiffService(),
-        DocumentUpdater(doc_repo, TokenRepository(db_session)),
+        DocumentUpdater(doc_repo, token_repo),
         TokenCompiler(
-            compilation_service,
-            validation_service,
-            CodeEvaluationService(llm_client=llm_client, validation_service=validation_service),
+            compilation_service=compilation_service,
+            validation_service=validation_service,
+            session_factory=session_factory,
+            token_repository=token_repo,
         ),
     )
 
@@ -130,6 +137,9 @@ def test_user_intervention_service_update_and_recompile_success(
     Test successful update and recompile, including validation, testing, and scoring.
     """
 
+    # Create session factory
+    session_factory = sessionmaker(bind=db_session.get_bind())
+
     # Repositories and services
     doc_repo = DocumentRepository(db_session)
     token_repo = TokenRepository(db_session)
@@ -143,7 +153,12 @@ def test_user_intervention_service_update_and_recompile_success(
     evaluation_service = CodeEvaluationService(
         llm_client=evaluator_llm, validation_service=validation_service
     )
-    token_compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
+    token_compiler = TokenCompiler(
+        compilation_service=compilation_service,
+        validation_service=validation_service,
+        session_factory=session_factory,
+        token_repository=token_repo,
+    )
 
     # Instantiate NIOrchestrator
     uis = NIOrchestrator(

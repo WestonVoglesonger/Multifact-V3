@@ -1,7 +1,7 @@
 """Interface for document repository operations."""
 
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Any
 from snc.domain.models import DomainDocument
 
 
@@ -13,14 +13,14 @@ class IDocumentRepository(ABC):
     """
 
     @abstractmethod
-    def get_document(self, doc_id: int) -> Optional[DomainDocument]:
-        """Retrieve a domain document by its ID.
+    def get_document(self, doc_id: int) -> Optional[Any]:
+        """Get a document by ID.
 
         Args:
-            doc_id: The ID of the document to retrieve
+            doc_id: Document ID
 
         Returns:
-            The domain document if found, None otherwise
+            Document if found, None otherwise
         """
         pass
 
@@ -43,5 +43,18 @@ class IDocumentRepository(ABC):
         Args:
             doc_id: The ID of the document to update
             new_content: The new content to set
+        """
+        pass
+
+    @abstractmethod
+    def create_document(self, content: str, version: str) -> Any:
+        """Create a new document.
+
+        Args:
+            content: Document content
+            version: Document version
+
+        Returns:
+            Created document
         """
         pass

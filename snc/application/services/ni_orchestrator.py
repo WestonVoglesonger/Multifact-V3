@@ -157,3 +157,41 @@ class NIOrchestrator:
             self.token_compiler.compile_and_validate(
                 added_tokens, llm_client, revalidate=revalidate
             )
+
+    def create_ni_document(
+        self,
+        initial_content: str,
+        version: str = "v1",
+    ) -> Any:
+        """Create a new NI document with initial content.
+
+        Args:
+            initial_content: Initial content for the document
+            version: Document version
+
+        Returns:
+            Created document domain object
+        """
+        # Parse initial content
+        model = ModelFactory.get_model(ClientType.OPENAI, OpenAIModelType.GPT_4O_MINI)
+        llm_client = OpenAILLMClient(model)
+
+        # Parse content into token data
+        parsed_data = self.llm_parser.parse_document(initial_content)
+        token_data = self._flatten_llm_output(parsed_data)
+
+        # Create document
+        doc = self.doc_repo.create_document(initial_content, version)
+
+        # Create initial tokens
+        tokens = self.document_updater.create_tokens(doc.id, initial_content, token_data)
+
+        # Commit to ensure tokens are in DB before compilation
+        if isinstance(self.doc_repo, DocumentRepository):
+            cast(DocumentRepository, self.doc_repo).session.commit()
+
+        # Compile tokens
+        if tokens:
+            self.token_compiler.compile_and_validate(tokens, llm_client, revalidate=True)
+
+        return doc

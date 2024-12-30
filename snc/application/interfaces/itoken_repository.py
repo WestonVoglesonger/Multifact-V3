@@ -45,9 +45,7 @@ class ITokenRepository(ABC):
     @abstractmethod
     def update_changed_tokens(
         self,
-        changed_data: List[
-            Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]
-        ],
+        changed_data: List[Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]],
     ) -> None:
         """Update existing tokens and their artifacts.
 
@@ -58,9 +56,7 @@ class ITokenRepository(ABC):
         pass
 
     @abstractmethod
-    def add_new_tokens(
-        self, ni_id: int, token_data_list: List[dict]
-    ) -> List[NIToken]:
+    def add_new_tokens(self, ni_id: int, token_data_list: List[dict]) -> List[NIToken]:
         """Add new tokens to a document.
 
         Args:
@@ -73,9 +69,7 @@ class ITokenRepository(ABC):
         pass
 
     @abstractmethod
-    def get_artifact(
-        self, artifact_id: int
-    ) -> Optional[DomainCompiledMultifact]:
+    def get_artifact(self, artifact_id: int) -> Optional[DomainCompiledMultifact]:
         """Get a compiled artifact by ID.
 
         Args:
@@ -119,5 +113,32 @@ class ITokenRepository(ABC):
 
         Returns:
             List of tokens in the document
+        """
+        pass
+
+    @abstractmethod
+    def create_token(
+        self,
+        doc_id: int,
+        token_type: str,
+        token_name: str,
+        scene_name: Optional[str],
+        component_name: Optional[str],
+        function_name: Optional[str],
+        content: str,
+    ) -> DomainToken:
+        """Create a new token.
+
+        Args:
+            doc_id: Document ID
+            token_type: Token type
+            token_name: Token name
+            scene_name: Scene name
+            component_name: Component name
+            function_name: Function name
+            content: Token content
+
+        Returns:
+            Created domain token
         """
         pass

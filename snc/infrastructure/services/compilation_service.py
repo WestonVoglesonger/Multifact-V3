@@ -1,10 +1,11 @@
 """Service for compiling narrative tokens into artifacts."""
 
-from typing import Dict, Any, List, cast
+from typing import Dict, Any, List, cast, Optional
 from sqlalchemy.orm import Session
 import re
 import threading
 import logging
+from datetime import datetime, timezone
 
 from snc.domain.models import DomainDocument, DomainCompiledMultifact
 from snc.domain.model_types import CompilationResult
@@ -57,82 +58,88 @@ class ConcreteCompilationService(ICompilationService):
             Compilation result with status and errors if any
         """
         try:
-            return CompilationResult(code=code, valid=True, errors=None, cache_hit=False)
+            return CompilationResult(
+                code=code,
+                valid=True,
+                errors=None,
+                cache_hit=False,
+                score=0.95,  # Default score for direct compilation
+                feedback="Compiled successfully",
+            )
         except Exception as e:
-            return CompilationResult(code="", valid=False, errors=[str(e)], cache_hit=False)
+            return CompilationResult(
+                code="",
+                valid=False,
+                errors=[str(e)],
+                cache_hit=False,
+                score=0.0,
+                feedback=str(e),
+            )
 
-    def compile_token(self, token_id: int, llm_client: ILLMClient) -> DomainCompiledMultifact:
-        """Compile a token into a multifact.
+    def compile_token(
+        self,
+        token_id: int,
+        llm_client: ILLMClient,
+    ) -> Optional[DomainCompiledMultifact]:
+        """Compile a single token into code.
 
         Args:
             token_id: ID of token to compile
             llm_client: LLM client to use for code generation
 
         Returns:
-            Compiled artifact
-
-        Raises:
-            ValueError: If token not found or invalid
+            Compiled artifact if successful, None otherwise
         """
         try:
-            # Check for cached artifacts
-            cached_artifact = (
-                self._thread_local.session.query(CompiledMultifact)
-                .filter(
-                    CompiledMultifact.ni_token_id == token_id,
-                    CompiledMultifact.cache_hit == True,
-                )
-                .first()
-            )
-            if cached_artifact:
-                return cached_artifact.to_domain_artifact()
-
             # Get token
-            token = (
-                self._thread_local.session.query(NIToken)
-                .filter(NIToken.id == token_id)
-                .one_or_none()
-            )
+            token = self.session.query(NIToken).get(token_id)
             if not token:
                 raise ValueError(f"Token with id {token_id} not found")
 
-            # Extract target name from token content
-            patterns = {
-                "scene": r"\[Scene:(\w+)\]",
-                "component": r"\[Component:(\w+)\]",
-                "service": r"\[Service:(\w+)\]",
-                "interface": r"\[Interface:(\w+)\]",
-                "type": r"\[Type:(\w+)\]",
-                "function": r"\[Function:(\w+)\]",
-            }
+            # Check for existing valid artifact with matching hash
+            existing_artifact = (
+                self.session.query(CompiledMultifact)
+                .filter(
+                    CompiledMultifact.ni_token_id == token_id,
+                    CompiledMultifact.token_hash == token.hash,
+                    CompiledMultifact.valid == True,
+                )
+                .order_by(CompiledMultifact.created_at.desc())
+                .first()
+            )
 
-            pattern = patterns.get(token.token_type)
-            if not pattern:
-                raise ValueError(f"Unknown token type: {token.token_type}")
+            if existing_artifact is not None:
+                # Return existing artifact
+                return existing_artifact.to_domain_artifact()
 
-            # If content doesn't start with the token type header, add it
-            if not token.content.strip().startswith(f"[{token.token_type.title()}:"):
-                token.content = f"[{token.token_type.title()}:{token.token_name}]\n{token.content}"
-
-            # Generate code using LLM
-            code = llm_client.generate_code(token.content)
-            if not code:
-                raise ValueError("Failed to generate code")
+            # Generate new code
+            generated_code = llm_client.generate_code(token.content)
 
             # Create new artifact
-            artifact = CompiledMultifact(
+            new_artifact = CompiledMultifact(
                 ni_token_id=token_id,
-                language="typescript",  # Default to TypeScript since we're generating Angular code
-                framework="angular",  # Default to Angular framework
-                code=code,
+                language="typescript",
+                framework="angular",
+                code=generated_code,
                 valid=True,
                 cache_hit=False,
+                token_hash=token.hash,
+                created_at=datetime.now(timezone.utc),
             )
-            self._thread_local.session.add(artifact)
-            return artifact.to_domain_artifact()
+            self.session.add(new_artifact)
+            self.session.flush()  # Get the ID without committing
+
+            # Convert to domain artifact
+            domain_artifact = new_artifact.to_domain_artifact()
+
+            # Commit the transaction
+            self.session.commit()
+
+            return domain_artifact
 
         except Exception as e:
             self.logger.error(f"Failed to compile token {token_id}: {e}")
+            self.session.rollback()
             raise
 
     def compile_document(
@@ -154,10 +161,18 @@ class ConcreteCompilationService(ICompilationService):
         for tok in document.tokens:
             if tok.id is None:
                 raise ValueError(f"Token with id {tok.id} not found")
+
+            # Compile token
             artifact_domain = self.compile_token(tok.id, llm_client)
+            if artifact_domain is None or artifact_domain.id is None:
+                self.logger.error(f"Failed to compile token {tok.id}")
+                continue
+
+            # Get entity artifact
             artifact_ent = self.session.query(CompiledMultifact).get(artifact_domain.id)
             if artifact_ent:
                 compiled_artifacts.append(cast(CompiledMultifact, artifact_ent))
+
         return compiled_artifacts
 
     def compile_token_with_dependencies(
@@ -187,9 +202,15 @@ class ConcreteCompilationService(ICompilationService):
 
         # Now compile this token:
         domain_artifact = self.compile_token(result.id, llm_client)
+        if domain_artifact is None or domain_artifact.id is None:
+            self.logger.error(f"Failed to compile token {result.id}")
+            return compiled_artifacts
+
+        # Get entity artifact
         artifact_ent = self.session.query(CompiledMultifact).get(domain_artifact.id)
         if artifact_ent:
             compiled_artifacts.append(cast(CompiledMultifact, artifact_ent))
+
         return compiled_artifacts
 
     def mark_artifact_invalid(self, artifact_id: int) -> None:

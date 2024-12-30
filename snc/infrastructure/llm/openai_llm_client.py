@@ -133,13 +133,21 @@ class OpenAILLMClient(ILLMClient):
         return data
 
     def _extract_target_name(self, token_content: str) -> str:
-        """Extract the target name from token content."""
-        print(f"\nToken content for name extraction:\n{token_content}\n")
+        """Extract the target name from token content.
 
+        Args:
+            token_content: Content to extract name from, can be in bracketed or non-bracketed format
+
+        Returns:
+            str: Extracted target name
+
+        Raises:
+            ValueError: If target name cannot be extracted
+        """
         if not token_content or not token_content.strip():
             raise ValueError("Token content is empty")
 
-        # Try to find Scene:Name, Component:Name, or Function:Name
+        # Try to find Scene:Name, Component:Name, or Function:Name in brackets
         patterns = [
             r"\[Scene:(\w+)\]",
             r"\[Component:(\w+)\]",
@@ -149,6 +157,7 @@ class OpenAILLMClient(ILLMClient):
             r"\[Type:(\w+)\]",
         ]
 
+        # First try bracketed format
         for pattern in patterns:
             match = re.search(pattern, token_content)
             if match:
@@ -156,12 +165,30 @@ class OpenAILLMClient(ILLMClient):
                 print(f"Found name: {name} using pattern: {pattern}")
                 return name
 
+        # Try non-bracketed format (e.g. "Scene: MainScene")
+        non_bracketed_patterns = [
+            r"Scene:\s*(\w+)",
+            r"Component:\s*(\w+)",
+            r"Function:\s*(\w+)",
+            r"Service:\s*(\w+)",
+            r"Interface:\s*(\w+)",
+            r"Type:\s*(\w+)",
+        ]
+
+        for pattern in non_bracketed_patterns:
+            match = re.search(pattern, token_content)
+            if match:
+                name = match.group(1)
+                print(f"Found name: {name} using non-bracketed pattern: {pattern}")
+                return name
+
         # If no match found, try to find it in the first line
         first_line = token_content.split("\n")[0].strip()
         if ":" in first_line:
             name = first_line.split(":")[-1].strip()
-            print(f"Found name from first line: {name}")
-            return name
+            if name and name.isalnum():  # Ensure name is valid
+                print(f"Found name from first line: {name}")
+                return name
 
         raise ValueError(
             f"Could not extract target name from token content: {token_content[:100]}..."

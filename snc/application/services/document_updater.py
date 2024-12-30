@@ -3,7 +3,7 @@
 """Service for applying document updates and managing token changes."""
 
 import logging
-from typing import List
+from typing import List, Dict, Any
 
 from snc.domain.models import DomainToken, TokenDiffResult
 from snc.application.interfaces.idocument_repository import IDocumentRepository
@@ -82,3 +82,33 @@ class DocumentUpdater:
             self.doc_repo.session.commit()
         if isinstance(self.token_repo, TokenRepository):
             self.token_repo.session.commit()
+
+    def create_tokens(
+        self,
+        doc_id: int,
+        content: str,
+        token_data: List[Dict[str, Any]],
+    ) -> List[DomainToken]:
+        """Create new tokens for a document.
+
+        Args:
+            doc_id: Document ID
+            content: Document content
+            token_data: List of token data dictionaries
+
+        Returns:
+            List of created domain tokens
+        """
+        created_tokens = []
+        for token_info in token_data:
+            token = self.token_repo.create_token(
+                doc_id=doc_id,
+                token_type=token_info["type"],
+                token_name=token_info["token_name"],
+                scene_name=token_info["scene_name"],
+                component_name=token_info["component_name"],
+                function_name=token_info["function_name"],
+                content=token_info["content"],
+            )
+            created_tokens.append(token)
+        return created_tokens

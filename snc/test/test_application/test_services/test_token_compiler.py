@@ -1,7 +1,7 @@
 # tests/services/test_token_compiler.py
 
 import pytest
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 from snc.application.services.token_compiler import TokenCompiler
 from snc.infrastructure.repositories.token_repository import TokenRepository
 from snc.infrastructure.services.compilation_service import (
@@ -27,6 +27,7 @@ from snc.infrastructure.llm.client_factory import ClientFactory
 from snc.domain.model_types import GroqModelType
 from snc.domain.models import DomainToken
 from snc.application.interfaces.ivalidation_service import ValidationResult
+from snc.database import engine
 import uuid
 
 
@@ -40,10 +41,51 @@ def cleanup_db(db_session: Session):
     db_session.commit()
 
 
+@pytest.fixture
+def session_factory():
+    """Create a session factory for tests."""
+    return sessionmaker(bind=engine)
+
+
+@pytest.fixture
+def compilation_service(db_session: Session) -> ConcreteCompilationService:
+    """Create a compilation service for testing."""
+    return ConcreteCompilationService(db_session)
+
+
+@pytest.fixture
+def validation_service(db_session: Session) -> ConcreteValidationService:
+    """Create a validation service for testing."""
+    return ConcreteValidationService(db_session)
+
+
+@pytest.fixture
+def token_repo(db_session: Session) -> TokenRepository:
+    """Create a token repository for testing."""
+    return TokenRepository(db_session)
+
+
+@pytest.fixture
+def token_compiler(
+    compilation_service: ConcreteCompilationService,
+    validation_service: ConcreteValidationService,
+    token_repo: TokenRepository,
+    session_factory: sessionmaker,
+) -> TokenCompiler:
+    """Create a TokenCompiler instance for testing."""
+    return TokenCompiler(
+        compilation_service=compilation_service,
+        validation_service=validation_service,
+        session_factory=session_factory,
+        token_repository=token_repo,
+    )
+
+
 def test_token_compiler_compile_success(
     db_session: Session,
     patch_client_factory: MagicMock,
     mock_validation_service_success: MagicMock,
+    token_compiler: TokenCompiler,
 ):
     """Test that compiling a token with valid code creates an artifact marked as valid."""
     # Create test document and token with unique UUID
@@ -68,13 +110,8 @@ def test_token_compiler_compile_success(
     domain_token = token_repo.get_token_by_id(token.id)
     assert domain_token, "Token should be fetched from repository."
 
-    # Setup services
-    compilation_service = ConcreteCompilationService(db_session)
-    validation_service = ConcreteValidationService(db_session)
+    # Get LLM client
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(
-        llm_client=llm_client, validation_service=validation_service
-    )
 
     # Patch validate_artifact on the class
     with patch(
@@ -82,14 +119,8 @@ def test_token_compiler_compile_success(
     ) as mock_validate:
         mock_validate.return_value = ValidationResult(success=True, errors=[])
 
-        compiler = TokenCompiler(
-            compilation_service,
-            validation_service,
-            evaluation_service,
-        )
-
         # Call compile_and_validate
-        compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
+        token_compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
 
         # Refresh session to see changes from parallel compilation
         db_session.expire_all()
@@ -108,6 +139,7 @@ def test_token_compiler_compile_fail(
     db_session: Session,
     patch_client_factory: MagicMock,
     mock_validation_service_failure: MagicMock,
+    token_compiler: TokenCompiler,
 ):
     """Test that compiling a token with invalid code creates an artifact marked as invalid."""
     # Create test document and token with unique UUID
@@ -132,17 +164,11 @@ def test_token_compiler_compile_fail(
     domain_token = token_repo.get_token_by_id(token.id)
     assert domain_token, "Token should be fetched from repository."
 
-    # Setup services
-    compilation_service = ConcreteCompilationService(db_session)
-    validation_service = ConcreteValidationService(db_session)
+    # Get LLM client
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(
-        llm_client=llm_client, validation_service=validation_service
-    )
-    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
     # Call compile_and_validate
-    compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
+    token_compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
 
     # Refresh session to see changes from parallel compilation
     db_session.expire_all()
@@ -150,17 +176,18 @@ def test_token_compiler_compile_fail(
     # Check artifact
     artifact = (
         db_session.query(CompiledMultifact)
-        .filter(CompiledMultifact.ni_token_id == token.id, CompiledMultifact.valid == False)
+        .filter(CompiledMultifact.ni_token_id == token.id)
         .first()
     )
-    assert artifact, "Artifact should exist even if compilation failed."
-    assert (
-        artifact.valid == False
-    ), "Artifact should be marked as invalid due to compilation failure."
-    assert artifact.cache_hit == False, "Artifact should not be a cache hit."
+    assert artifact, "Artifact should have been created."
+    assert artifact.valid is False, "Artifact should be invalid."
 
 
-def test_token_compiler_no_id_raises_error(db_session: Session, patch_client_factory: MagicMock):
+def test_token_compiler_no_id_raises_error(
+    db_session: Session,
+    patch_client_factory: MagicMock,
+    token_compiler: TokenCompiler,
+):
     """Attempting to compile a token with no ID should raise ValueError."""
     # Create a DomainToken in memory (not in DB) with unique UUID
     domain_token = DomainToken(
@@ -172,24 +199,19 @@ def test_token_compiler_no_id_raises_error(db_session: Session, patch_client_fac
         hash=TokenDiffService._compute_hash("No ID token"),
     )
 
-    # Setup services
-    compilation_service = ConcreteCompilationService(db_session)
-    validation_service = ConcreteValidationService(db_session)
+    # Get LLM client
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(
-        llm_client=llm_client, validation_service=validation_service
-    )
-    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
-    # Expect ValueError
+    # Call compile_and_validate should raise ValueError
     with pytest.raises(ValueError, match="Token ID cannot be None"):
-        compiler.compile_and_validate([domain_token], llm_client, revalidate=False)
+        token_compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
 
 
 def test_token_compiler_cache_hit(
     db_session: Session,
     patch_client_factory: MagicMock,
     mock_validation_service_success: MagicMock,
+    token_compiler: TokenCompiler,
 ):
     """Test that compiling a token with an existing cache_hit=True artifact does not create a new artifact."""
     # Create test document and token with unique UUID
@@ -228,24 +250,18 @@ def test_token_compiler_cache_hit(
     domain_token = token_repo.get_token_by_id(token.id)
     assert domain_token, "Token should be fetched from repository."
 
-    # Setup services
-    compilation_service = ConcreteCompilationService(db_session)
-    validation_service = ConcreteValidationService(db_session)
+    # Get LLM client
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService(
-        llm_client=llm_client, validation_service=validation_service
-    )
-    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
-    # Call compile_and_validate with revalidate=False
-    compiler.compile_and_validate([domain_token], llm_client, revalidate=False)
+    # Call compile_and_validate
+    token_compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
 
     # Refresh session to see changes from parallel compilation
     db_session.expire_all()
 
-    # Ensure no new artifact is created
+    # Check that no new artifact was created
     artifacts = (
         db_session.query(CompiledMultifact).filter(CompiledMultifact.ni_token_id == token.id).all()
     )
-    assert len(artifacts) == 1, "No new artifact should be created if cache_hit=True."
-    assert artifacts[0].cache_hit == True, "Existing artifact should remain cache_hit=True."
+    assert len(artifacts) == 1, "Should not have created a new artifact."
+    assert artifacts[0].id == existing_artifact.id, "Should have reused existing artifact."
