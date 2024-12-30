@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
-from snc.infrastructure.llm.model_factory import ClientType
+from snc.domain.client_types import ClientType
 
 
 class Model(BaseModel):

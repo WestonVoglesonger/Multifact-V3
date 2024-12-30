@@ -13,6 +13,7 @@ from snc.infrastructure.validation.validation_service import ConcreteValidationS
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.infrastructure.llm.model_factory import OpenAIModelType
 from snc.infrastructure.services.code_fixer_service import ConcreteCodeFixerService
+from snc.infrastructure.llm.client_factory import ClientFactory
 
 
 @dataclass
@@ -46,14 +47,13 @@ def setup_services(
         Services instance with all required services
     """
     llm_service = ConcreteLLMService(model_type)
+    llm_client = ClientFactory.get_llm_client(model_type)
     token_diff_service = TokenDiffService()
-    document_updater = DocumentUpdater(
-        repositories.document_repo, repositories.token_repo
-    )
+    document_updater = DocumentUpdater(repositories.document_repo, repositories.token_repo)
 
     validation_service = ConcreteValidationService(session)
     compilation_service = ConcreteCompilationService(session)
-    code_evaluation_service = CodeEvaluationService()
+    code_evaluation_service = CodeEvaluationService(llm_client, validation_service)
 
     token_compiler = TokenCompiler(
         compilation_service,

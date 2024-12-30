@@ -12,10 +12,3 @@ class ICompilationService(ABC):
     def compile(self, code: str) -> CompilationResult:
         """Compile code and return the result."""
         pass
-
-    @abstractmethod
-    def compile_multifact(
-        self, multifact: DomainCompiledMultifact
-    ) -> CompilationResult:
-        """Compile multifact and return the result."""
-        pass

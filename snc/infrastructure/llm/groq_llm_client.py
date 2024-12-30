@@ -16,12 +16,12 @@ from groq.types.chat import (
 from openai.types.completion_usage import CompletionUsage
 
 from snc.domain.models import Model
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from snc.application.interfaces.illm_client import ILLMClient
 
 load_dotenv()
 
 
-class GroqLLMClient(BaseLLMClient):
+class GroqLLMClient(ILLMClient):
     """
     Client for interacting with Groq's LLM to generate code and parse narrative instructions,
     using ModelFactory and the specified model type.
@@ -161,9 +161,7 @@ class GroqLLMClient(BaseLLMClient):
             scene["functions"] = new_functions
             scene["narrative"] = "\n".join(cleaned_lines)
 
-            logging.debug(
-                f"Updated scene '{scene['name']}' with functions: {scene['functions']}"
-            )
+            logging.debug(f"Updated scene '{scene['name']}' with functions: {scene['functions']}")
 
         # Debug: Print the final JSON after post-processing
         logging.debug(f"Final JSON after post-processing: {json.dumps(data, indent=2)}")
@@ -188,9 +186,7 @@ class GroqLLMClient(BaseLLMClient):
         )
 
         user_message = {"content": user_message_content}
-        return self._generic_chat_call(
-            system_message, user_message, model_name=self.model.name
-        )
+        return self._generic_chat_call(system_message, user_message, model_name=self.model.name)
 
     def fix_code(self, original_code: str, error_summary: str) -> str:
         system_message = {
@@ -228,7 +224,7 @@ class GroqLLMClient(BaseLLMClient):
 
     def _generic_chat_call(
         self,
-        system_message: Dict[str, str],   # or more specific TypedDict if you like
+        system_message: Dict[str, str],  # or more specific TypedDict if you like
         user_message: Dict[str, str],
         model_name: str,
         temperature: float = 0.7,
@@ -241,16 +237,16 @@ class GroqLLMClient(BaseLLMClient):
             try:
                 # Build typed message params
                 sys_msg = ChatCompletionSystemMessageParam(
-                    role="system",
-                    content=system_message["content"]
+                    role="system", content=system_message["content"]
                 )
                 usr_msg = ChatCompletionUserMessageParam(
-                    role="user",
-                    content=user_message["content"]
+                    role="user", content=user_message["content"]
                 )
 
                 # Now Mypy / Pyright sees a list of properly typed message objects
-                messages: list[ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam] = [sys_msg, usr_msg]
+                messages: list[
+                    ChatCompletionSystemMessageParam | ChatCompletionUserMessageParam
+                ] = [sys_msg, usr_msg]
 
                 response = self.client.chat.completions.create(
                     model=model_name,
@@ -267,13 +263,11 @@ class GroqLLMClient(BaseLLMClient):
                     self.last_usage = CompletionUsage(
                         prompt_tokens=usage_dict.prompt_tokens,
                         completion_tokens=usage_dict.completion_tokens,
-                        total_tokens=usage_dict.total_tokens
+                        total_tokens=usage_dict.total_tokens,
                     )
                 else:
                     self.last_usage = CompletionUsage(
-                        prompt_tokens=0,
-                        completion_tokens=0,
-                        total_tokens=0
+                        prompt_tokens=0, completion_tokens=0, total_tokens=0
                     )
 
                 if hasattr(response.choices[0], "message") and hasattr(
@@ -291,7 +285,6 @@ class GroqLLMClient(BaseLLMClient):
 
         raise RuntimeError("LLM call failed after 3 attempts.")
 
-
     def compute_cost_from_model(self, usage: CompletionUsage) -> float:
         """
         Compute the cost of a given usage dictionary based on the model's pricing.
@@ -300,14 +293,10 @@ class GroqLLMClient(BaseLLMClient):
         completion_tokens = usage.completion_tokens
 
         prompt_cost = (
-            Decimal(prompt_tokens)
-            / Decimal(1000)
-            * Decimal(self.model.prompt_cost_per_1k)
+            Decimal(prompt_tokens) / Decimal(1000) * Decimal(self.model.prompt_cost_per_1k)
         )
         completion_cost = (
-            Decimal(completion_tokens)
-            / Decimal(1000)
-            * Decimal(self.model.completion_cost_per_1k)
+            Decimal(completion_tokens) / Decimal(1000) * Decimal(self.model.completion_cost_per_1k)
         )
         return float(round(prompt_cost + completion_cost, 6))
 

@@ -12,6 +12,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     postgresql-client \
     zsh \
+    nodejs \
+    npm \
+    && npm install -g typescript \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and switch to a non-root user

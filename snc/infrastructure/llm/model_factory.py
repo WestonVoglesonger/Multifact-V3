@@ -2,21 +2,10 @@ from enum import Enum
 
 from snc.domain.models import Model
 from snc.domain.model_types import GroqModelType, OpenAIModelType
+from snc.domain.client_types import ClientType
 
 
 BaseModelType = GroqModelType | OpenAIModelType
-
-
-class ClientType(Enum):
-    """
-    Enumeration of supported LLM clients.
-
-    - OPENAI: Models and endpoints associated with OpenAI.
-    - GROQ: Models and endpoints offered by the Groq service.
-    """
-
-    OPENAI = "openai"
-    GROQ = "groq"
 
 
 class ModelFactory:

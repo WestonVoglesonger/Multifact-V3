@@ -41,9 +41,7 @@ def test_compile_token_cache_hit(db_session: Session, mock_groq_client: MagicMoc
     # Debug: Print existing artifacts before test
     print("\nBefore test:")
     existing_artifacts = (
-        db_session.query(CompiledMultifact)
-        .filter_by(ni_token_id=token_with_cache.id)
-        .all()
+        db_session.query(CompiledMultifact).filter_by(ni_token_id=token_with_cache.id).all()
     )
     for art in existing_artifacts:
         print(f"Artifact {art.id}: cache_hit={art.cache_hit}, valid={art.valid}")
@@ -54,16 +52,12 @@ def test_compile_token_cache_hit(db_session: Session, mock_groq_client: MagicMoc
     mock_groq_client.generate_code.return_value = "// mocked code"
 
     # 3) Call compile_token
-    artifact_domain = compilation_service.compile_token(
-        token_with_cache.id, mock_groq_client
-    )
+    artifact_domain = compilation_service.compile_token(token_with_cache.id, mock_groq_client)
 
     # Debug: Print artifacts after test
     print("\nAfter test:")
     final_artifacts = (
-        db_session.query(CompiledMultifact)
-        .filter_by(ni_token_id=token_with_cache.id)
-        .all()
+        db_session.query(CompiledMultifact).filter_by(ni_token_id=token_with_cache.id).all()
     )
     for art in final_artifacts:
         print(f"Artifact {art.id}: cache_hit={art.cache_hit}, valid={art.valid}")
@@ -73,9 +67,7 @@ def test_compile_token_cache_hit(db_session: Session, mock_groq_client: MagicMoc
     assert artifact_domain.cache_hit is True
     # Ensure no new artifact is in DB
     count_artifacts = (
-        db_session.query(CompiledMultifact)
-        .filter_by(ni_token_id=token_with_cache.id)
-        .count()
+        db_session.query(CompiledMultifact).filter_by(ni_token_id=token_with_cache.id).count()
     )
     assert count_artifacts == 1, "No new artifact should have been created."
 
@@ -92,17 +84,13 @@ def test_compile_token_no_cache(db_session: Session, mock_groq_client: MagicMock
         .filter((CompiledMultifact.id == None) | (CompiledMultifact.cache_hit == False))
         .first()
     )
-    assert (
-        no_cache_token
-    ), "Expected to find a token that does not have a cache artifact."
+    assert no_cache_token, "Expected to find a token that does not have a cache artifact."
 
     # mock LLM generate_code
     mock_groq_client.generate_code.return_value = "// new code from mock"
 
     compilation_service = ConcreteCompilationService(db_session)
-    artifact_domain = compilation_service.compile_token(
-        no_cache_token.id, mock_groq_client
-    )
+    artifact_domain = compilation_service.compile_token(no_cache_token.id, mock_groq_client)
 
     assert artifact_domain.cache_hit is False, "New artifact shouldn't be cache_hit."
     assert artifact_domain.code == "// new code from mock"
@@ -170,14 +158,10 @@ def test_compile_document(db_session: Session, mock_groq_client: MagicMock):
     compilation_service = ConcreteCompilationService(db_session)
     compiled_ents = compilation_service.compile_document(domain_doc, mock_groq_client)
     # We expect it compiled each token
-    assert len(compiled_ents) == len(
-        domain_tokens
-    ), "Should have an artifact for each token."
+    assert len(compiled_ents) == len(domain_tokens), "Should have an artifact for each token."
 
 
-def test_compile_token_with_dependencies(
-    db_session: Session, mock_groq_client: MagicMock
-):
+def test_compile_token_with_dependencies(db_session: Session, mock_groq_client: MagicMock):
     """
     If a token has dependencies, compile_token_with_dependencies recursively
     compiles them first.
@@ -198,9 +182,7 @@ def test_compile_token_with_dependencies(
     mock_groq_client.generate_code.return_value = "// dep code"
 
     compilation_service = ConcreteCompilationService(db_session)
-    all_arts = compilation_service.compile_token_with_dependencies(
-        token_s.id, mock_groq_client
-    )
+    all_arts = compilation_service.compile_token_with_dependencies(token_s.id, mock_groq_client)
     assert len(all_arts) == 3, "Should have compiled S, C, F in total."
 
 
@@ -232,7 +214,7 @@ def test_compile_multifact(db_session: Session):
         feedback="Good code",
     )
 
-    result = service.compile_multifact(multifact)
+    result = service.compile(multifact.code)
 
     assert result.code == multifact.code
     assert result.valid == multifact.valid

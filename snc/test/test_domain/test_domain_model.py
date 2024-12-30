@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from snc.domain.models import Model
+from snc.domain.client_types import ClientType
 
 
 def test_model_init_minimal():
@@ -8,11 +9,8 @@ def test_model_init_minimal():
     """
     from enum import Enum
 
-    class DummyClientType(Enum):
-        GROQ = "groq"
-
     model_obj = Model(
-        client_type=DummyClientType.GROQ,
+        client_type=ClientType.GROQ,
         name="dummy-model",
         context_window=4096,
         max_output_tokens=1000,
@@ -21,7 +19,7 @@ def test_model_init_minimal():
         supports_images=False,
     )
 
-    assert model_obj.client_type == DummyClientType.GROQ
+    assert model_obj.client_type == ClientType.GROQ
     assert model_obj.name == "dummy-model"
     assert model_obj.context_window == 4096
     assert model_obj.max_output_tokens == 1000
@@ -37,14 +35,9 @@ def test_model_init_full():
     """
     Verify the Model class handles optional fields.
     """
-    from enum import Enum
-
-    class DummyClientType(Enum):
-        GROQ = "groq"
-
     now = datetime.now(timezone.utc)
     model_obj = Model(
-        client_type=DummyClientType.GROQ,
+        client_type=ClientType.GROQ,
         name="some-groq-model",
         context_window=8192,
         max_output_tokens=32768,
@@ -58,7 +51,7 @@ def test_model_init_full():
         supports_reasoning=True,
     )
 
-    assert model_obj.client_type == DummyClientType.GROQ
+    assert model_obj.client_type == ClientType.GROQ
     assert model_obj.name == "some-groq-model"
     assert model_obj.context_window == 8192
     assert model_obj.max_output_tokens == 32768

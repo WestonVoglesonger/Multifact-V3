@@ -1,11 +1,9 @@
 """Core domain models for the System Narrative Compiler."""
 
 from datetime import datetime
-from typing import Optional, List, Tuple, Literal
+from typing import Optional, List, Tuple
 from dataclasses import dataclass
-
-# Type alias for supported client types
-ClientType = Literal["openai", "groq", "anthropic"]
+from snc.domain.client_types import ClientType
 
 
 class DomainToken:
@@ -201,6 +199,6 @@ class TokenDiffResult:
     removed: List[Tuple[DomainToken, Optional[DomainCompiledMultifact]]]
     changed: List[Tuple[DomainToken, Optional[DomainCompiledMultifact], dict]]
     added: List[dict]
-    evaluation_differences: Optional[List[Tuple[int, float, str]]] = (
-        None  # Token ID, New Score, Feedback
-    )
+    evaluation_differences: Optional[
+        List[Tuple[int, float, str]]
+    ] = None  # Token ID, New Score, Feedback

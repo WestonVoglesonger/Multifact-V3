@@ -6,7 +6,7 @@ from snc.domain.model_types import GroqModelType, OpenAIModelType
 
 class ConcreteLLMService(ILLMService):
     """
-    This class implements ILLMService and uses ClientFactory to get a BaseLLMClient.
+    This class implements ILLMService and uses ClientFactory to get an ILLMClient implementation.
     It doesn't tie the application layer to a specific LLM implementation.
     """
 
@@ -23,9 +23,7 @@ class ConcreteLLMService(ILLMService):
         additional_requirements: str = "",
         code_style: str = "",
     ) -> str:
-        return self.llm_client.generate_code(
-            token_content, additional_requirements, code_style
-        )
+        return self.llm_client.generate_code(token_content, additional_requirements, code_style)
 
     def fix_code(self, original_code: str, error_summary: str) -> str:
         return self.llm_client.fix_code(original_code, error_summary)

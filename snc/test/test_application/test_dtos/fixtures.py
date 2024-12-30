@@ -4,7 +4,7 @@ from typing import Dict, Any
 
 import pytest
 
-from snc.infrastructure.llm.model_factory import ClientType
+from snc.domain.client_types import ClientType
 
 
 @pytest.fixture

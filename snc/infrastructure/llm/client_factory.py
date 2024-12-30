@@ -2,9 +2,8 @@ from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
 from snc.infrastructure.llm.groq_llm_client import GroqLLMClient
 from snc.domain.models import Model
 from snc.domain.model_types import GroqModelType, OpenAIModelType
-from snc.infrastructure.llm.model_factory import ClientType
+from snc.domain.client_types import ClientType
 from snc.infrastructure.llm.model_factory import ModelFactory
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 
 
 class ClientFactory:

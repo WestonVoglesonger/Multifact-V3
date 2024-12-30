@@ -14,15 +14,15 @@ from openai.types.chat import (
 from openai.types.completion_usage import CompletionUsage
 
 from snc.domain.models import Model
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from snc.application.interfaces.illm_client import ILLMClient
 
 load_dotenv()
 
 
-class OpenAILLMClient(BaseLLMClient):
+class OpenAILLMClient(ILLMClient):
     """
     A bracket-based LLM parser that ensures we never skip lines like
-    [Scene:XYZ], [Component:ABC], or [Function:Foo]. Inherits from BaseLLMClient.
+    [Scene:XYZ], [Component:ABC], or [Function:Foo]. Implements ILLMClient interface.
     """
 
     def __init__(self, model: Model):
@@ -55,9 +55,7 @@ class OpenAILLMClient(BaseLLMClient):
             line = line.strip()
             if line.startswith("[") and "]" in line:
                 if current_bracket:
-                    bracket_content[current_bracket] = "\n".join(
-                        current_content
-                    ).strip()
+                    bracket_content[current_bracket] = "\n".join(current_content).strip()
                 current_bracket = line
                 current_content = []
             elif current_bracket:
@@ -130,9 +128,7 @@ class OpenAILLMClient(BaseLLMClient):
             for component in scene.get("components", []):
                 component_line = f"[Component:{component['name']}]"
                 if component_line in bracket_content:
-                    component["raw_text"] = (
-                        f"{component_line}\n{bracket_content[component_line]}"
-                    )
+                    component["raw_text"] = f"{component_line}\n{bracket_content[component_line]}"
 
         return data
 
@@ -188,9 +184,7 @@ class OpenAILLMClient(BaseLLMClient):
         selector_name = "".join(
             ["-" + c.lower() if c.isupper() else c for c in target_name]
         ).lstrip("-")
-        code = re.sub(
-            r"selector:\s*\'[^\']+\'", f"selector: 'app-{selector_name}'", code
-        )
+        code = re.sub(r"selector:\s*\'[^\']+\'", f"selector: 'app-{selector_name}'", code)
         code = re.sub(
             r"templateUrl:\s*\'[^\']+\'",
             f"templateUrl: './{selector_name}.component.html'",
@@ -361,7 +355,7 @@ class OpenAILLMClient(BaseLLMClient):
         max_tokens: int = 1500,
     ) -> str:
         """
-        Wraps an OpenAI ChatCompletion call, implementing the abstract method from BaseLLMClient.
+        Wraps an OpenAI ChatCompletion call to handle common functionality for all LLM requests.
         """
         import time
         import logging
@@ -390,9 +384,7 @@ class OpenAILLMClient(BaseLLMClient):
                     self.last_cost = self.compute_cost_from_model(self.last_usage)
                 else:
                     self.last_usage = CompletionUsage(
-                        prompt_tokens=0,
-                        completion_tokens=0,
-                        total_tokens=0
+                        prompt_tokens=0, completion_tokens=0, total_tokens=0
                     )
                     self.last_cost = 0.0
 
@@ -431,18 +423,14 @@ class OpenAILLMClient(BaseLLMClient):
         Returns them as a list of raw lines.
         """
         lines = text.splitlines()
-        bracket_pattern = re.compile(
-            r"^\s*\[(Scene|Component|Function)\s*:\s*(.*?)\]\s*$"
-        )
+        bracket_pattern = re.compile(r"^\s*\[(Scene|Component|Function)\s*:\s*(.*?)\]\s*$")
         bracket_lines = []
         for line in lines:
             if bracket_pattern.match(line.strip()):
                 bracket_lines.append(line.strip())
         return bracket_lines
 
-    def _enforce_bracket_count(
-        self, data: Dict[str, Any], bracket_lines: List[str]
-    ) -> None:
+    def _enforce_bracket_count(self, data: Dict[str, Any], bracket_lines: List[str]) -> None:
         """
         Check how many bracket lines we have vs how many total objects in the final JSON.
         If there's a mismatch, we log a warning. We could also do fallback inserts, etc.
@@ -473,9 +461,7 @@ class OpenAILLMClient(BaseLLMClient):
                 "Might have duplicates or spurious objects."
             )
         else:
-            logging.debug(
-                "Bracket lines match the LLM's final JSON object count perfectly!"
-            )
+            logging.debug("Bracket lines match the LLM's final JSON object count perfectly!")
 
     def _attempt_json_parse(self, text: str) -> Optional[Dict[str, Any]]:
         """

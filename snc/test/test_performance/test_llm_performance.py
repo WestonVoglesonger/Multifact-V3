@@ -17,7 +17,6 @@ from snc.application.services.token_diff_service import TokenDiffService
 from snc.infrastructure.validation.validation_service import ConcreteValidationService
 from snc.database import Session
 from snc.infrastructure.entities.ni_document import NIDocument
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 from snc.domain.model_types import OpenAIModelType
 from snc.infrastructure.repositories.artifact_repository import ArtifactRepository
 from snc.infrastructure.repositories.document_repository import DocumentRepository
@@ -31,7 +30,7 @@ logger = logging.getLogger(__name__)
 input_ids = [f"input_{i+1}" for i in range(len(TEST_INPUTS))]
 
 
-def _build_llm_client_from_env() -> Optional[BaseLLMClient]:
+def _build_llm_client_from_env() -> Optional[ILLMClient]:
     """Build LLM client from environment variables.
 
     Returns:
@@ -106,7 +105,12 @@ def test_ni_creation_and_compilation(
             document_updater = DocumentUpdater(doc_repo, token_repo)
             compilation_service = ConcreteCompilationService(test_session)
             validation_service = ConcreteValidationService(test_session)
-            evaluation_service = CodeEvaluationService()
+            llm_client = _build_llm_client_from_env()
+            if llm_client is None:
+                pytest.skip("Required LLM environment variables not set")
+            evaluation_service = CodeEvaluationService(
+                llm_client=llm_client, validation_service=validation_service
+            )
             token_compiler = TokenCompiler(
                 compilation_service,
                 validation_service,

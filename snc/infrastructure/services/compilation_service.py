@@ -6,13 +6,13 @@ import re
 import threading
 import logging
 
-from snc.domain.models import DomainDocument, DomainCompiledMultifact, DomainMultifact
+from snc.domain.models import DomainDocument, DomainCompiledMultifact
 from snc.domain.model_types import CompilationResult
 from snc.infrastructure.entities.compiled_multifact import CompiledMultifact
 from snc.infrastructure.entities.ni_token import NIToken
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 from snc.application.interfaces.icompilation_service import ICompilationService
 from snc.application.services.code_evaluation_service import CodeEvaluationService
+from snc.application.interfaces.illm_client import ILLMClient
 
 
 class ConcreteCompilationService(ICompilationService):
@@ -61,43 +61,7 @@ class ConcreteCompilationService(ICompilationService):
         except Exception as e:
             return CompilationResult(code="", valid=False, errors=[str(e)], cache_hit=False)
 
-    def compile_multifact(self, multifact: DomainMultifact) -> DomainCompiledMultifact:
-        """Compile a multifact into a compiled multifact."""
-        if multifact.is_compiled is True:
-            return DomainCompiledMultifact(
-                id=multifact.id,
-                name=multifact.name,
-                description=multifact.description,
-                code=multifact.code,
-                metadata=multifact.metadata,
-                is_compiled=True,
-                created_at=multifact.created_at,
-                updated_at=multifact.updated_at,
-                compiled_at=multifact.compiled_at,
-                version=multifact.version,
-                parent_id=multifact.parent_id,
-                parent_version=multifact.parent_version,
-                parent_type=multifact.parent_type,
-                parent_name=multifact.parent_name,
-                parent_description=multifact.parent_description,
-                parent_metadata=multifact.parent_metadata,
-                parent_created_at=multifact.parent_created_at,
-                parent_updated_at=multifact.parent_updated_at,
-                parent_compiled_at=multifact.parent_compiled_at,
-                parent_is_compiled=multifact.parent_is_compiled,
-                parent_code=multifact.parent_code,
-                parent_version_id=multifact.parent_version_id,
-                parent_version_name=multifact.parent_version_name,
-                parent_version_description=multifact.parent_version_description,
-                parent_version_metadata=multifact.parent_version_metadata,
-                parent_version_created_at=multifact.parent_version_created_at,
-                parent_version_updated_at=multifact.parent_version_updated_at,
-                parent_version_compiled_at=multifact.parent_version_compiled_at,
-                parent_version_is_compiled=multifact.parent_version_is_compiled,
-                parent_version_code=multifact.parent_version_code,
-            )
-
-    def compile_token(self, token_id: int, llm_client: BaseLLMClient) -> DomainCompiledMultifact:
+    def compile_token(self, token_id: int, llm_client: ILLMClient) -> DomainCompiledMultifact:
         """Compile a token into a multifact.
 
         Args:
@@ -172,7 +136,7 @@ class ConcreteCompilationService(ICompilationService):
             raise
 
     def compile_document(
-        self, document: DomainDocument, llm_client: BaseLLMClient
+        self, document: DomainDocument, llm_client: ILLMClient
     ) -> List[CompiledMultifact]:
         """Compile all tokens in a document.
 
@@ -197,7 +161,7 @@ class ConcreteCompilationService(ICompilationService):
         return compiled_artifacts
 
     def compile_token_with_dependencies(
-        self, token_id: int, llm_client: BaseLLMClient
+        self, token_id: int, llm_client: ILLMClient
     ) -> List[CompiledMultifact]:
         """Compile a token and all its dependencies.
 

@@ -3,10 +3,9 @@
 import pytest
 from unittest.mock import patch, Mock
 from sqlalchemy.orm import Session
+from sqlalchemy import create_engine
 from snc.application.services.ni_orchestrator import (
     NIOrchestrator,
-    DocumentNotFoundError,
-    LLMParsingError,
 )
 from snc.infrastructure.repositories.document_repository import DocumentRepository
 from snc.infrastructure.repositories.token_repository import TokenRepository
@@ -24,19 +23,21 @@ from snc.infrastructure.validation.validation_service import (
 )
 from snc.infrastructure.llm.model_factory import OpenAIModelType
 from snc.infrastructure.entities.ni_document import NIDocument
-from snc.application.services.exceptions import (
-    ArtifactNotFoundError,
-    DocumentNotFoundError,
-    TokenNotFoundError,
-)
-from snc.test.test_application.test_services.fixtures import (
-    mock_llm_parse_help,
-    mock_validation_service_success,
-    mock_llm_client,
-    patch_client_factory,
-)
 from snc.infrastructure.llm.client_factory import ClientFactory
 from snc.domain.models import DomainDocument
+from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
+from snc.infrastructure.llm.model_factory import ModelFactory, ClientType
+from snc.domain.model_types import OpenAIModelType
+from snc.test.test_application.test_services.fixtures import (
+    mock_llm_parse_help,
+    mock_validation_service_failure,
+    mock_validation_service_success,
+)
+
+
+def get_test_session():
+    engine = create_engine("sqlite:///:memory:")
+    return Session(engine)
 
 
 @pytest.fixture
@@ -56,6 +57,10 @@ def test_create_ni_document(db_session: Session):
     Test creating a new NI document.
     """
     doc_repo = DocumentRepository(db_session)
+    model = ModelFactory.get_model(ClientType.OPENAI, OpenAIModelType.GPT_4O_MINI)
+    llm_client = OpenAILLMClient(model=model)
+    compilation_service = ConcreteCompilationService(db_session)
+    validation_service = ConcreteValidationService(db_session)
     ni_orchestrator = NIOrchestrator(
         doc_repo,
         TokenRepository(db_session),
@@ -64,10 +69,9 @@ def test_create_ni_document(db_session: Session):
         TokenDiffService(),
         DocumentUpdater(doc_repo, TokenRepository(db_session)),
         TokenCompiler(
-            ConcreteCompilationService(db_session),
-            ConcreteValidationService(db_session),
-            CodeEvaluationService(),
-            session=db_session,
+            compilation_service,
+            validation_service,
+            CodeEvaluationService(llm_client=llm_client, validation_service=validation_service),
         ),
     )
 
@@ -82,8 +86,19 @@ def test_create_ni_document(db_session: Session):
         Log the user's entry time and IP address for security auditing."""
 
     # Create a new document
-    doc = ni_orchestrator.create_ni_document(test_create_ni_document_content)
-    doc_entity = doc_repo.get_document(doc.id)
+    doc_ent = NIDocument(content="", version="v1")
+    db_session.add(doc_ent)
+    db_session.commit()
+
+    # Update the document
+    ni_orchestrator.update_ni_and_compile(
+        ni_id=doc_ent.id,
+        new_content=test_create_ni_document_content,
+        model_type=OpenAIModelType.GPT_4O_MINI,
+        revalidate=True,
+    )
+
+    doc_entity = doc_repo.get_document(doc_ent.id)
     assert doc_entity is not None, "Document should exist"
     assert doc_entity.content == test_create_ni_document_content
     assert doc_entity.id is not None
@@ -92,20 +107,16 @@ def test_create_ni_document(db_session: Session):
     assert doc_entity.updated_at is not None
     assert len(doc_entity.tokens) > 0
     # Check specific tokens
+    assert any(t.token_type == "scene" and t.scene_name == "Intro" for t in doc_entity.tokens)
     assert any(
-        t.token_type == "scene" and t.scene_name == "Intro" for t in doc_entity.tokens
-    )
-    assert any(
-        t.token_type == "component" and t.component_name == "Greeting"
-        for t in doc_entity.tokens
+        t.token_type == "component" and t.component_name == "Greeting" for t in doc_entity.tokens
     )
     assert any(
         t.token_type == "function" and t.function_name == "displayGreeting"
         for t in doc_entity.tokens
     )
     assert any(
-        t.token_type == "function" and t.function_name == "logEntry"
-        for t in doc_entity.tokens
+        t.token_type == "function" and t.function_name == "logEntry" for t in doc_entity.tokens
     )
 
 
@@ -129,10 +140,10 @@ def test_user_intervention_service_update_and_recompile_success(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     evaluator_llm = ClientFactory.get_llm_client(OpenAIModelType.GPT_4O_MINI)
-    evaluation_service = CodeEvaluationService()
-    token_compiler = TokenCompiler(
-        compilation_service, validation_service, evaluation_service, session=db_session
+    evaluation_service = CodeEvaluationService(
+        llm_client=evaluator_llm, validation_service=validation_service
     )
+    token_compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
     # Instantiate NIOrchestrator
     uis = NIOrchestrator(
@@ -154,7 +165,9 @@ def test_user_intervention_service_update_and_recompile_success(
     assert intervention_doc, "Demo data should have a doc with [Scene:Intervention]"
     doc_id = intervention_doc.id
 
-    new_content = "[Scene:Intervention]\nUpdated intervention doc.\n[Component:Help]\nDisplay a help message."
+    new_content = (
+        "[Scene:Intervention]\nUpdated intervention doc.\n[Component:Help]\nDisplay a help message."
+    )
 
     # Perform the update and compile
     uis.update_ni_and_compile(
@@ -167,17 +180,13 @@ def test_user_intervention_service_update_and_recompile_success(
     # Verify the updated content
     updated_doc = doc_repo.get_document(doc_id)
     assert updated_doc is not None, "Document should exist"
-    assert isinstance(
-        updated_doc, DomainDocument
-    ), "Document should be a DomainDocument"
+    assert isinstance(updated_doc, DomainDocument), "Document should be a DomainDocument"
     doc: DomainDocument = updated_doc  # Type cast after assertion
     assert doc.content == new_content, "Document content should be updated."
 
     # Verify tokens
     updated_tokens = token_repo.get_all_tokens_for_document(doc_id)
-    updated_component = next(
-        (t for t in updated_tokens if t.component_name == "Help"), None
-    )
+    updated_component = next((t for t in updated_tokens if t.component_name == "Help"), None)
     assert updated_component is not None, "Should have a new 'Help' component"
     assert updated_component.content == "[Component:Help]\nDisplay a help message."
 
@@ -188,8 +197,6 @@ def test_user_intervention_service_update_and_recompile_success(
         if token.id is None:
             continue
         # Find the artifact for this specific token
-        token_artifact = next(
-            (art for tok, art in artifacts_by_token if tok.id == token.id), None
-        )
+        token_artifact = next((art for tok, art in artifacts_by_token if tok.id == token.id), None)
         assert token_artifact is not None, f"No artifact found for token {token.id}"
         # assert token_artifact.valid, f"Artifact {token_artifact.id} is not valid"

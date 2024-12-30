@@ -2,10 +2,15 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, Any
+from snc.domain.models import Model
 
 
 class ILLMClient(ABC):
     """Interface for LLM clients for code generation and evaluation."""
+
+    def __init__(self, model: Model):
+        self.model = model
+        self.last_usage = None
 
     @abstractmethod
     def generate_code(self, prompt: str, **kwargs: Any) -> str:
@@ -17,19 +22,6 @@ class ILLMClient(ABC):
 
         Returns:
             Generated code as a string
-        """
-        pass
-
-    @abstractmethod
-    def evaluate_code(self, code: str, requirements: str) -> Dict[str, Any]:
-        """Evaluate code against requirements.
-
-        Args:
-            code: The code to evaluate
-            requirements: Requirements to evaluate against
-
-        Returns:
-            Dictionary containing evaluation results
         """
         pass
 

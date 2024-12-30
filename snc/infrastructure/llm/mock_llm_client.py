@@ -1,9 +1,9 @@
-from typing import Optional, Dict, Any
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
+from typing import Dict, Any
+from snc.application.interfaces.illm_client import ILLMClient
 from snc.domain.models import Model
 
 
-class MockLLMClient(BaseLLMClient):
+class MockLLMClient(ILLMClient):
     """Mock LLM client for testing."""
 
     def __init__(self, model: Model):

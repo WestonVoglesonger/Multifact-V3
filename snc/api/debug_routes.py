@@ -5,7 +5,8 @@ from pydantic import BaseModel
 from snc.infrastructure.llm.openai_llm_client import OpenAILLMClient
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.domain.models import Model
-from snc.infrastructure.llm.model_factory import ClientType
+from snc.domain.client_types import ClientType
+from snc.infrastructure.validation.validation_service import ConcreteValidationService
 
 api = APIRouter(prefix="/debug", tags=["debug"])
 
@@ -30,13 +31,14 @@ def debug_code_evaluation(payload: CodeEvalRequest, db: Session = Depends()):
 
         # Initialize services with debug logging
         llm_client = OpenAILLMClient(model)
-        evaluation_service = CodeEvaluationService(llm_client)
+        validation_service = ConcreteValidationService(db)
+        evaluation_service = CodeEvaluationService(
+            llm_client=llm_client, validation_service=validation_service
+        )
 
         # Try evaluation with detailed error capture
         try:
-            result = evaluation_service.evaluate_code(
-                code=payload.code, context={"debug": True}
-            )
+            result = evaluation_service.evaluate_code(code=payload.code, metadata={"debug": True})
         except Exception as e:
             return {
                 "error": str(e),

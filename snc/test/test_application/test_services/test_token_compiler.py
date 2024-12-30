@@ -72,7 +72,9 @@ def test_token_compiler_compile_success(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService()
+    evaluation_service = CodeEvaluationService(
+        llm_client=llm_client, validation_service=validation_service
+    )
 
     # Patch validate_artifact on the class
     with patch(
@@ -84,7 +86,6 @@ def test_token_compiler_compile_success(
             compilation_service,
             validation_service,
             evaluation_service,
-            session=db_session,
         )
 
         # Call compile_and_validate
@@ -135,10 +136,10 @@ def test_token_compiler_compile_fail(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService()
-    compiler = TokenCompiler(
-        compilation_service, validation_service, evaluation_service, session=db_session
+    evaluation_service = CodeEvaluationService(
+        llm_client=llm_client, validation_service=validation_service
     )
+    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
     # Call compile_and_validate
     compiler.compile_and_validate([domain_token], llm_client, revalidate=True)
@@ -149,9 +150,7 @@ def test_token_compiler_compile_fail(
     # Check artifact
     artifact = (
         db_session.query(CompiledMultifact)
-        .filter(
-            CompiledMultifact.ni_token_id == token.id, CompiledMultifact.valid == False
-        )
+        .filter(CompiledMultifact.ni_token_id == token.id, CompiledMultifact.valid == False)
         .first()
     )
     assert artifact, "Artifact should exist even if compilation failed."
@@ -161,9 +160,7 @@ def test_token_compiler_compile_fail(
     assert artifact.cache_hit == False, "Artifact should not be a cache hit."
 
 
-def test_token_compiler_no_id_raises_error(
-    db_session: Session, patch_client_factory: MagicMock
-):
+def test_token_compiler_no_id_raises_error(db_session: Session, patch_client_factory: MagicMock):
     """Attempting to compile a token with no ID should raise ValueError."""
     # Create a DomainToken in memory (not in DB) with unique UUID
     domain_token = DomainToken(
@@ -179,10 +176,10 @@ def test_token_compiler_no_id_raises_error(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService()
-    compiler = TokenCompiler(
-        compilation_service, validation_service, evaluation_service, session=db_session
+    evaluation_service = CodeEvaluationService(
+        llm_client=llm_client, validation_service=validation_service
     )
+    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
     # Expect ValueError
     with pytest.raises(ValueError, match="Token ID cannot be None"):
@@ -235,10 +232,10 @@ def test_token_compiler_cache_hit(
     compilation_service = ConcreteCompilationService(db_session)
     validation_service = ConcreteValidationService(db_session)
     llm_client = ClientFactory.get_llm_client(GroqModelType.LLAMA_GUARD_3_8B)
-    evaluation_service = CodeEvaluationService()
-    compiler = TokenCompiler(
-        compilation_service, validation_service, evaluation_service, session=db_session
+    evaluation_service = CodeEvaluationService(
+        llm_client=llm_client, validation_service=validation_service
     )
+    compiler = TokenCompiler(compilation_service, validation_service, evaluation_service)
 
     # Call compile_and_validate with revalidate=False
     compiler.compile_and_validate([domain_token], llm_client, revalidate=False)
@@ -248,11 +245,7 @@ def test_token_compiler_cache_hit(
 
     # Ensure no new artifact is created
     artifacts = (
-        db_session.query(CompiledMultifact)
-        .filter(CompiledMultifact.ni_token_id == token.id)
-        .all()
+        db_session.query(CompiledMultifact).filter(CompiledMultifact.ni_token_id == token.id).all()
     )
     assert len(artifacts) == 1, "No new artifact should be created if cache_hit=True."
-    assert (
-        artifacts[0].cache_hit == True
-    ), "Existing artifact should remain cache_hit=True."
+    assert artifacts[0].cache_hit == True, "Existing artifact should remain cache_hit=True."

@@ -3,7 +3,7 @@ from typing import Any, Dict
 import pytest
 from pydantic import ValidationError
 from snc.application.dto.llm_model import Model
-from snc.infrastructure.llm.model_factory import ClientType
+from snc.domain.client_types import ClientType
 from snc.test.test_application.test_dtos.fixtures import valid_model_data
 
 

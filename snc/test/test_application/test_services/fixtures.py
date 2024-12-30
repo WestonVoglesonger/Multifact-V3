@@ -59,9 +59,7 @@ def mock_validation_service_failure():
         mock_validate.return_value = ValidationResult(
             success=False,
             errors=[
-                ValidationError(
-                    file="artifact.ts", line=1, char=1, message="TS1005: ';' expected."
-                )
+                ValidationError(file="artifact.ts", line=1, char=1, message="TS1005: ';' expected.")
             ],
         )
         yield mock_validate
@@ -100,9 +98,7 @@ def mock_llm_client():
 #
 @pytest.fixture
 def patch_client_factory(mock_llm_client: Mock):
-    with patch.object(
-        ClientFactory, "get_llm_client", return_value=mock_llm_client
-    ) as mock_method:
+    with patch.object(ClientFactory, "get_llm_client", return_value=mock_llm_client) as mock_method:
         yield mock_method
 
 
@@ -140,8 +136,10 @@ def mock_llm_parse_help():
 @pytest.fixture
 def evaluation_service_mock():
     """Mock evaluation service that returns a fixed score and feedback."""
-    service = CodeEvaluationService()
-    service.evaluate_code = lambda code, context: {
+    mock_llm = MagicMock()
+    mock_validation = MagicMock()
+    service = CodeEvaluationService(llm_client=mock_llm, validation_service=mock_validation)
+    service.evaluate_code = lambda code, metadata: {
         "score": 9.2,
         "feedback": "Great code structure.",
     }

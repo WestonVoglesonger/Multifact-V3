@@ -8,12 +8,12 @@ from collections import defaultdict
 from sqlalchemy.orm import Session, sessionmaker, scoped_session
 
 from snc.domain.models import DomainToken
-from snc.infrastructure.llm.base_llm_client import BaseLLMClient
 from snc.application.interfaces.icompilation_service import ICompilationService
 from snc.application.interfaces.ivalidation_service import IValidationService
 from snc.application.interfaces.icode_evaluation_service import ICodeEvaluationService
 from snc.application.services.code_evaluation_service import CodeEvaluationService
 from snc.infrastructure.entities.ni_token import NIToken
+from snc.application.interfaces.illm_client import ILLMClient
 from snc.database import engine
 
 
@@ -146,7 +146,7 @@ class TokenCompiler:
     def _compile_token_wrapper(
         self,
         token: DomainToken,
-        llm_client: BaseLLMClient,
+        llm_client: ILLMClient,
         revalidate: bool,
         session: Optional[Session] = None,
     ) -> None:
@@ -229,7 +229,7 @@ class TokenCompiler:
     def compile_and_validate(
         self,
         tokens: List[DomainToken],
-        llm_client: BaseLLMClient,
+        llm_client: ILLMClient,
         revalidate: bool = True,
     ) -> None:
         """Compile and validate a list of tokens.
